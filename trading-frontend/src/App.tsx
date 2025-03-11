@@ -1,48 +1,82 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import './App.css';
 import { ChartComponent } from './components/Chart';
 
+interface PolygonData {
+  t: number; // timestamp 
+  o: number; // open
+  h: number; // high
+  l: number; // low
+  c: number; // close
+  v: number; // volume
+}
+
+const BAR_LOOKBACK = 100;
+const defaultTicker = 'QQQ';
+const defaultTimeframe = '1d';
+
 function App() {
   const chartContainerRef = useRef(null);
-  const [ticker, setTicker] = useState('BTC-USD');
-  const [timeframe, setTimeframe] = useState('15m'); // Default timeframe
+  const [ticker, setTicker] = useState(defaultTicker);
+  const [timeframe, setTimeframe] = useState(defaultTimeframe); // Default timeframe
   const [data, setData] = useState([]);
-
+  const [startDate, setStartDate] = useState(new Date(Date.now() - BAR_LOOKBACK * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
+  const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
+  const [error, setError] = useState(null);
   // Fetch data from the backend
-  const fetchData = async (ticker, timeframe) => {
+  const fetchData = async (ticker, timeframe, startDate, endDate) => {
     try {
-      const response = await fetch(`http://127.0.0.1:5000/stock/${ticker}?timeframe=${timeframe}`);
-      const data = await response.json();
-      if (data.error) {
-        alert(data.error);
-        return;
+      const response = await fetch(`http://127.0.0.1:5000/stock/${ticker}/${startDate}/${endDate}?timeframe=${timeframe}`);
+      const responseData = await response.json();
+      if (responseData.error) {
+        setError(responseData.error);
+        throw new Error(responseData.error);
       }
-      const parsedData = JSON.parse(data.data);
-      console.log(parsedData)
-      const formattedData = parsedData.map((item) => ({
-        time: new Date(item.Datetime || item.Date).getTime(),
-        open: item.Open,
-        high: item.High,
-        low: item.Low,
-        close: item.Close,
-        volume: item.Volume,
+      console.log(data)
+      const parsedData = responseData.data
+      console.log(parsedData) 
+      const formattedData = parsedData.results.map((item : PolygonData) => ({
+        time: new Date(item.t / 1000).getTime(),
+        open: item.o,
+        high: item.h,
+        low: item.l,
+        close: item.c,
+        volume: item.v,
       }));
-      console.log(formattedData)
-      setData(formattedData);
+      const newData = [...formattedData, ...data]
+      setData(newData);
     } catch (error) {
       console.error('Error fetching data:', error);
-      alert('Failed to fetch data. Please try again.');
     }
   };
+
+  const requestMore = async () => {
+    const newStartDate = new Date(new Date(startDate).getTime() - BAR_LOOKBACK * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const newEndDate = new Date(new Date(startDate).getTime() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    
+    console.log(newStartDate, newEndDate)
+    try {
+      await fetchData(ticker, timeframe,newStartDate,newEndDate);
+     
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      setError(error.message);
+    }
+    setStartDate(newStartDate);
+  }
 
   // Handle search
   const handleSearch = () => {
     if (ticker) {
-      fetchData(ticker, timeframe);
+      fetchData(ticker, timeframe,startDate,endDate);
     } else {
       alert('Please enter a ticker symbol.');
     }
   };
+
+  useEffect(() => {
+    fetchData(ticker, timeframe,startDate,endDate);
+  }, []);
 
   return (
     <div className="app">
@@ -63,7 +97,7 @@ function App() {
           type="text"
           value={ticker}
           onChange={(e) => setTicker(e.target.value)}
-          placeholder="Enter ticker (e.g., BTC-USD)"
+          placeholder="Enter ticker (e.g., QQQ)"
           className="ticker-input"
         />
         <button onClick={handleSearch} className="search-button">
@@ -71,10 +105,26 @@ function App() {
         </button>
       </div>
       <div className="chart-container tv-lightweight-charts" ref={chartContainerRef}>
-        <ChartComponent data={data} />
+        <ChartComponent data={data} requestMore={requestMore} />
       </div>
+      <ErrorAlert error={error} />
     </div>
   );
+}
+
+const ErrorAlert = (props) => {
+
+  return (
+    <div>
+      {
+        props.error && 
+          <div className="error-alert">
+            <p>{props.error}</p>
+          </div>
+        }
+      </div>
+      
+    )
 }
 
 export default App;

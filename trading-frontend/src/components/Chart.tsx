@@ -1,8 +1,11 @@
 
 import { AreaSeries, createChart, ColorType, CandlestickSeries } from 'lightweight-charts';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 export const ChartComponent = props => {
+ 
+    const [loadingMoreTime, setLoadingMoreTimer] = useState(0);
+
     const {
         data,
         colors: {
@@ -12,9 +15,27 @@ export const ChartComponent = props => {
             areaTopColor = '#2962FF',
             areaBottomColor = 'rgba(41, 98, 255, 0.28)',
         } = {},
+        requestMore,
     } = props;
 
     const chartContainerRef = useRef();
+
+    const loadMoreCallback = () => {
+        if (loadingMoreTime > 0) return;
+        setLoadingMoreTimer(1000);   
+    }
+
+    useEffect(() => {
+        if (loadingMoreTime > 0) {
+            setTimeout(() => {
+                requestMore().then(() => {
+                    setLoadingMoreTimer(0);
+                })
+            }, 1000);
+        }
+        console.log(loadingMoreTime)
+      
+    }, [loadingMoreTime])
 
     useEffect(
         () => {
@@ -31,6 +52,22 @@ export const ChartComponent = props => {
                 height: 800
             });
             chart.timeScale().fitContent();
+            chart.timeScale().subscribeVisibleLogicalRangeChange((range, loadingMore) => {
+                const visibleRange = chart.timeScale().getVisibleRange();
+                if (visibleRange && visibleRange.from) {
+                    const firstPoint = data[0];
+                    
+                    // If we're close to the earliest data point, load more data
+                    // You can adjust the threshold based on your needs
+                    if (firstPoint && visibleRange.from <= firstPoint.time + 86400 ) { // Within 1 day of earliest data
+                        setTimeout(() => {
+                            loadMoreCallback();
+                        }, 1000);
+                
+                    }
+                
+                }
+            })
 
             const newSeries = chart.addSeries(CandlestickSeries, {  });
             newSeries.setData(data);
