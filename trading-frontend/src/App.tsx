@@ -1,6 +1,7 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect , useReducer} from 'react';
 import './App.css';
 import { ChartComponent } from './components/Chart';
+import { CustomChart } from './components/CustomChart';
 
 interface PolygonData {
   t: number; // timestamp 
@@ -16,15 +17,46 @@ const defaultTicker = 'QQQ';
 const defaultTimeframe = '1d';
 
 function App() {
+  const defaultEndDate = new Date().toISOString().split('T')[0];
+  const defaultStartDate = new Date(Date.now() - BAR_LOOKBACK * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
   const chartContainerRef = useRef(null);
   const [ticker, setTicker] = useState(defaultTicker);
   const [timeframe, setTimeframe] = useState(defaultTimeframe); // Default timeframe
-  const [data, setData] = useState([]);
-  const [startDate, setStartDate] = useState(new Date(Date.now() - BAR_LOOKBACK * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
-  const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
+ 
+
+  const [state, dispatch] = useReducer(reducer, {
+    data: [], 
+    startDate: defaultStartDate,
+    endDate: defaultEndDate,
+  });
+
+  function reducer(state, action) {
+    switch (action.type) {
+      case 'RESET_AND_FETCH':
+        return {
+          ...state,
+          data: action.payload.data,
+          startDate: action.payload.startDate,
+          endDate: action.payload.endDate
+        };
+      case 'ADD_MORE_DATA':
+        const newData = [...action.payload.data, ...state.data]
+        return {
+          ...state,
+          data: newData,
+          startDate: action.payload.startDate,
+          endDate: action.payload.endDate
+        };
+      default:
+        return state;
+    }
+  }
+
+  const {data, startDate, endDate} = state;
+ 
   const [error, setError] = useState(null);
   // Fetch data from the backend
-  const fetchData = async (ticker, timeframe, startDate, endDate) => {
+  const fetchData = async (ticker, timeframe, startDate, endDate, type) => {
     try {
       const response = await fetch(`http://127.0.0.1:5000/stock/${ticker}/${startDate}/${endDate}?timeframe=${timeframe}`);
       const responseData = await response.json();
@@ -32,7 +64,7 @@ function App() {
         setError(responseData.error);
         throw new Error(responseData.error);
       }
-      console.log(data)
+    
       const parsedData = responseData.data
       console.log(parsedData) 
       const formattedData = parsedData.results.map((item : PolygonData) => ({
@@ -43,8 +75,15 @@ function App() {
         close: item.c,
         volume: item.v,
       }));
-      const newData = [...formattedData, ...data]
-      setData(newData);
+    
+      dispatch({
+        type,
+        payload: {
+          data : formattedData,
+          startDate, 
+          endDate
+        }
+      }); 
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -56,27 +95,24 @@ function App() {
     
     console.log(newStartDate, newEndDate)
     try {
-      await fetchData(ticker, timeframe,newStartDate,newEndDate);
-     
+      await fetchData(ticker, timeframe,newStartDate,newEndDate, 'ADD_MORE_DATA');
     } catch (error) {
       console.error('Error fetching data:', error);
       setError(error.message);
     }
-    setStartDate(newStartDate);
   }
 
   // Handle search
   const handleSearch = () => {
     if (ticker) {
-      fetchData(ticker, timeframe,startDate,endDate);
+      fetchData(ticker, timeframe,defaultStartDate,defaultEndDate, 'RESET_AND_FETCH'); 
     } else {
       alert('Please enter a ticker symbol.');
     }
   };
 
-  useEffect(() => {
-    fetchData(ticker, timeframe,startDate,endDate);
-  }, []);
+  const d = [{ open: 10, high: 10.63, low: 9.49, close: 9.55, time: 1642427876 }, { open: 9.55, high: 10.30, low: 9.42, close: 9.94, time: 1642514276 }, { open: 9.94, high: 10.17, low: 9.92, close: 9.78, time: 1642600676 }, { open: 9.78, high: 10.59, low: 9.18, close: 9.51, time: 1642687076 }, { open: 9.51, high: 10.46, low: 9.10, close: 10.17, time: 1642773476 }, { open: 10.17, high: 10.96, low: 10.16, close: 10.47, time: 1642859876 }, { open: 10.47, high: 11.39, low: 10.40, close: 10.81, time: 1642946276 }, { open: 10.81, high: 11.60, low: 10.30, close: 10.75, time: 1643032676 }, { open: 10.75, high: 11.60, low: 10.49, close: 10.93, time: 1643119076 }, { open: 10.93, high: 11.53, low: 10.76, close: 10.96, time: 1643205476 }];
+
 
   return (
     <div className="app">
@@ -95,8 +131,8 @@ function App() {
         </select>
         <input
           type="text"
-          value={ticker}
-          onChange={(e) => setTicker(e.target.value)}
+          defaultValue={ticker}
+          onBlur={(e) => setTicker(e.target.value)}
           placeholder="Enter ticker (e.g., QQQ)"
           className="ticker-input"
         />
@@ -105,7 +141,8 @@ function App() {
         </button>
       </div>
       <div className="chart-container tv-lightweight-charts" ref={chartContainerRef}>
-        <ChartComponent data={data} requestMore={requestMore} />
+        {/* <ChartComponent data={data} requestMore={requestMore} /> */}
+        <CustomChart candlestickData={d} theme={"dark"}/>
       </div>
       <ErrorAlert error={error} />
     </div>

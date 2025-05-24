@@ -14,9 +14,9 @@ TIMEFRAMES = {
     '1wk': 'week'
 }
 
-POLYGON_API_KEY = os.getenv('POLYGON_API_KEY', '')
-if not POLYGON_API_KEY:
-    raise ValueError("POLYGON_API_KEY environment variable is not set")
+# POLYGON_API_KEY = os.getenv('POLYGON_API_KEY', '')
+# if not POLYGON_API_KEY:
+#     raise ValueError("POLYGON_API_KEY environment variable is not set")
 
 POLYGON_API = "https://api.polygon.io/v2/aggs/ticker/"
 
@@ -47,4 +47,5 @@ def get_stock_data(ticker, start_date=None, end_date=None):
         # Return the results
         return jsonify(data=data)
     except Exception as e:
+        print(e)
         return jsonify(error=str(e)), 500
