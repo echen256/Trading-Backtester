@@ -4,6 +4,9 @@ from app import app
 import os
 import requests
 from datetime import datetime, timedelta
+from dotenv import load_dotenv
+import os
+from pathlib import Path
 # Supported timeframes
 TIMEFRAMES = {
     '1m': 'minute',
@@ -14,9 +17,9 @@ TIMEFRAMES = {
     '1wk': 'week'
 }
 
-# POLYGON_API_KEY = os.getenv('POLYGON_API_KEY', '')
-# if not POLYGON_API_KEY:
-#     raise ValueError("POLYGON_API_KEY environment variable is not set")
+POLYGON_API_KEY = os.getenv('POLYGON_API_KEY', '')
+if not POLYGON_API_KEY:
+    raise ValueError("POLYGON_API_KEY environment variable is not set")
 
 POLYGON_API = "https://api.polygon.io/v2/aggs/ticker/"
 
