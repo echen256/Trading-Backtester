@@ -51,4 +51,5 @@ price_aligned = price.reindex_like(X)
 
 pf = vbt.Portfolio.from_signals(price_aligned, entries, exits, init_cash=100_000, direction='short_only')
 print(pf.stats())
+pf.trades.to_csv('trades.csv')
 pf.plot().show()

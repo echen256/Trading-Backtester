@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trading Dashboard</title>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+        
+        .dashboard {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            text-align: center;
+        }
+        
+        .status.connected {
+            background-color: #4CAF50;
+        }
+        
+        .status.disconnected {
+            background-color: #f44336;
+        }
+        
+        .data-container {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .data-section {
+            flex: 1;
+            background-color: #2a2a2a;
+            border-radius: 10px;
+            padding: 20px;
+        }
+        
+        .data-section h3 {
+            color: #4CAF50;
+            margin-top: 0;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        .data-table th, .data-table td {
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 1px solid #333;
+        }
+        
+        .data-table th {
+            background-color: #333;
+            color: #4CAF50;
+        }
+        
+        .data-table tr:hover {
+            background-color: #333;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background-color: #333;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            flex: 1;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #ccc;
+            margin-top: 5px;
+        }
+        
+        .timestamp {
+            color: #888;
+            font-size: 12px;
+            margin-bottom: 15px;
+        }
+        
+        .buy { color: #4CAF50; }
+        .sell { color: #f44336; }
+        
+        @media (max-width: 768px) {
+            .data-container {
+                flex-direction: column;
+            }
+            .stats {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="header">
+            <h1>🚀 Trading Dashboard</h1>
+            <div id="status" class="status disconnected">Disconnected</div>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="totalTrades">0</div>
+                <div class="stat-label">Total Trades</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="dataPoints">0</div>
+                <div class="stat-label">Market Data Points</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="lastUpdate">-</div>
+                <div class="stat-label">Last Update</div>
+            </div>
+        </div>
+        
+        <div class="data-container">
+            <div class="data-section">
+                <h3>📊 Recent Trades</h3>
+                <div class="timestamp" id="tradesTimestamp">No data yet</div>
+                <table class="data-table" id="tradesTable">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Symbol</th>
+                            <th>Side</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                            <th>P&L</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tradesBody">
+                        <tr>
+                            <td colspan="6" style="text-align: center; color: #666;">Waiting for trade data...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="data-section">
+                <h3>📈 Market Data</h3>
+                <div class="timestamp" id="marketTimestamp">No data yet</div>
+                <table class="data-table" id="marketTable">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Symbol</th>
+                            <th>Open</th>
+                            <th>High</th>
+                            <th>Low</th>
+                            <th>Close</th>
+                            <th>RSI</th>
+                        </tr>
+                    </thead>
+                    <tbody id="marketBody">
+                        <tr>
+                            <td colspan="7" style="text-align: center; color: #666;">Waiting for market data...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Socket.IO connection
+        const socket = io();
+        
+        // Connection status
+        socket.on('connect', function() {
+            document.getElementById('status').textContent = 'Connected';
+            document.getElementById('status').className = 'status connected';
+            console.log('Connected to server');
+            
+            // Join frontend room
+            socket.emit('join_frontend');
+        });
+        
+        socket.on('disconnect', function() {
+            document.getElementById('status').textContent = 'Disconnected';
+            document.getElementById('status').className = 'status disconnected';
+            console.log('Disconnected from server');
+        });
+        
+        // Handle trading data updates
+        socket.on('trading_update', function(data) {
+            console.log('Received trading update:', data);
+            
+            // Update stats
+            document.getElementById('totalTrades').textContent = data.trades_count;
+            document.getElementById('dataPoints').textContent = data.market_data_count;
+            document.getElementById('lastUpdate').textContent = new Date(data.timestamp).toLocaleTimeString();
+            
+            // Update trades table
+            updateTradesTable(data.trades);
+            document.getElementById('tradesTimestamp').textContent = `Last updated: ${new Date(data.timestamp).toLocaleString()}`;
+            
+            // Update market data table
+            updateMarketTable(data.market_data);
+            document.getElementById('marketTimestamp').textContent = `Last updated: ${new Date(data.timestamp).toLocaleString()}`;
+        });
+        
+        function updateTradesTable(trades) {
+            const tbody = document.getElementById('tradesBody');
+            tbody.innerHTML = '';
+            
+            trades.slice(-10).reverse().forEach(trade => {
+                const row = tbody.insertRow();
+                const sideClass = trade.side === 'BUY' ? 'buy' : 'sell';
+                const profitClass = trade.profit_loss >= 0 ? 'buy' : 'sell';
+                
+                row.innerHTML = `
+                    <td>${new Date(trade.timestamp).toLocaleTimeString()}</td>
+                    <td>${trade.symbol}</td>
+                    <td class="${sideClass}">${trade.side}</td>
+                    <td>${trade.quantity}</td>
+                    <td>$${trade.price}</td>
+                    <td class="${profitClass}">$${trade.profit_loss}</td>
+                `;
+            });
+        }
+        
+        function updateMarketTable(marketData) {
+            const tbody = document.getElementById('marketBody');
+            tbody.innerHTML = '';
+            
+            marketData.slice(-10).reverse().forEach(point => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${new Date(point.timestamp).toLocaleTimeString()}</td>
+                    <td>${point.symbol}</td>
+                    <td>$${point.open}</td>
+                    <td>$${point.high}</td>
+                    <td>$${point.low}</td>
+                    <td>$${point.close}</td>
+                    <td>${point.rsi}</td>
+                `;
+            });
+        }
+        
+        // Handle status messages
+        socket.on('status', function(data) {
+            console.log('Status:', data.msg);
+        });
+        
+        // Test ping
+        socket.on('pong', function(data) {
+            console.log('Pong received:', data);
+        });
+        
+        // Send periodic ping for testing
+        setInterval(() => {
+            socket.emit('ping_server');
+        }, 30000);
+    </script>
+</body>
+</html> 

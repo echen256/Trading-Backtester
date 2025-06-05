@@ -5,3 +5,7 @@ scikit-learn
 polygon-api-client
 dotenv
 joblib
+flask
+flask-socketio
+flask-cors
+python-socketio
