@@ -32,7 +32,7 @@ interface AppAction {
   };
 }
 
-const BAR_LOOKBACK = 100;
+const BAR_LOOKBACK = 300;
 const defaultTicker = 'QQQ';
 const defaultTimeframe = '1d';
 
