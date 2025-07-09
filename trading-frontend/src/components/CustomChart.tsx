@@ -40,7 +40,7 @@ interface CustomChartProps {
   autosize?: boolean
   timeVisible?: boolean
   onCrosshairMove?: (param: any) => void
-  onVisibleRangeChange?: (range: { from: number; to: number } | null) => void
+  requestMore?: () => void
   customIndicators?: Array<{
     name: string
     data: LineData[]
@@ -57,16 +57,18 @@ export function CustomChart({
   autosize = true,
   timeVisible = true,
   onCrosshairMove,
-  onVisibleRangeChange,
+  requestMore,
   customIndicators = [],
 }: CustomChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null)
   const [chartCreated, setChartCreated] = useState(false)
-
+  const [visibleRange, setVisibleRange] = useState<{ from: number; to: number } | null>(null)
+  const [visualRangeLoading, setVisualRangeLoading] = useState(false)
   // Chart instance and series references
   const chartRef = useRef<any>(null)
   const candlestickSeriesRef = useRef<any>(null)
   const customSeriesRefs = useRef<any[]>([])
+  const loadingRef = useRef(false)
 
   useEffect(() => {
     if (!chartContainerRef.current) return
@@ -97,7 +99,6 @@ export function CustomChart({
         vertTouchDrag: false,
       },
     })
-    console.log(chart)
     // Create candlestick series
     const candlestickSeries = chart.addSeries(LightweightCharts.CandlestickSeries,{
       upColor: "#26a69a",
@@ -112,8 +113,30 @@ export function CustomChart({
 
     // Store references
     chartRef.current = chart
-    console.log(candlestickSeries)
-   // candlestickSeriesRef.current = candlestickSeries
+    candlestickSeriesRef.current = candlestickSeries
+
+    console.log("Chart created")
+    setChartCreated(true)
+    const handleVisibleLogicalRangeChange = async () => {
+      const currentRange = chart.timeScale().getVisibleLogicalRange()
+      if (currentRange?.from && currentRange?.to && currentRange?.from < 30 && !loadingRef.current) {
+        loadingRef.current = true
+        setVisualRangeLoading(true)
+        
+        // Call requestMore if provided
+        if (requestMore) {
+          await requestMore()
+        }
+        
+        // Reset loading state after a delay
+        setTimeout(() => {
+          loadingRef.current = false
+          setVisualRangeLoading(false)
+        }, 1000)
+      }
+    }
+  
+    chart.timeScale().subscribeVisibleLogicalRangeChange(handleVisibleLogicalRangeChange)
 
     // Handle resize
     if (autosize) {
@@ -130,20 +153,17 @@ export function CustomChart({
         chart.remove()
       }
     }
-
-    setChartCreated(true)
-
+ 
+  
     return () => {
       chart.remove()
     }
   }, [width, height, theme, autosize, timeVisible, candlestickData.length])
 
   
-
-  //Add custom indicators when chart is created and when they change
   useEffect(() => {
     if (!chartCreated || !chartRef.current) return
-
+  
     // Clear previous custom series
     customSeriesRefs.current.forEach((series) => {
       if (series && chartRef.current) {
@@ -151,11 +171,11 @@ export function CustomChart({
       }
     })
     customSeriesRefs.current = []
-
+  
     // Add new custom series
     customIndicators.forEach((indicator) => {
       let series
-
+  
       switch (indicator.options?.lineType) {
         case "histogram":
           series = chartRef.current.addHistogramSeries({
@@ -185,14 +205,14 @@ export function CustomChart({
             priceFormat: indicator.options?.priceFormat,
           })
       }
-
+  
       if (series) {
         series.setData(indicator.data)
         customSeriesRefs.current.push(series)
       }
     })
   }, [chartCreated, customIndicators])
-
+  
   // Update candlestick data when it changes
   useEffect(() => {
     if (candlestickSeriesRef.current && candlestickData.length > 0) {
@@ -213,23 +233,6 @@ export function CustomChart({
     }
   }, [onCrosshairMove, chartCreated])
 
-  // Set up visible range change handler
-  useEffect(() => {
-    if (!chartRef.current || !onVisibleRangeChange) return
-
-    const timeScale = chartRef.current.timeScale()
-    timeScale.subscribeVisibleTimeRangeChange(() => {
-      const range = timeScale.getVisibleRange()
-      onVisibleRangeChange(range)
-    })
-
-    return () => {
-      if (chartRef.current) {
-        const timeScale = chartRef.current.timeScale()
-        timeScale.unsubscribeVisibleTimeRangeChange()
-      }
-    }
-  }, [onVisibleRangeChange, chartCreated])
 
  
   return (

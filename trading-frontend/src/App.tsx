@@ -69,7 +69,7 @@ function App() {
       }
 
       const parsedData = responseData.data
-      console.log(parsedData)
+      console.log(parsedData, startDate, endDate)
       const formattedData = parsedData.results.map((item: PolygonData) => ({
         time: new Date(item.t / 1000).getTime(),
         open: item.o,
@@ -161,8 +161,7 @@ function App() {
         )}
       </div>
       <div className="chart-container tv-lightweight-charts" ref={chartContainerRef}>
-        {/* <ChartComponent data={data} requestMore={requestMore} /> */}
-        <CustomChart candlestickData={data} theme={"dark"} />
+        <CustomChart candlestickData={data} theme={"dark"} requestMore={requestMore} />
       </div>
       <ErrorAlert error={error} />
     </div>
