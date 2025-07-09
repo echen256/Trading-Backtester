@@ -24,6 +24,8 @@ function App() {
   const [timeframe, setTimeframe] = useState(defaultTimeframe); // Default timeframe
 
 
+  const [loading , setLoading] = useState(false)
+
   const [state, dispatch] = useReducer(reducer, {
     data: [],
     startDate: defaultStartDate,
@@ -32,20 +34,21 @@ function App() {
 
   function reducer(state, action) {
     switch (action.type) {
-      case 'RESET_AND_FETCH':
+      case 'SET_INITIAL_DATA':
         return {
           ...state,
-          data: action.payload.data,
+          initialData: action.payload.data,
+          incrementalData: [], // Reset incremental data
+          currentTicker: action.payload.ticker,
           startDate: action.payload.startDate,
           endDate: action.payload.endDate
         };
-      case 'ADD_MORE_DATA': {
-        const newData = [...action.payload.data, ...state.data]
+      case 'ADD_INCREMENTAL_DATA': {
         return {
           ...state,
-          data: newData,
-          startDate: action.payload.startDate,
-          endDate: action.payload.endDate
+          incrementalData: action.payload.data,
+          startDate: action.payload.startDate, // This should be the NEW earlier startDate
+          // Don't update endDate for incremental data - keep the original end
         };
       }
       default:
@@ -53,10 +56,19 @@ function App() {
     }
   }
 
-  const { data, startDate } = state;
+  const {initialData, incrementalData, currentTicker, startDate} = state;
+  
 
+  
   const [error, setError] = useState(null);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+  useEffect(() => {
+    if (loading) {
+      requestMore()
+      setLoading(false)
+    }
+  }, [loading])
 
   // Fetch data from the backend
   const fetchData = useCallback(async (ticker, timeframe, startDate, endDate, type) => {
@@ -69,7 +81,6 @@ function App() {
       }
 
       const parsedData = responseData.data
-      console.log(parsedData, startDate, endDate)
       const formattedData = parsedData.results.map((item: PolygonData) => ({
         time: new Date(item.t / 1000).getTime(),
         open: item.o,
@@ -83,6 +94,7 @@ function App() {
         type,
         payload: {
           data: formattedData,
+          ticker: ticker, // Pass ticker to the payload
           startDate,
           endDate
         }
@@ -93,27 +105,27 @@ function App() {
   }, []);
 
   const requestMore = useCallback(async () => {
-    if (isLoadingMore) return; // Prevent multiple simultaneous requests
-
-    setIsLoadingMore(true);
-    const newStartDate = new Date(new Date(startDate).getTime() - BAR_LOOKBACK * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-    const newEndDate = new Date(new Date(startDate).getTime() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-
-    console.log('Loading more data:', newStartDate, 'to', newEndDate);
+    if (isLoadingMore) return; 
+    
+    
+    const currentStartDate = state.startDate 
+    const newStartDate = new Date(new Date(currentStartDate).getTime() - BAR_LOOKBACK * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const newEndDate = new Date(new Date(currentStartDate).getTime() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+  
     try {
-      await fetchData(ticker, timeframe, newStartDate, newEndDate, 'ADD_MORE_DATA');
+      await fetchData(ticker, timeframe, newStartDate, newEndDate, 'ADD_INCREMENTAL_DATA');
     } catch (error) {
       console.error('Error fetching data:', error);
       setError(error.message);
     } finally {
       setIsLoadingMore(false);
     }
-  }, [startDate, ticker, timeframe, isLoadingMore, fetchData]);
+  }, [state.startDate, ticker, timeframe, isLoadingMore]);
 
   // Handle search
   const handleSearch = () => {
     if (ticker) {
-      fetchData(ticker, timeframe, defaultStartDate, defaultEndDate, 'RESET_AND_FETCH');
+      fetchData(ticker, timeframe, defaultStartDate, defaultEndDate, 'SET_INITIAL_DATA');
     } else {
       alert('Please enter a ticker symbol.');
     }
@@ -122,7 +134,7 @@ function App() {
   // Fetch initial data on mount
   useEffect(() => {
     if (ticker) {
-      fetchData(ticker, timeframe, defaultStartDate, defaultEndDate, 'RESET_AND_FETCH');
+      fetchData(ticker, timeframe, defaultStartDate, defaultEndDate, 'SET_INITIAL_DATA');
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -161,7 +173,13 @@ function App() {
         )}
       </div>
       <div className="chart-container tv-lightweight-charts" ref={chartContainerRef}>
-        <CustomChart candlestickData={data} theme={"dark"} requestMore={requestMore} />
+        <CustomChart 
+          initialData={initialData}
+          incrementalData={incrementalData}
+          currentTicker={currentTicker}
+          theme={"dark"} 
+          requestMore={() => setLoading(true)} 
+        />
       </div>
       <ErrorAlert error={error} />
     </div>

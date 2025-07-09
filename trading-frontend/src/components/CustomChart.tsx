@@ -34,8 +34,9 @@ export interface CustomPlotOptions {
 interface CustomChartProps {
   width?: number | string
   height?: number | string
-  candlestickData?: Array<LightweightCharts.CandlestickData<Time>>
-  initialSymbol?: string
+  initialData?: Array<LightweightCharts.CandlestickData<Time>>
+  incrementalData?: Array<LightweightCharts.CandlestickData<Time>>
+  currentTicker?: string
   theme?: "light" | "dark"
   autosize?: boolean
   timeVisible?: boolean
@@ -51,8 +52,9 @@ interface CustomChartProps {
 export function CustomChart({
   width = "90vw",
   height = 500,
-  candlestickData = [],
-  initialSymbol = "Custom Backtest",
+  initialData = [],
+  incrementalData = [],
+  currentTicker = "UNKNOWN",
   theme = "light",
   autosize = true,
   timeVisible = true,
@@ -69,6 +71,9 @@ export function CustomChart({
   const candlestickSeriesRef = useRef<any>(null)
   const customSeriesRefs = useRef<any[]>([])
   const loadingRef = useRef(false)
+  const [internalTicker, setInternalTicker] = useState<string>('')
+  const [internalDataCount, setInternalDataCount] = useState<number>(0)
+  const [updateError, setUpdateError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!chartContainerRef.current) return
@@ -99,23 +104,18 @@ export function CustomChart({
         vertTouchDrag: false,
       },
     })
-    // Create candlestick series
+    // Create candlestick series 
     const candlestickSeries = chart.addSeries(LightweightCharts.CandlestickSeries,{
       upColor: "#26a69a",
       downColor: "#ef5350",
       borderVisible: false,
       wickUpColor: "#26a69a",
       wickDownColor: "#ef5350",
-    })
-    candlestickSeries.setData(candlestickData)
-
-    chart.timeScale().fitContent();
-
+    }) 
     // Store references
     chartRef.current = chart
     candlestickSeriesRef.current = candlestickSeries
-
-    console.log("Chart created")
+ 
     setChartCreated(true)
     const handleVisibleLogicalRangeChange = async () => {
       const currentRange = chart.timeScale().getVisibleLogicalRange()
@@ -158,7 +158,7 @@ export function CustomChart({
     return () => {
       chart.remove()
     }
-  }, [width, height, theme, autosize, timeVisible, candlestickData.length])
+  }, [width, height, theme, autosize, timeVisible])
 
   
   useEffect(() => {
@@ -213,12 +213,53 @@ export function CustomChart({
     })
   }, [chartCreated, customIndicators])
   
-  // Update candlestick data when it changes
+  // Handle initial data load (when ticker changes or first load)
   useEffect(() => {
-    if (candlestickSeriesRef.current && candlestickData.length > 0) {
-      candlestickSeriesRef.current.setData(candlestickData)
+    if (!candlestickSeriesRef.current || !initialData.length) return
+    
+    // Check if ticker changed - if so, reset everything
+    if (currentTicker !== internalTicker) {
+      console.log(`Ticker changed from ${internalTicker} to ${currentTicker} - resetting chart data`)
+      setInternalTicker(currentTicker)
+      setInternalDataCount(0)
+      setUpdateError(null)
+      
+      // Use setData for initial load
+      candlestickSeriesRef.current.setData(initialData)
+      setInternalDataCount(initialData.length)
+      
+      // Fit content for new ticker
+      if (chartRef.current) {
+        chartRef.current.timeScale().fitContent()
+      }
+    } else if (initialData.length > 0 && internalDataCount === 0) {
+      // First time loading data for this ticker
+      console.log(`Setting initial data for ${currentTicker}: ${initialData.length} bars`)
+      candlestickSeriesRef.current.setData(initialData)
+      setInternalDataCount(initialData.length)
+      
+      if (chartRef.current) {
+        chartRef.current.timeScale().fitContent()
+      }
     }
-  }, [candlestickData])
+  }, [initialData, currentTicker, internalTicker, internalDataCount])
+  
+  // Handle incremental data updates
+  useEffect(() => {
+    if (!candlestickSeriesRef.current || !incrementalData.length || currentTicker !== internalTicker) return
+    
+
+    try {
+      const data = candlestickSeriesRef.current.data()
+      candlestickSeriesRef.current.setData( [...incrementalData,...data]) 
+      setInternalDataCount(prev => prev + incrementalData.length)
+    } catch (error) {
+      const errorMsg = `Failed to update chart data: ${error.message}`
+      console.error(errorMsg, error)
+      setUpdateError(errorMsg)
+    }
+  }, [incrementalData, currentTicker])
+
 
   // Set up crosshair move handler
   useEffect(() => {
@@ -236,7 +277,46 @@ export function CustomChart({
 
  
   return (
-    <div className="w-full h-full">
+    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+      {/* Bar count warning */}
+      {internalDataCount > 10000 && (
+        <div style={{
+          position: 'absolute',
+          top: '40px',
+          left: '8px',
+          zIndex: 10,
+          backgroundColor: '#ff9800',
+          color: 'white',
+          padding: '8px 12px',
+          borderRadius: '4px',
+          fontSize: '14px',
+          fontWeight: 'bold'
+        }}>
+          ⚠️ {internalDataCount.toLocaleString()} bars loaded - Performance may be impacted
+        </div>
+      )}
+      
+      {/* Update error notification */}
+      {updateError && (
+        <div style={{
+          position: 'absolute',
+          top: internalDataCount > 10000 ? '80px' : '40px',
+          left: '8px',
+          zIndex: 10,
+          backgroundColor: '#f44336',
+          color: 'white',
+          padding: '8px 12px',
+          borderRadius: '4px',
+          fontSize: '14px',
+          cursor: 'pointer'
+        }}
+        onClick={() => setUpdateError(null)}
+        title="Click to dismiss"
+        >
+          ❌ {updateError}
+        </div>
+      )}
+      
       <div
         ref={chartContainerRef}
         style={{
