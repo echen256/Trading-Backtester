@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect, useReducer, useCallback } from 'react';
 import './App.css';
 import { CustomChart } from './components/CustomChart';
+import { Watchlist } from './components/Watchlist';
 
 
 interface PolygonData {
@@ -10,6 +11,25 @@ interface PolygonData {
   l: number; // low
   c: number; // close
   v: number; // volume
+}
+
+interface AppState {
+  data: any[];
+  initialData?: any[];
+  incrementalData?: any[];
+  currentTicker?: string;
+  startDate: string;
+  endDate: string;
+}
+
+interface AppAction {
+  type: string;
+  payload: {
+    data: any[];
+    ticker?: string;
+    startDate?: string;
+    endDate?: string;
+  };
 }
 
 const BAR_LOOKBACK = 100;
@@ -25,6 +45,8 @@ function App() {
 
 
   const [loading , setLoading] = useState(false)
+  const [backtestInput, setBacktestInput] = useState('');
+  const resetChartRef = useRef<() => void>(() => {});
 
   const [state, dispatch] = useReducer(reducer, {
     data: [],
@@ -32,22 +54,22 @@ function App() {
     endDate: defaultEndDate,
   });
 
-  function reducer(state, action) {
+  function reducer(state: AppState, action: AppAction): AppState {
     switch (action.type) {
       case 'SET_INITIAL_DATA':
         return {
           ...state,
           initialData: action.payload.data,
           incrementalData: [], // Reset incremental data
-          currentTicker: action.payload.ticker,
-          startDate: action.payload.startDate,
-          endDate: action.payload.endDate
+          currentTicker: action.payload.ticker || '',
+          startDate: action.payload.startDate || state.startDate,
+          endDate: action.payload.endDate || state.endDate
         };
       case 'ADD_INCREMENTAL_DATA': {
         return {
           ...state,
           incrementalData: action.payload.data,
-          startDate: action.payload.startDate, // This should be the NEW earlier startDate
+          startDate: action.payload.startDate || state.startDate, // This should be the NEW earlier startDate
           // Don't update endDate for incremental data - keep the original end
         };
       }
@@ -56,11 +78,11 @@ function App() {
     }
   }
 
-  const {initialData, incrementalData, currentTicker, startDate} = state;
+  const {initialData, incrementalData, currentTicker} = state;
   
 
   
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   useEffect(() => {
@@ -71,7 +93,7 @@ function App() {
   }, [loading])
 
   // Fetch data from the backend
-  const fetchData = useCallback(async (ticker, timeframe, startDate, endDate, type) => {
+  const fetchData = useCallback(async (ticker: string, timeframe: string, startDate: string, endDate: string, type: string) => {
     try {
       const response = await fetch(`http://127.0.0.1:5000/stock/${ticker}/${startDate}/${endDate}?timeframe=${timeframe}`);
       const responseData = await response.json();
@@ -116,7 +138,7 @@ function App() {
       await fetchData(ticker, timeframe, newStartDate, newEndDate, 'ADD_INCREMENTAL_DATA');
     } catch (error) {
       console.error('Error fetching data:', error);
-      setError(error.message);
+      setError(error instanceof Error ? error.message : 'Unknown error');
     } finally {
       setIsLoadingMore(false);
     }
@@ -131,6 +153,18 @@ function App() {
     }
   };
 
+  // Handle watchlist ticker selection
+  const handleWatchlistTickerSelect = (selectedTicker: string) => {
+    setTicker(selectedTicker);
+    fetchData(selectedTicker, timeframe, defaultStartDate, defaultEndDate, 'SET_INITIAL_DATA');
+  };
+
+  // Handle backtest form submission
+  const handleBacktestSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // TODO: Implement backtest functionality
+  };
+
   // Fetch initial data on mount
   useEffect(() => {
     if (ticker) {
@@ -141,52 +175,86 @@ function App() {
 
   return (
     <div className="app">
-      <div className="controls-container">
-        <select
-          value={timeframe}
-          onChange={(e) => setTimeframe(e.target.value)}
-          className="timeframe-select"
-        >
-          <option value="1m">1 Minute</option>
-          <option value="5m">5 Minutes</option>
-          <option value="15m">15 Minutes</option>
-          <option value="1h">1 Hour</option>
-          <option value="1d">1 Day</option>
-          <option value="1wk">1 Week</option>
-        </select>
-        <input
-          type="text"
-          defaultValue={ticker}
-          onBlur={(e) => setTicker(e.target.value)}
-          placeholder="Enter ticker (e.g., QQQ)"
-          className="ticker-input"
-        />
-        <button onClick={handleSearch} className="search-button">
-          Search
-        </button>
-      </div>
-      <div className="status-bar">
-        {isLoadingMore && (
-          <div className="loading-indicator">
-            Loading more data...
+      <div className="main-layout">
+        <div className="left-panel">
+          <Watchlist 
+            onTickerSelect={handleWatchlistTickerSelect}
+            currentTicker={ticker}
+          />
+          <div className="controls-container">
+            <select
+              value={timeframe}
+              onChange={(e) => setTimeframe(e.target.value)}
+              className="timeframe-select"
+            >
+              <option value="1m">1 Minute</option>
+              <option value="5m">5 Minutes</option>
+              <option value="15m">15 Minutes</option>
+              <option value="1h">1 Hour</option>
+              <option value="1d">1 Day</option>
+              <option value="1wk">1 Week</option>
+            </select>
+            <input
+              type="text"
+              defaultValue={ticker}
+              onBlur={(e) => setTicker(e.target.value)}
+              placeholder="Enter ticker (e.g., QQQ)"
+              className="ticker-input"
+            />
+            <button onClick={handleSearch} className="search-button">
+              Search
+            </button>
           </div>
-        )}
-      </div>
-      <div className="chart-container tv-lightweight-charts" ref={chartContainerRef}>
-        <CustomChart 
-          initialData={initialData}
-          incrementalData={incrementalData}
-          currentTicker={currentTicker}
-          theme={"dark"} 
-          requestMore={() => setLoading(true)} 
-        />
+          <div className="status-bar">
+            {isLoadingMore && (
+              <div className="loading-indicator">
+                Loading more data...
+              </div>
+            )}
+          </div>
+        </div>
+        
+        <div className="right-panel">
+          <div className="chart-container tv-lightweight-charts" ref={chartContainerRef}>
+            <CustomChart 
+              initialData={initialData}
+              incrementalData={incrementalData}
+              currentTicker={currentTicker}
+              theme={"dark"} 
+              requestMore={() => setLoading(true)}
+              onResetChart={resetChartRef}
+            />
+          </div>
+          
+          <div className="bottom-controls">
+            <button 
+              onClick={() => resetChartRef.current?.()}
+              className="reset-chart-btn"
+            >
+              Reset Chart View
+            </button>
+            
+            <form onSubmit={handleBacktestSubmit} className="backtest-form">
+              <input
+                type="text"
+                value={backtestInput}
+                onChange={(e) => setBacktestInput(e.target.value)}
+                placeholder="Enter backtest parameters"
+                className="backtest-input"
+              />
+              <button type="submit" className="backtest-submit-btn">
+                RUN BACKTEST
+              </button>
+            </form>
+          </div>
+        </div>
       </div>
       <ErrorAlert error={error} />
     </div>
   );
 }
 
-const ErrorAlert = (props) => {
+const ErrorAlert = (props: { error: string | null }) => {
 
   return (
     <div>

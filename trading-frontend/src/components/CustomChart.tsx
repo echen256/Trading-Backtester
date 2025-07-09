@@ -42,6 +42,7 @@ interface CustomChartProps {
   timeVisible?: boolean
   onCrosshairMove?: (param: any) => void
   requestMore?: () => void
+  onResetChart?: React.MutableRefObject<() => void>
   customIndicators?: Array<{
     name: string
     data: LineData[]
@@ -60,12 +61,11 @@ export function CustomChart({
   timeVisible = true,
   onCrosshairMove,
   requestMore,
+  onResetChart,
   customIndicators = [],
 }: CustomChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null)
   const [chartCreated, setChartCreated] = useState(false)
-  const [visibleRange, setVisibleRange] = useState<{ from: number; to: number } | null>(null)
-  const [visualRangeLoading, setVisualRangeLoading] = useState(false)
   // Chart instance and series references
   const chartRef = useRef<any>(null)
   const candlestickSeriesRef = useRef<any>(null)
@@ -74,6 +74,17 @@ export function CustomChart({
   const [internalTicker, setInternalTicker] = useState<string>('')
   const [internalDataCount, setInternalDataCount] = useState<number>(0)
   const [updateError, setUpdateError] = useState<string | null>(null)
+
+  // Call onResetChart when it's provided
+  useEffect(() => {
+    if (onResetChart) {
+      onResetChart.current = () => {
+        if (chartRef.current) {
+          chartRef.current.timeScale().fitContent()
+        }
+      }
+    }
+  }, [onResetChart])
 
   useEffect(() => {
     if (!chartContainerRef.current) return
@@ -121,7 +132,6 @@ export function CustomChart({
       const currentRange = chart.timeScale().getVisibleLogicalRange()
       if (currentRange?.from && currentRange?.to && currentRange?.from < 30 && !loadingRef.current) {
         loadingRef.current = true
-        setVisualRangeLoading(true)
         
         // Call requestMore if provided
         if (requestMore) {
@@ -131,7 +141,6 @@ export function CustomChart({
         // Reset loading state after a delay
         setTimeout(() => {
           loadingRef.current = false
-          setVisualRangeLoading(false)
         }, 1000)
       }
     }
@@ -219,7 +228,6 @@ export function CustomChart({
     
     // Check if ticker changed - if so, reset everything
     if (currentTicker !== internalTicker) {
-      console.log(`Ticker changed from ${internalTicker} to ${currentTicker} - resetting chart data`)
       setInternalTicker(currentTicker)
       setInternalDataCount(0)
       setUpdateError(null)
@@ -234,7 +242,6 @@ export function CustomChart({
       }
     } else if (initialData.length > 0 && internalDataCount === 0) {
       // First time loading data for this ticker
-      console.log(`Setting initial data for ${currentTicker}: ${initialData.length} bars`)
       candlestickSeriesRef.current.setData(initialData)
       setInternalDataCount(initialData.length)
       
@@ -254,8 +261,7 @@ export function CustomChart({
       candlestickSeriesRef.current.setData( [...incrementalData,...data]) 
       setInternalDataCount(prev => prev + incrementalData.length)
     } catch (error) {
-      const errorMsg = `Failed to update chart data: ${error.message}`
-      console.error(errorMsg, error)
+      const errorMsg = `Failed to update chart data: ${error instanceof Error ? error.message : 'Unknown error'}`
       setUpdateError(errorMsg)
     }
   }, [incrementalData, currentTicker])

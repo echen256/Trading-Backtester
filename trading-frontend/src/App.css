@@ -47,6 +47,134 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  min-height: 100vh;
+  width: 100%;
+}
+
+.main-layout {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  gap: 16px;
+}
+
+.left-panel {
+  width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.right-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.chart-container {
+  flex: 1;
+  position: relative;
+}
+
+.bottom-controls {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  padding: 16px;
+  background-color: #1a1a1a;
+  border-radius: 8px;
+  margin-top: 16px;
+}
+
+.controls-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  background-color: #1a1a1a;
+  border-radius: 8px;
+  border: 1px solid #333;
+}
+
+.timeframe-select,
+.ticker-input,
+.search-button {
+  padding: 8px 12px;
+  border: 1px solid #555;
+  border-radius: 4px;
+  background-color: #333;
+  color: white;
+  font-size: 14px;
+}
+
+.timeframe-select {
+  margin-bottom: 8px;
+}
+
+.ticker-input {
+  margin-bottom: 8px;
+}
+
+.search-button {
+  background-color: #4CAF50;
+  border-color: #4CAF50;
+  cursor: pointer;
+}
+
+.search-button:hover {
+  background-color: #45a049;
+}
+
+.reset-chart-btn {
+  padding: 8px 16px;
+  background-color: #2196F3;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.reset-chart-btn:hover {
+  background-color: #1976D2;
+}
+
+.backtest-form {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.backtest-input {
+  padding: 8px 12px;
+  border: 1px solid #555;
+  border-radius: 4px;
+  background-color: #333;
+  color: white;
+  font-size: 14px;
+  min-width: 200px;
+}
+
+.backtest-input:focus {
+  outline: none;
+  border-color: #4CAF50;
+}
+
+.backtest-submit-btn {
+  padding: 8px 16px;
+  background-color: #FF9800;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.backtest-submit-btn:hover {
+  background-color: #F57C00;
 }
 
 .search-container {
@@ -90,4 +218,22 @@
 .loading-indicator {
   color: #4CAF50;
   font-style: italic;
+}
+
+.error-alert {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: #f44336;
+  color: white;
+  padding: 16px;
+  border-radius: 8px;
+  max-width: 400px;
+  z-index: 1000;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.error-alert p {
+  margin: 0;
+  font-size: 14px;
 }
