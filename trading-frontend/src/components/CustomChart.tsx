@@ -40,6 +40,7 @@ interface CustomChartProps {
   autosize?: boolean
   timeVisible?: boolean
   onCrosshairMove?: (param: any) => void
+  onVisibleRangeChange?: (range: { from: number; to: number } | null) => void
   customIndicators?: Array<{
     name: string
     data: LineData[]
@@ -56,6 +57,7 @@ export function CustomChart({
   autosize = true,
   timeVisible = true,
   onCrosshairMove,
+  onVisibleRangeChange,
   customIndicators = [],
 }: CustomChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null)
@@ -210,6 +212,24 @@ export function CustomChart({
       }
     }
   }, [onCrosshairMove, chartCreated])
+
+  // Set up visible range change handler
+  useEffect(() => {
+    if (!chartRef.current || !onVisibleRangeChange) return
+
+    const timeScale = chartRef.current.timeScale()
+    timeScale.subscribeVisibleTimeRangeChange(() => {
+      const range = timeScale.getVisibleRange()
+      onVisibleRangeChange(range)
+    })
+
+    return () => {
+      if (chartRef.current) {
+        const timeScale = chartRef.current.timeScale()
+        timeScale.unsubscribeVisibleTimeRangeChange()
+      }
+    }
+  }, [onVisibleRangeChange, chartCreated])
 
  
   return (

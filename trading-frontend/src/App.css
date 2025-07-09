@@ -54,3 +54,40 @@
   display: flex;
   margin-bottom: 10px;
 }
+
+.status-bar {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: #1a1a1a;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.connection-status {
+  font-weight: bold;
+}
+
+.connection-status.connected {
+  color: #4CAF50;
+}
+
+.connection-status.disconnected {
+  color: #f44336;
+}
+
+.last-update {
+  color: #888;
+}
+
+.trade-count {
+  color: #888;
+}
+
+.loading-indicator {
+  color: #4CAF50;
+  font-style: italic;
+}
