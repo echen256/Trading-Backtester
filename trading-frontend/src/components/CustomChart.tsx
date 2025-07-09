@@ -51,7 +51,7 @@ interface CustomChartProps {
 }
 
 export function CustomChart({
-  width = "90vw",
+  width = "80vw",
   height = 500,
   initialData = [],
   incrementalData = [],
