@@ -11,6 +11,9 @@ from pathlib import Path
 import pandas as pd
 import json
 import io
+from data_download import download_historical_data
+from backtest import execute, save_backtest_results
+from config import DEFAULT_DATA_RANGE_YEARS, DATA_DIR, SUPPORTED_TIMEFRAMES
 # Supported timeframes
 TIMEFRAMES = {
     '1m': 'minute',
@@ -166,6 +169,137 @@ def receive_trading_data():
             'status': 'success',
             'trades_processed': len(trades_df),
             'market_data_processed': len(market_data_df)
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/download_historical_data')
+def download_historical_data_route():
+    """
+    Download historical data for a given symbol
+    Query parameters:
+    - symbol: Stock symbol (required)
+    - start_date: Start date (optional, defaults to 10 years ago)
+    - end_date: End date (optional, defaults to today)
+    - interval: Time interval in minutes (optional, defaults to 5)
+    """
+    try:
+        # Get query parameters
+        symbol = request.args.get('symbol')
+        start_date = request.args.get('start_date')
+        end_date = request.args.get('end_date')
+        interval = request.args.get('interval', '5')
+        
+        if not symbol:
+            return jsonify({'error': 'Symbol parameter is required'}), 400
+        
+        # Set default dates if not provided
+        if not end_date:
+            end_date = datetime.now()
+        else:
+            end_date = datetime.strptime(end_date, '%Y-%m-%d')
+            
+        if not start_date:
+            start_date = end_date - timedelta(days=365 * DEFAULT_DATA_RANGE_YEARS)
+        else:
+            start_date = datetime.strptime(start_date, '%Y-%m-%d')
+        
+        # Download the data
+        df = download_historical_data(symbol, start_date, end_date, interval)
+        
+        # Save to CSV in data directory
+        os.makedirs(DATA_DIR, exist_ok=True)
+        filename = f"{symbol}_{interval}m.csv"
+        filepath = os.path.join(DATA_DIR, filename)
+        df.to_csv(filepath)
+        
+        return jsonify({
+            'status': 'success',
+            'message': f'Downloaded {len(df)} data points for {symbol}',
+            'filename': filename,
+            'filepath': filepath,
+            'data_points': len(df),
+            'start_date': start_date.strftime('%Y-%m-%d'),
+            'end_date': end_date.strftime('%Y-%m-%d'),
+            'interval': interval
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/execute_backtest')
+def execute_backtest_route():
+    """
+    Execute a backtest for a given strategy
+    Query parameters:
+    - strategy_name: Name of the strategy (required)
+    - ticker: Stock ticker symbol (required)
+    - timeframe: Time interval (required)
+    - start_date: Start date (required)
+    - end_date: End date (required)
+    """
+    try:
+        # Get query parameters
+        strategy_name = request.args.get('strategy_name')
+        ticker = request.args.get('ticker')
+        timeframe = request.args.get('timeframe')
+        start_date = request.args.get('start_date')
+        end_date = request.args.get('end_date')
+        
+        # Validate required parameters
+        if not all([strategy_name, ticker, timeframe, start_date, end_date]):
+            return jsonify({
+                'error': 'All parameters are required: strategy_name, ticker, timeframe, start_date, end_date'
+            }), 400
+        
+        # Validate timeframe
+        if timeframe not in SUPPORTED_TIMEFRAMES:
+            return jsonify({
+                'error': f'Invalid timeframe. Supported timeframes: {SUPPORTED_TIMEFRAMES}'
+            }), 400
+        
+        # Parse dates
+        start_date_obj = datetime.strptime(start_date, '%Y-%m-%d')
+        end_date_obj = datetime.strptime(end_date, '%Y-%m-%d')
+        
+        # Check if data file exists
+        interval = timeframe.replace('m', '')  # Convert 5m to 5
+        data_filename = f"{ticker}_{interval}m.csv"
+        data_filepath = os.path.join(DATA_DIR, data_filename)
+        
+        if not os.path.exists(data_filepath):
+            # Download data if it doesn't exist
+            try:
+                df = download_historical_data(ticker, start_date_obj, end_date_obj, interval)
+                os.makedirs(DATA_DIR, exist_ok=True)
+                df.to_csv(data_filepath)
+                download_message = f"Downloaded {len(df)} data points for {ticker}"
+            except Exception as e:
+                return jsonify({'error': f'Failed to download data: {str(e)}'}), 500
+        else:
+            download_message = f"Using existing data file: {data_filename}"
+        
+        # Execute the backtest
+        backtest_results = execute()
+        
+        # Save results
+        results_filepath = save_backtest_results(
+            strategy_name, ticker, start_date, end_date, timeframe, backtest_results
+        )
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'Backtest executed successfully',
+            'download_message': download_message,
+            'data_file': data_filepath,
+            'results_file': results_filepath,
+            'strategy_name': strategy_name,
+            'ticker': ticker,
+            'timeframe': timeframe,
+            'start_date': start_date,
+            'end_date': end_date,
+            'results': backtest_results
         })
         
     except Exception as e:
