@@ -94,6 +94,82 @@
             flex: 1;
         }
         
+        .controls {
+            background-color: #2a2a2a;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .controls h3 {
+            color: #4CAF50;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        
+        .control-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .control-group label {
+            min-width: 80px;
+            color: #ccc;
+        }
+        
+        .control-group input, .control-group select {
+            background-color: #333;
+            color: #fff;
+            border: 1px solid #555;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .control-group input:focus, .control-group select:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+        
+        .btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: #45a049;
+        }
+        
+        .btn:disabled {
+            background-color: #666;
+            cursor: not-allowed;
+        }
+        
+        .download-status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .download-status.success {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .download-status.error {
+            background-color: #f44336;
+            color: white;
+        }
+        
         .stat-value {
             font-size: 24px;
             font-weight: bold;
@@ -122,6 +198,10 @@
             .stats {
                 flex-direction: column;
             }
+            .control-group {
+                flex-direction: column;
+                align-items: flex-start;
+            }
         }
     </style>
 </head>
@@ -145,6 +225,28 @@
                 <div class="stat-value" id="lastUpdate">-</div>
                 <div class="stat-label">Last Update</div>
             </div>
+        </div>
+        
+        <div class="controls">
+            <h3>📥 Data Management</h3>
+            <div class="control-group">
+                <label for="ticker">Ticker:</label>
+                <input type="text" id="ticker" value="AAPL" placeholder="Enter ticker symbol">
+                
+                <label for="timeframe">Timeframe:</label>
+                <select id="timeframe">
+                    <option value="1">1 minute</option>
+                    <option value="5" selected>5 minutes</option>
+                    <option value="15">15 minutes</option>
+                    <option value="30">30 minutes</option>
+                    <option value="60">1 hour</option>
+                </select>
+                
+                <button class="btn" id="downloadBtn" onclick="downloadHistoricalData()">
+                    Download Historical Data
+                </button>
+            </div>
+            <div class="download-status" id="downloadStatus"></div>
         </div>
         
         <div class="data-container">
@@ -271,6 +373,56 @@
             });
         }
         
+        // Download historical data function
+        async function downloadHistoricalData() {
+            const ticker = document.getElementById('ticker').value.trim().toUpperCase();
+            const timeframe = document.getElementById('timeframe').value;
+            const downloadBtn = document.getElementById('downloadBtn');
+            const statusDiv = document.getElementById('downloadStatus');
+            
+            if (!ticker) {
+                showDownloadStatus('Please enter a ticker symbol', 'error');
+                return;
+            }
+            
+            // Disable button and show loading
+            downloadBtn.disabled = true;
+            downloadBtn.textContent = 'Downloading...';
+            statusDiv.style.display = 'none';
+            
+            try {
+                const response = await fetch(`/download_historical_data?symbol=${ticker}&interval=${timeframe}`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showDownloadStatus(
+                        `✅ ${data.message} (${data.data_points} points from ${data.start_date} to ${data.end_date})`,
+                        'success'
+                    );
+                } else {
+                    showDownloadStatus(`❌ ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showDownloadStatus(`❌ Network error: ${error.message}`, 'error');
+            } finally {
+                // Re-enable button
+                downloadBtn.disabled = false;
+                downloadBtn.textContent = 'Download Historical Data';
+            }
+        }
+        
+        function showDownloadStatus(message, type) {
+            const statusDiv = document.getElementById('downloadStatus');
+            statusDiv.textContent = message;
+            statusDiv.className = `download-status ${type}`;
+            statusDiv.style.display = 'block';
+            
+            // Hide after 5 seconds
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 5000);
+        }
+        
         // Handle status messages
         socket.on('status', function(data) {
             console.log('Status:', data.msg);
@@ -287,4 +439,4 @@
         }, 30000);
     </script>
 </body>
-</html> 
+</html>
