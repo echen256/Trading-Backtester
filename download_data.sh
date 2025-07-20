@@ -13,4 +13,4 @@ fi
 
 cd ./app/data_download
 # Start the Flask server
-python data_download.py >> ./../../logs/data_download.txt 2>&1
+python -u data_download.py >> ./../../logs/data_download.txt 2>&1
