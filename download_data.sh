@@ -1,7 +1,6 @@
 #!/bin/bash
-
-# Activate the virtual environment
 cd ./backend
+mkdir -p logs
 source venv/bin/activate
 
 set -a  # Automatically export all variables
@@ -14,4 +13,4 @@ fi
 
 cd ./app/data_download
 # Start the Flask server
-python data_download.py >> ./../../logs/data_download.log 2>&1
+python data_download.py >> ./../../logs/data_download.txt 2>&1

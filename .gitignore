@@ -9,3 +9,4 @@ virtualenv/
 .env.production.local/
 **/backend/data/**
 **/backend/logs
+**/backend/app/data_download/data/**
