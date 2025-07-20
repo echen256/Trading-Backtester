@@ -10,3 +10,4 @@ virtualenv/
 **/backend/data/**
 **/backend/logs
 **/backend/app/data_download/data/**
+backend/.env
