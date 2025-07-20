@@ -44,6 +44,7 @@ def filter_tickers(ticker, config):
             return info['results']['market_cap'] > config['minimum_market_cap']
         else:
             return False
+    print(info)
     return False
 
 def main():
