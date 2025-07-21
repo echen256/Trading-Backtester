@@ -1,0 +1,1 @@
+gsutil -m cp  ./Trading-Backtester/backend/app/data_download/data/1440/*.csv gs://stock-data-bucket-256/data/1440
