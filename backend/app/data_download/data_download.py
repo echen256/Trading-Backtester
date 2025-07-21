@@ -34,7 +34,7 @@ def download_historical_data(symbol, start_date, end_date, interval='5'):
     df = pd.DataFrame(aggs)
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     df.set_index('timestamp', inplace=True)
-    
+    df['ticker'] = symbol
     return df
 
 def filter_tickers(ticker, config):
