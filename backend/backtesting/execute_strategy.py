@@ -28,17 +28,16 @@ def execute_strategy(file_name, start_date, end_date, strategy_name="Default", i
     data_path = os.path.join(backend_root, "app", "data_download", "data", "1440", file_name)
     data = pd.read_csv(data_path)
 
-    data.set_index("timestamp", inplace=True)
+    # data.set_index("timestamp", inplace=True)
+    rsi = ta.rsi(data["close"], length=14, scalar=100, offset=0)
+    data["rsi"] = rsi 
+    print(rsi)
+    output_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "output", f"strategy_{strategy_name}")
+    os.makedirs(output_dir, exist_ok=True)
+    output_path = os.path.join(output_dir, file_name)
+    data.to_csv(output_path, index=True)
     
-    for indicator in indicators:
-        if indicator == "rsi":
-            rsi = ta.rsi(data["close"], length=14, scalar=100, offset=0)
-            data["rsi"] = rsi
-        data.dropna(inplace=True)
-        # Create output directory if it doesn't exist
-        output_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "output", f"strategy_{strategy_name}")
-        os.makedirs(output_dir, exist_ok=True)
-        output_path = os.path.join(output_dir, file_name)
-        data.to_csv(output_path, index=True)
+  #  for indicator in indicators:
+    
     return {"data": data, "indicators": indicators, "strategy_name": strategy_name}
 

@@ -28,7 +28,8 @@ def find_csv_files():
 def plot_trading_data(csv_path):
     """Create Plotly visualization for trading CSV data"""
     try:
-        res = execute_strategy(csv_path, "Default", default_indicators)
+        # Call execute_strategy with proper parameters
+        res = execute_strategy(os.path.basename(csv_path), None, None, "Default", ['rsi'])
         df = res["data"]
         indicators = res["indicators"]
         strategy_name = res["strategy_name"]
@@ -87,8 +88,24 @@ def plot_trading_data(csv_path):
                 row=2, col=1
             )
         
-        # Update layout
-        ticker = df['ticker'].iloc[0] if 'ticker' in df.columns else 'Unknown'
+        if ('rsi' in df.columns):
+            fig.add_trace(
+                go.Line(
+                    x=df['timestamp'] if 'timestamp' in df.columns else df.index,
+                    y=df['rsi'],
+                    name='RSI'
+                ),
+                row=3, col=1
+            )
+            
+            # Update layout - safely get ticker
+            
+        ticker = 'Unknown'
+        if 'ticker' in df.columns and len(df) > 0:
+            ticker = df['ticker'].iloc[0]
+        elif len(df) > 0:
+            # Try to extract ticker from filename
+            ticker = os.path.basename(csv_path).split('-')[0] if '-' in os.path.basename(csv_path) else 'Unknown'
         fig.update_layout(
             title=f'{ticker} Trading Data Visualization',
             xaxis_rangeslider_visible=False,
@@ -114,7 +131,7 @@ def main():
     # Use provided path or default
     csv_path =   sys.argv[1] if len(sys.argv) > 1 else default_csv
  
-    plot_trading_data(default_csv)
+    plot_trading_data(csv_path)
 
 if __name__ == "__main__":
     main()
