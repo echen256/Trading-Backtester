@@ -11,3 +11,6 @@ virtualenv/
 **/backend/logs
 **/backend/app/data_download/data/**
 backend/.env
+**/backend/csv/**    */
+backend/csv/Webull_Orders_Records_Options.csv
+backend/csv/data.csv
