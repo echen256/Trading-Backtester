@@ -10,3 +10,4 @@ flask-socketio
 flask-cors
 python-socketio
 pandas-ta
+pytest
