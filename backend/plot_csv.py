@@ -10,7 +10,8 @@ import os
 import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-from backtesting.execute_strategy import default_indicators, execute_strategy
+from backtesting.execute_strategy import execute_strategy
+from backtesting.indicators import BaseIndicator
 
 def find_csv_files():
     """Find available CSV files in the data directory"""
@@ -29,9 +30,9 @@ def plot_trading_data(csv_path):
     """Create Plotly visualization for trading CSV data"""
     try:
         # Call execute_strategy with proper parameters
-        res = execute_strategy(os.path.basename(csv_path), None, None, "Default", ['rsi'])
+        res = execute_strategy(os.path.basename(csv_path), None, None, "Default", ['rsi', 'atr', 'macd'])
         df = res["data"]
-        indicators = res["indicators"]
+        indicator_objects = res["indicator_objects"]
         strategy_name = res["strategy_name"]
         
         # Convert timestamp to datetime if it exists
@@ -39,16 +40,22 @@ def plot_trading_data(csv_path):
             df['timestamp'] = pd.to_datetime(df['timestamp'])
             df = df.sort_values('timestamp')
         
-        # Create subplot with secondary y-axis for volume
+        # Calculate subplot layout based on indicators
+        num_indicator_subplots = len([ind for ind in indicator_objects if ind.get_plot_config()["subplot_row"] > 0])
+        total_rows = 2 + num_indicator_subplots  # Price + Volume + Indicators
+        
+        # Create dynamic row heights
+        row_heights = [0.5, 0.2] + [0.3 / num_indicator_subplots] * num_indicator_subplots if num_indicator_subplots > 0 else [0.5, 0.5]
+        
+        # Create subplot titles
+        subplot_titles = ['Price Data', 'Volume'] + [ind.get_subplot_title() for ind in indicator_objects if ind.get_plot_config()["subplot_row"] > 0]
+        
         fig = make_subplots(
-            rows=len(indicators) + 2, cols=1,
-            row_heights= [0.5, 0.25, 0.25],
-            vertical_spacing=0.1,
-            subplot_titles=('Price Data', 'Volume', "RSI"),
-            specs=[[{"secondary_y": False}],
-                   [{"secondary_y": False}],
-                   [{"secondary_y": False}]
-                   ]
+            rows=total_rows, cols=1,
+            row_heights=row_heights,
+            vertical_spacing=0.08,
+            subplot_titles=subplot_titles,
+            specs=[[{"secondary_y": False}]] * total_rows
         )
         
         # Add candlestick chart if OHLC data is available
@@ -88,15 +95,71 @@ def plot_trading_data(csv_path):
                 row=2, col=1
             )
         
-        if ('rsi' in df.columns):
-            fig.add_trace(
-                go.Line(
-                    x=df['timestamp'] if 'timestamp' in df.columns else df.index,
-                    y=df['rsi'],
-                    name='RSI'
-                ),
-                row=3, col=1
-            )
+        # Add indicator plots dynamically
+        indicator_subplot_counter = 3  # Start after Price (1) and Volume (2)
+        
+        for indicator in indicator_objects:
+            plot_config = indicator.get_plot_config()
+            
+            if plot_config["subplot_row"] == 0:
+                # Plot on main price chart
+                row = 1
+            else:
+                # Plot on separate subplot
+                row = indicator_subplot_counter
+                indicator_subplot_counter += 1
+            
+            if plot_config.get("plot_type") == "multi":
+                # Handle multi-trace indicators like MACD
+                for trace_config in plot_config["traces"]:
+                    column_name = trace_config["column"]
+                    if column_name in df.columns:
+                        trace_type = trace_config["type"]
+                        
+                        if trace_type == "line":
+                            trace = go.Scatter(
+                                x=df['timestamp'] if 'timestamp' in df.columns else df.index,
+                                y=df[column_name],
+                                mode='lines',
+                                name=trace_config["name"],
+                                line=dict(color=trace_config["color"], width=trace_config.get("line", {}).get("width", 1))
+                            )
+                        elif trace_type == "bar":
+                            trace = go.Bar(
+                                x=df['timestamp'] if 'timestamp' in df.columns else df.index,
+                                y=df[column_name],
+                                name=trace_config["name"],
+                                marker_color=trace_config["color"],
+                                opacity=trace_config.get("opacity", 1.0)
+                            )
+                        
+                        fig.add_trace(trace, row=row, col=1)
+            else:
+                # Handle single-trace indicators
+                if indicator.column_name in df.columns:
+                    if plot_config["plot_type"] == "line":
+                        trace = go.Scatter(
+                            x=df['timestamp'] if 'timestamp' in df.columns else df.index,
+                            y=df[indicator.column_name],
+                            mode='lines',
+                            name=indicator.name,
+                            line=dict(color=plot_config["color"], width=2),
+                            **plot_config.get("additional_config", {})
+                        )
+                    elif plot_config["plot_type"] == "bar":
+                        trace = go.Bar(
+                            x=df['timestamp'] if 'timestamp' in df.columns else df.index,
+                            y=df[indicator.column_name],
+                            name=indicator.name,
+                            marker_color=plot_config["color"]
+                        )
+                    
+                    fig.add_trace(trace, row=row, col=1)
+                    
+                    # Set y-axis range if specified
+                    y_range = indicator.get_y_axis_range()
+                    if y_range and row > 1:
+                        fig.update_yaxes(range=y_range, row=row, col=1)
             
             # Update layout - safely get ticker
             
@@ -113,9 +176,14 @@ def plot_trading_data(csv_path):
             showlegend=True
         )
         
-        fig.update_xaxes(title_text="Time", row=2, col=1)
+        # Update axes labels
+        fig.update_xaxes(title_text="Time", row=total_rows, col=1)  # Only show time label on bottom subplot
         fig.update_yaxes(title_text="Price", row=1, col=1)
         fig.update_yaxes(title_text="Volume", row=2, col=1)
+        
+        # Add labels for indicator subplots
+        for i, indicator in enumerate([ind for ind in indicator_objects if ind.get_plot_config()["subplot_row"] > 0]):
+            fig.update_yaxes(title_text=indicator.name, row=3+i, col=1)
         
         fig.show()
         

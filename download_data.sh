@@ -12,5 +12,5 @@ if [ -f .env ]; then
 fi
 
 cd ./app/data_download
-# Start the Flask server
+# # Start the Flask server
 python -u data_download.py >> ./../../logs/data_download.txt 2>&1

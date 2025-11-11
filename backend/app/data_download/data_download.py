@@ -62,12 +62,13 @@ def download_ticker_data(symbol, config):
     # Using Method 1: While loop with timedelta
     current_date = start_date
     chunk_size = timedelta(days=30)  # 30-day chunks
-    
+    print('--------------------------------')
     while current_date < end_date:
         next_date = min(current_date + chunk_size, end_date)
         print(f"Downloading from {current_date.date()} to {next_date.date()} for {symbol}")
         
         try:
+            print(f"Downloading from {current_date.date()} to {next_date.date()} for {symbol}")
             df = download_historical_data(symbol, current_date, next_date, interval)
             all_data.append(df)
             print(f"Downloaded {len(df)} rows")
@@ -100,7 +101,7 @@ def main():
     parser = argparse.ArgumentParser(description='Download historical trading data from Polygon.io')
     parser.add_argument('ticker', nargs='?', help='Single ticker to download (e.g., TSLA, AAPL)')
     args = parser.parse_args()
-
+    print('temp--------------------------------')
     with open('data_download_config.json', 'r') as file:
         config = json.load(file)
 
