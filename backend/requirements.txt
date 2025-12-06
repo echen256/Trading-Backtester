@@ -9,5 +9,5 @@ flask
 flask-socketio
 flask-cors
 python-socketio
-pandas-ta
 pytest
+google-cloud-bigquery
