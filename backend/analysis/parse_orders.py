@@ -3,16 +3,15 @@ from __future__ import annotations
 
 import argparse
 import csv
-import json
+import math
 import re
 import statistics
-from collections import defaultdict
+from collections import defaultdict, deque
 from dataclasses import dataclass, replace
 from datetime import date, datetime
 from pathlib import Path
-from typing import Iterable, List, Mapping, Sequence
+from typing import Iterable, List, Mapping, Sequence, Tuple
 
-import plotly.graph_objects as go
 from asciichart import asciichart as asciichart_module
 from statistics import StatisticsError
 
@@ -90,6 +89,23 @@ class RealizedTrade:
     quantity: float
     price: float
     pnl: float
+    open_date: date
+
+
+@dataclass
+class DayPnL:
+    date_label: str
+    winners_total: float
+    losers_total: float
+    winners_lines: List[Tuple[str, str]]
+    losers_lines: List[Tuple[str, str]]
+
+
+@dataclass
+class PositionLot:
+    quantity: float
+    price: float
+    opened: date
 
 
 def _parse_numeric(value: str | None) -> float | None:
@@ -198,8 +214,8 @@ def compute_realized_trades(orders: Sequence[Order]) -> List[RealizedTrade]:
         or _parse_order_datetime(order.placed_time)
         or datetime.min,
     )
-    positions: defaultdict[str, dict[str, float]] = defaultdict(
-        lambda: {"quantity": 0.0, "avg_price": 0.0}
+    positions: defaultdict[str, dict[str, deque[PositionLot]]] = defaultdict(
+        lambda: {"long": deque(), "short": deque()}
     )
     realized: List[RealizedTrade] = []
 
@@ -217,73 +233,64 @@ def compute_realized_trades(orders: Sequence[Order]) -> List[RealizedTrade]:
             continue
 
         side = order.side.lower()
-        position = positions[order.symbol]
+        instrument = positions[order.symbol]
         remaining = qty
 
         if side == "buy":
-            while remaining > 0:
-                if position["quantity"] < 0:
-                    close_qty = min(remaining, abs(position["quantity"]))
-                    pnl = (position["avg_price"] - price) * close_qty * CONTRACT_MULTIPLIER
-                    realized.append(
-                        RealizedTrade(
-                            trade_date=trade_date,
-                            symbol=order.symbol,
-                            quantity=close_qty,
-                            price=price,
-                            pnl=pnl,
-                        )
+            while remaining > 0 and instrument["short"]:
+                lot = instrument["short"][0]
+                close_qty = min(remaining, lot.quantity)
+                pnl = (lot.price - price) * close_qty * CONTRACT_MULTIPLIER
+                realized.append(
+                    RealizedTrade(
+                        trade_date=trade_date,
+                        symbol=order.symbol,
+                        quantity=close_qty,
+                        price=price,
+                        pnl=pnl,
+                        open_date=lot.opened,
                     )
-                    position["quantity"] += close_qty
-                    remaining -= close_qty
-                    if position["quantity"] == 0:
-                        position["avg_price"] = 0.0
-                else:
-                    total_qty = position["quantity"] + remaining
-                    if total_qty == 0:
-                        position["avg_price"] = 0.0
-                    else:
-                        weighted = (position["avg_price"] * position["quantity"]) + (price * remaining)
-                        position["avg_price"] = weighted / total_qty
-                    position["quantity"] = total_qty
-                    remaining = 0
+                )
+                lot.quantity -= close_qty
+                remaining -= close_qty
+                if lot.quantity <= 1e-9:
+                    instrument["short"].popleft()
+            if remaining > 0:
+                instrument["long"].append(
+                    PositionLot(quantity=remaining, price=price, opened=trade_date)
+                )
         elif side == "sell":
-            while remaining > 0:
-                if position["quantity"] > 0:
-                    close_qty = min(remaining, position["quantity"])
-                    pnl = (price - position["avg_price"]) * close_qty * CONTRACT_MULTIPLIER
-                    realized.append(
-                        RealizedTrade(
-                            trade_date=trade_date,
-                            symbol=order.symbol,
-                            quantity=close_qty,
-                            price=price,
-                            pnl=pnl,
-                        )
+            while remaining > 0 and instrument["long"]:
+                lot = instrument["long"][0]
+                close_qty = min(remaining, lot.quantity)
+                pnl = (price - lot.price) * close_qty * CONTRACT_MULTIPLIER
+                realized.append(
+                    RealizedTrade(
+                        trade_date=trade_date,
+                        symbol=order.symbol,
+                        quantity=close_qty,
+                        price=price,
+                        pnl=pnl,
+                        open_date=lot.opened,
                     )
-                    position["quantity"] -= close_qty
-                    remaining -= close_qty
-                    if position["quantity"] == 0:
-                        position["avg_price"] = 0.0
-                else:
-                    abs_qty = abs(position["quantity"])
-                    new_abs_qty = abs_qty + remaining
-                    if new_abs_qty == 0:
-                        position["avg_price"] = 0.0
-                    else:
-                        weighted = (position["avg_price"] * abs_qty) + (price * remaining)
-                        position["avg_price"] = weighted / new_abs_qty
-                    position["quantity"] -= remaining
-                    remaining = 0
+                )
+                lot.quantity -= close_qty
+                remaining -= close_qty
+                if lot.quantity <= 1e-9:
+                    instrument["long"].popleft()
+            if remaining > 0:
+                instrument["short"].append(
+                    PositionLot(quantity=remaining, price=price, opened=trade_date)
+                )
 
     return realized
 
 
-def summarize_daily_realized_pnl(trades: Sequence[RealizedTrade]) -> dict[str, dict[str, dict[str, object]]]:
+def summarize_daily_realized_pnl(trades: Sequence[RealizedTrade]) -> List[DayPnL]:
     """Aggregate realized trades into daily winner/loser buckets."""
 
     if not trades:
-        return {}
+        return []
 
     summary: dict[str, dict[str, dict[str, object]]] = defaultdict(
         lambda: {
@@ -297,91 +304,26 @@ def summarize_daily_realized_pnl(trades: Sequence[RealizedTrade]) -> dict[str, d
         bucket_name = "Winners" if trade.pnl >= 0 else "Losers"
         bucket = summary[date_key][bucket_name]
         bucket["total"] = bucket.get("total", 0.0) + trade.pnl
-        bucket.setdefault("lines", []).append(
-            f"{trade.symbol}: {trade.quantity:g} @ {trade.price:.2f} -> {trade.pnl:,.2f}"
+        summary_line = f"{describe_contract(trade.symbol)}: {trade.quantity:g} @ {trade.price:.2f} -> {trade.pnl:,.2f}"
+        initiated_line = f"Initiated: {trade.open_date.isoformat()}"
+        bucket.setdefault("lines", []).append((summary_line, initiated_line))
+
+    day_entries: List[DayPnL] = []
+    for date_label in sorted(summary.keys()):
+        winners_bucket = summary[date_label]["Winners"]
+        losers_bucket = summary[date_label]["Losers"]
+        day_entries.append(
+            DayPnL(
+                date_label=date_label,
+                winners_total=float(winners_bucket.get("total", 0.0)),
+                losers_total=float(losers_bucket.get("total", 0.0)),
+                winners_lines=list(winners_bucket.get("lines", [])),
+                losers_lines=list(losers_bucket.get("lines", [])),
+            )
         )
 
-    ordered_summary = dict(sorted(summary.items()))
-    return ordered_summary
+    return day_entries
 
-
-def build_timeline_figure(daily_summary: Mapping[str, Mapping[str, Mapping[str, object]]]) -> go.Figure:
-    """Create a Plotly figure showing daily winner/loser bars."""
-
-    if not daily_summary:
-        raise ValueError("No realized PnL data available for plotting.")
-
-    dates = list(daily_summary.keys())
-    winners = [float(daily_summary[day]["Winners"].get("total", 0.0)) for day in dates]
-    losers = [float(daily_summary[day]["Losers"].get("total", 0.0)) for day in dates]
-
-    fig = go.Figure()
-    fig.add_bar(
-        name="Winners",
-        x=dates,
-        y=winners,
-        marker_color="#2ca02c",
-        hovertemplate="%{x}<br>Winners: %{y:$,.2f}<extra></extra>",
-    )
-    fig.add_bar(
-        name="Losers",
-        x=dates,
-        y=losers,
-        marker_color="#d62728",
-        hovertemplate="%{x}<br>Losers: %{y:$,.2f}<extra></extra>",
-    )
-    fig.update_layout(
-        title="Daily Realized Contract PnL",
-        barmode="relative",
-        bargap=0.25,
-        template="plotly_white",
-        xaxis_title="Date",
-        yaxis_title="Realized PnL (USD)",
-        hovermode="x unified",
-        legend_title_text="",
-    )
-    fig.update_traces(marker_line_width=1, marker_line_color="#222")
-    return fig
-
-
-def write_timeline_html(
-    fig: go.Figure,
-    output_path: Path,
-    daily_summary: Mapping[str, Mapping[str, Mapping[str, object]]],
-) -> None:
-    """Persist the Plotly figure to HTML with click popups for trade breakdowns."""
-
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    breakdown_json = json.dumps(daily_summary)
-    div_id = "daily-pnl-timeline"
-    post_script = f"""
-const pnlBreakdown = {breakdown_json};
-const graphDiv = document.getElementById('{div_id}');
-if (graphDiv) {{
-  graphDiv.on('plotly_click', function(eventData) {{
-    if (!eventData.points || !eventData.points.length) {{
-      return;
-    }}
-    const point = eventData.points[0];
-    const date = point.x;
-    const traceName = point.data.name;
-    const bucket = pnlBreakdown[date] && pnlBreakdown[date][traceName];
-    if (!bucket) {{
-      alert(traceName + ' on ' + date + '\n\nNo trades recorded.');
-      return;
-    }}
-    const lines = bucket.lines && bucket.lines.length ? bucket.lines : ['No trades recorded.'];
-    alert(traceName + ' on ' + date + '\n\n' + lines.join('\n'));
-  }});
-}}
-"""
-    fig.write_html(
-        output_path,
-        include_plotlyjs="cdn",
-        full_html=True,
-        div_id=div_id,
-        post_script=post_script,
-    )
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
@@ -404,9 +346,9 @@ def parse_args() -> argparse.Namespace:
         help="Display an ASCII bar chart of contract PnL aggregated per symbol",
     )
     parser.add_argument(
-        "--timeline-html",
-        type=Path,
-        help="Write an interactive realized PnL timeline (Plotly HTML) to this path",
+        "--interactive-report",
+        action="store_true",
+        help="Launch an interactive ASCII timeline for realized PnL",
     )
     return parser.parse_args()
 
@@ -453,7 +395,7 @@ def render_contract_pnl_chart(contract_pnl: Mapping[str, float]) -> str:
     min_value = min(magnitudes)
     max_value = max(magnitudes)
     if max_value == 0:
-        return "\n".join(label.rjust(max_label_len) for label in labels)
+        return "".join(label.rjust(max_label_len) for label in labels)
     width = max(10, 80 - max_label_len - 1)
     lines = []
     for label, magnitude in zip(labels, magnitudes):
@@ -473,15 +415,160 @@ def render_contract_pnl_chart(contract_pnl: Mapping[str, float]) -> str:
     stdev = statistics.stdev(pnl_list) if len(pnl_list) >= 2 else 0.0
 
     lines.append("--------------------------------")
-    lines.append(f"Total: {total:,.2f}")
-    lines.append(f"Average: {average:,.2f}")
-    lines.append(f"Median: {median:,.2f}")
-    lines.append(f"Mode: {mode_value:,.2f}")
-    lines.append(f"Range: {pnl_range[0]:,.2f} - {pnl_range[1]:,.2f}")
-    lines.append(f"Standard Deviation: {stdev:,.2f}")
+    lines.append(f"Total: {total:,.2f}".strip("\n"))
+    lines.append(f"Average: {average:,.2f}".strip("\""))
+    lines.append(f"Median: {median:,.2f}".strip("\""))
+    lines.append(f"Mode: {mode_value:,.2f}".strip("\""))
+    lines.append(f"Range: {pnl_range[0]:,.2f} - {pnl_range[1]:,.2f}".strip("\""))
+    lines.append(f"Standard Deviation: {stdev:,.2f}".strip("\""))
     lines.append("--------------------------------")
     return "\n".join(lines)
 
+
+def describe_contract(name: str) -> str:
+    match = re.match(r"([A-Z]+)(\d{6})([CP])(\d{8})", name)
+    if not match:
+        return name
+    symbol, _, option_type, strike_raw = match.groups()
+    option_label = "Call" if option_type == "C" else "Put"
+    strike_value = int(strike_raw) / 1000.0
+    if strike_value.is_integer():
+        strike_text = f"{strike_value:.0f}"
+    else:
+        strike_text = f"{strike_value:.3f}".rstrip("0").rstrip(".")
+    return f"{symbol} {option_label} {strike_text}"
+
+
+def _format_currency(value: float) -> str:
+    sign = "-" if value < 0 else "+"
+    return f"{sign}${abs(value):,.2f}"
+
+
+def _build_bar(value: float, max_abs_value: float, width: int = 32) -> str:
+    if max_abs_value <= 0 or value == 0:
+        return ""
+    units = max(1, int((abs(value) / max_abs_value) * width))
+    char = "+" if value >= 0 else "-"
+    return char * units
+
+
+def _render_timeline_page(day_entries: Sequence[DayPnL], page: int, page_size: int) -> str:
+    total_days = len(day_entries)
+    if total_days == 0:
+        return "No realized trades available."
+
+    total_pages = max(1, math.ceil(total_days / page_size))
+    page = max(0, min(page, total_pages - 1))
+    start = page * page_size
+    end = min(start + page_size, total_days)
+    max_abs = max(
+        (max(abs(day.winners_total), abs(day.losers_total)) for day in day_entries),
+        default=0,
+    )
+    max_abs = max_abs or 1.0
+
+    lines: List[str] = []
+    lines.append(f"Daily Realized PnL Timeline (page {page + 1}/{total_pages})")
+    lines.append("-" * 72)
+    for global_index in range(start, end):
+        day = day_entries[global_index]
+        label = f"[{global_index + 1:03d}] {day.date_label}"
+        winners_bar = _build_bar(day.winners_total, max_abs)
+        losers_bar = _build_bar(day.losers_total, max_abs)
+        lines.append(label)
+        lines.append(
+            f"  Winners {_format_currency(day.winners_total):>12}: {winners_bar or '(flat)'}"
+        )
+        lines.append(
+            f"  Losers  {_format_currency(day.losers_total):>12}: {losers_bar or '(flat)'}"
+        )
+        lines.append("")
+
+    lines.append(
+        "Navigation: [Enter day #] View | [N] Next page | [P] Previous page | [Q] Quit"
+    )
+    return "\n".join(lines)
+
+
+def _render_day_detail(day_entries: Sequence[DayPnL], index: int) -> str:
+    total_days = len(day_entries)
+    day = day_entries[index]
+    lines: List[str] = []
+    lines.append("=" * 72)
+    lines.append(f"Day {index + 1:03d}/{total_days} - {day.date_label}")
+    net = day.winners_total + day.losers_total
+    lines.append(f"Net PnL: {_format_currency(net)}")
+    lines.append(f"Winners Total: {_format_currency(day.winners_total)}")
+    lines.append(f"Losers Total: {_format_currency(day.losers_total)}")
+    lines.append("-- Winners --")
+    if day.winners_lines:
+        for summary, initiated in day.winners_lines:
+            lines.append(f"  + {summary}")
+            lines.append(f"    {initiated}")
+    else:
+        lines.append("  + None")
+    lines.append("-- Losers --")
+    if day.losers_lines:
+        for summary, initiated in day.losers_lines:
+            lines.append(f"  - {summary}")
+            lines.append(f"    {initiated}")
+    else:
+        lines.append("  - None")
+    lines.append("=" * 72)
+    lines.append("Navigation: [B] Back to timeline | [N] Next day | [P] Previous day | [Q] Quit")
+    return "\n".join(lines)
+
+
+def run_interactive_report(day_entries: Sequence[DayPnL]) -> None:
+    if not day_entries:
+        print("No realized trades available to display.")
+        return
+
+    page = 0
+    page_size = 20
+    view_mode = "timeline"
+    selected_index = 0
+
+    while True:
+        if view_mode == "timeline":
+            print(_render_timeline_page(day_entries, page, page_size))
+            command = input("Command: ").strip().lower()
+            if not command:
+                continue
+            if command == "q":
+                break
+            if command == "n":
+                page += 1
+                continue
+            if command == "p":
+                page = max(0, page - 1)
+                continue
+            if command.isdigit():
+                idx = int(command) - 1
+                if 0 <= idx < len(day_entries):
+                    selected_index = idx
+                    view_mode = "detail"
+                else:
+                    print(f"Invalid day number: {command}")
+                continue
+            print(f"Unknown command: {command}")
+        else:
+            print(_render_day_detail(day_entries, selected_index))
+            command = input("Command: ").strip().lower()
+            if not command:
+                continue
+            if command == "q":
+                break
+            if command == "b":
+                view_mode = "timeline"
+                continue
+            if command == "n":
+                selected_index = min(len(day_entries) - 1, selected_index + 1)
+                continue
+            if command == "p":
+                selected_index = max(0, selected_index - 1)
+                continue
+            print(f"Unknown command: {command}")
 
 def main() -> None:
     args = parse_args()
@@ -501,15 +588,10 @@ def main() -> None:
             print("Symbol PnL:")
             print(render_contract_pnl_chart(symbol_pnl))
 
-    if args.timeline_html:
+    if args.interactive_report:
         realized_trades = compute_realized_trades(orders)
         daily_summary = summarize_daily_realized_pnl(realized_trades)
-        if not daily_summary:
-            print("No realized trades available to plot a timeline.")
-        else:
-            fig = build_timeline_figure(daily_summary)
-            write_timeline_html(fig, args.timeline_html, daily_summary)
-            print(f"Wrote realized PnL timeline to {args.timeline_html}")
+        run_interactive_report(daily_summary)
 
 
 if __name__ == "__main__":
