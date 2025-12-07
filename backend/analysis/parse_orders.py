@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import json
 import math
 import re
 import statistics
@@ -12,6 +13,7 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import Iterable, List, Mapping, Sequence, Tuple
 
+import plotly.graph_objects as go
 from asciichart import asciichart as asciichart_module
 from statistics import StatisticsError
 
@@ -159,6 +161,34 @@ def _order_trade_date(order: Order) -> date | None:
         if parsed:
             return parsed.date()
     return None
+
+
+def _parse_iso_date(value: str | None) -> date | None:
+    if not value:
+        return None
+    try:
+        return datetime.strptime(value, "%Y-%m-%d").date()
+    except ValueError as exc:
+        raise ValueError(f"Invalid date '{value}'. Expected YYYY-MM-DD format.") from exc
+
+
+def filter_orders_by_date(
+    orders: Sequence[Order], start_date: date | None, end_date: date | None
+) -> List[Order]:
+    if not start_date and not end_date:
+        return list(orders)
+
+    filtered: List[Order] = []
+    for order in orders:
+        trade_date = _order_trade_date(order)
+        if trade_date is None:
+            continue
+        if start_date and trade_date < start_date:
+            continue
+        if end_date and trade_date > end_date:
+            continue
+        filtered.append(order)
+    return filtered
 
 
 def load_orders(csv_path: Path) -> List[Order]:
@@ -350,6 +380,19 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Launch an interactive ASCII timeline for realized PnL",
     )
+    parser.add_argument(
+        "--timeline-html",
+        type=Path,
+        help="Write an interactive Plotly timeline to the given HTML path",
+    )
+    parser.add_argument(
+        "--start-date",
+        help="Filter analytics to orders filled on/after this YYYY-MM-DD date",
+    )
+    parser.add_argument(
+        "--end-date",
+        help="Filter analytics to orders filled on/before this YYYY-MM-DD date",
+    )
     return parser.parse_args()
 
 
@@ -414,13 +457,23 @@ def render_contract_pnl_chart(contract_pnl: Mapping[str, float]) -> str:
     pnl_range = (min(pnl_list), max(pnl_list))
     stdev = statistics.stdev(pnl_list) if len(pnl_list) >= 2 else 0.0
 
+    wins = sum(1 for value in pnl_list if value > 0)
+    losses = sum(1 for value in pnl_list if value < 0)
+    flats = len(pnl_list) - wins - losses
+    denominator = len(pnl_list) or 1
+    win_rate = (wins / denominator) * 100
+    loss_rate = (losses / denominator) * 100
+
     lines.append("--------------------------------")
-    lines.append(f"Total: {total:,.2f}".strip("\n"))
-    lines.append(f"Average: {average:,.2f}".strip("\""))
-    lines.append(f"Median: {median:,.2f}".strip("\""))
-    lines.append(f"Mode: {mode_value:,.2f}".strip("\""))
-    lines.append(f"Range: {pnl_range[0]:,.2f} - {pnl_range[1]:,.2f}".strip("\""))
-    lines.append(f"Standard Deviation: {stdev:,.2f}".strip("\""))
+    lines.append(f"Total: {total:,.2f}")
+    lines.append(f"Average: {average:,.2f}")
+    lines.append(f"Median: {median:,.2f}")
+    lines.append(f"Mode: {mode_value:,.2f}")
+    lines.append(f"Range: {pnl_range[0]:,.2f} - {pnl_range[1]:,.2f}")
+    lines.append(f"Standard Deviation: {stdev:,.2f}")
+    lines.append(f"Win rate: {win_rate:5.2f}% ({wins}/{len(pnl_list)})")
+    lines.append(f"Loss rate: {loss_rate:5.2f}% ({losses}/{len(pnl_list)})")
+    lines.append(f"Flat positions: {flats}")
     lines.append("--------------------------------")
     return "\n".join(lines)
 
@@ -485,7 +538,7 @@ def _render_timeline_page(day_entries: Sequence[DayPnL], page: int, page_size: i
         lines.append("")
 
     lines.append(
-        "Navigation: [Enter day #] View | [N] Next page | [P] Previous page | [Q] Quit"
+        "Navigation: [Enter day #] View | [N] Next page | [P] Previous page | [S] Symbol PnL | [Q] Quit"
     )
     return "\n".join(lines)
 
@@ -515,19 +568,22 @@ def _render_day_detail(day_entries: Sequence[DayPnL], index: int) -> str:
     else:
         lines.append("  - None")
     lines.append("=" * 72)
-    lines.append("Navigation: [B] Back to timeline | [N] Next day | [P] Previous day | [Q] Quit")
+    lines.append("Navigation: [B] Back | [N] Next day | [P] Previous day | [S] Symbol PnL | [Q] Quit")
     return "\n".join(lines)
 
 
-def run_interactive_report(day_entries: Sequence[DayPnL]) -> None:
+def run_interactive_report(day_entries: Sequence[DayPnL], symbol_chart: str | None = None) -> None:
     if not day_entries:
         print("No realized trades available to display.")
         return
 
     page = 0
     page_size = 20
+    total_days = len(day_entries)
+    total_pages = max(1, math.ceil(total_days / page_size))
     view_mode = "timeline"
     selected_index = 0
+    previous_view = "timeline"
 
     while True:
         if view_mode == "timeline":
@@ -538,21 +594,28 @@ def run_interactive_report(day_entries: Sequence[DayPnL]) -> None:
             if command == "q":
                 break
             if command == "n":
-                page += 1
+                page = (page + 1) % total_pages
                 continue
             if command == "p":
-                page = max(0, page - 1)
+                page = (page - 1) % total_pages
+                continue
+            if command == "s":
+                if symbol_chart:
+                    previous_view = "timeline"
+                    view_mode = "symbol"
+                else:
+                    print("Symbol PnL chart unavailable.")
                 continue
             if command.isdigit():
                 idx = int(command) - 1
-                if 0 <= idx < len(day_entries):
+                if 0 <= idx < total_days:
                     selected_index = idx
                     view_mode = "detail"
                 else:
                     print(f"Invalid day number: {command}")
                 continue
             print(f"Unknown command: {command}")
-        else:
+        elif view_mode == "detail":
             print(_render_day_detail(day_entries, selected_index))
             command = input("Command: ").strip().lower()
             if not command:
@@ -562,13 +625,147 @@ def run_interactive_report(day_entries: Sequence[DayPnL]) -> None:
             if command == "b":
                 view_mode = "timeline"
                 continue
+            if command == "s":
+                if symbol_chart:
+                    previous_view = "detail"
+                    view_mode = "symbol"
+                else:
+                    print("Symbol PnL chart unavailable.")
+                continue
             if command == "n":
-                selected_index = min(len(day_entries) - 1, selected_index + 1)
+                selected_index = (selected_index + 1) % total_days
                 continue
             if command == "p":
-                selected_index = max(0, selected_index - 1)
+                selected_index = (selected_index - 1) % total_days
                 continue
             print(f"Unknown command: {command}")
+        else:
+            print("=" * 72)
+            print("Symbol PnL Chart")
+            print(symbol_chart or "No data available.")
+            print("=" * 72)
+            print("Navigation: [B] Back | [Q] Quit")
+            command = input("Command: ").strip().lower()
+            if not command:
+                continue
+            if command == "q":
+                break
+            if command == "b":
+                view_mode = previous_view
+                continue
+            print(f"Unknown command: {command}")
+
+
+def build_timeline_figure(day_entries: Sequence[DayPnL]) -> go.Figure:
+    if not day_entries:
+        raise ValueError("No realized PnL data available for plotting.")
+
+    dates = [day.date_label for day in day_entries]
+    winners = [day.winners_total for day in day_entries]
+    losers = [day.losers_total for day in day_entries]
+
+    fig = go.Figure()
+    fig.add_bar(
+        name="Winners",
+        x=dates,
+        y=winners,
+        marker_color="#2ca02c",
+        hovertemplate="%{x}<br>Winners: %{y:$,.2f}<extra></extra>",
+    )
+    fig.add_bar(
+        name="Losers",
+        x=dates,
+        y=losers,
+        marker_color="#d62728",
+        hovertemplate="%{x}<br>Losers: %{y:$,.2f}<extra></extra>",
+    )
+    fig.update_layout(
+        title="Daily Realized Contract PnL",
+        barmode="relative",
+        bargap=0.25,
+        template="plotly_white",
+        xaxis_title="Date",
+        yaxis_title="Realized PnL (USD)",
+        hovermode="x unified",
+        legend_title_text="",
+    )
+    fig.update_traces(marker_line_width=1, marker_line_color="#222")
+    return fig
+
+
+def write_timeline_html(fig: go.Figure, output_path: Path, day_entries: Sequence[DayPnL]) -> None:
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    breakdown = {
+        day.date_label: {
+            "Winners": {
+                "total": day.winners_total,
+                "lines": [[summary, detail] for summary, detail in day.winners_lines],
+            },
+            "Losers": {
+                "total": day.losers_total,
+                "lines": [[summary, detail] for summary, detail in day.losers_lines],
+            },
+        }
+        for day in day_entries
+    }
+    breakdown_json = json.dumps(breakdown)
+    div_id = "daily-pnl-timeline"
+    post_script = f""";(function() {{
+  const pnlBreakdown = {breakdown_json};
+  const graphDiv = document.getElementById('{div_id}');
+  if (!graphDiv || typeof graphDiv.on !== 'function') {{
+    return;
+  }}
+  graphDiv.on('plotly_click', function(eventData) {{
+    if (!eventData.points || !eventData.points.length) {{
+      return;
+    }}
+    const point = eventData.points[0];
+    const date = point.x;
+    const traceName = point.data.name;
+    const dayData = pnlBreakdown[date];
+    const bucket = dayData ? dayData[traceName] : null;
+    if (!bucket) {{
+      window.alert(traceName + ' on ' + date + '\\n\\nNo trades recorded.');
+      return;
+    }}
+    const total = typeof bucket.total === 'number' ? bucket.total : 0;
+    const formatter = new Intl.NumberFormat('en-US', {{ style: 'currency', currency: 'USD' }});
+    const totalText = formatter.format(total);
+    let details = '';
+    const lines = Array.isArray(bucket.lines) ? bucket.lines : [];
+    if (lines.length === 0) {{
+      details = 'No trades recorded.';
+    }} else {{
+      for (const pair of lines) {{
+        if (Array.isArray(pair)) {{
+          if (pair[0]) {{
+            details += pair[0] + '\\n';
+          }}
+          if (pair[1]) {{
+            details += '  ' + pair[1] + '\\n';
+          }}
+        }} else if (typeof pair === 'string') {{
+          details += pair + '\\n';
+        }}
+      }}
+      details = details.trimEnd();
+    }}
+    let message = traceName + ' on ' + date + '\\nTotal: ' + totalText;
+    if (details) {{
+      message += '\\n\\n' + details;
+    }}
+    window.alert(message);
+  }});
+}})();
+"""
+    fig.write_html(
+        output_path,
+        include_plotlyjs="cdn",
+        full_html=True,
+        div_id=div_id,
+        post_script=post_script,
+    )
 
 def main() -> None:
     args = parse_args()
@@ -579,19 +776,60 @@ def main() -> None:
     output_path = args.output or args.csv
     save_orders(orders, output_path)
 
+    contract_pnl: dict[str, float] | None = None
+    symbol_pnl: dict[str, float] | None = None
+    symbol_chart_text: str | None = None
+
+    try:
+        start_date = _parse_iso_date(args.start_date)
+        end_date = _parse_iso_date(args.end_date)
+        if start_date and end_date and start_date > end_date:
+            raise ValueError("Start date must be on or before end date.")
+    except ValueError as exc:
+        print(exc)
+        return
+
+    analysis_orders = filter_orders_by_date(orders, start_date, end_date)
+
+    contract_pnl: dict[str, float] | None = None
+    symbol_pnl: dict[str, float] | None = None
+    symbol_chart_text: str | None = None
+
+    if (args.show_pnl_chart or args.interactive_report) and analysis_orders:
+        contract_pnl = analyze_orders(analysis_orders)
+        if contract_pnl:
+            symbol_pnl = analyze_symbols(contract_pnl)
+            if symbol_pnl:
+                symbol_chart_text = render_contract_pnl_chart(symbol_pnl)
+
     if args.show_pnl_chart:
-        contract_pnl = analyze_orders(orders)
-        symbol_pnl = analyze_symbols(contract_pnl)
-        if not symbol_pnl:
-            print("No filled orders with price data to analyze.")
+        if not symbol_chart_text:
+            print("No filled orders in the selected date range to analyze.")
         else:
             print("Symbol PnL:")
-            print(render_contract_pnl_chart(symbol_pnl))
+            print(symbol_chart_text)
+
+    daily_summary: List[DayPnL] | None = None
+    if args.interactive_report or args.timeline_html:
+        if analysis_orders:
+            realized_trades = compute_realized_trades(analysis_orders)
+            daily_summary = summarize_daily_realized_pnl(realized_trades)
+        else:
+            daily_summary = []
 
     if args.interactive_report:
-        realized_trades = compute_realized_trades(orders)
-        daily_summary = summarize_daily_realized_pnl(realized_trades)
-        run_interactive_report(daily_summary)
+        if not daily_summary:
+            print("No realized trades available to display.")
+        else:
+            run_interactive_report(daily_summary, symbol_chart_text)
+
+    if args.timeline_html:
+        if not daily_summary:
+            print("No realized trades available to plot a timeline.")
+        else:
+            fig = build_timeline_figure(daily_summary)
+            write_timeline_html(fig, args.timeline_html, daily_summary)
+            print(f"Wrote realized PnL timeline to {args.timeline_html}")
 
 
 if __name__ == "__main__":
