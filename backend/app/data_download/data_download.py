@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 import requests
 import json
 import argparse
+import time
 # Load API key from .env file
 load_dotenv()
 API_KEY = os.getenv('POLYGON_API_KEY')
@@ -16,23 +17,29 @@ def download_historical_data(symbol, start_date, end_date, interval='5'):
     interval: '1', '5', '15', '30', '60' (minutes)
     """
     client = RESTClient(API_KEY)
-    
+    print('--------------------------------')
+    print(symbol, start_date, end_date, interval)
     # Convert dates to timestamps
     start_ts = int(start_date.timestamp() * 1000)
     end_ts = int(end_date.timestamp() * 1000)
-    
+
+    print(start_ts, end_ts)
+    print('--------------------------------')
     # Get the data
     aggs = client.get_aggs(
-        symbol,
+        "X:BTCUSD",
         multiplier=int(interval),
-        timespan='minute',
-        from_=start_ts,
-        to=end_ts,
+        from_=start_date.strftime('%Y-%m-%d'),
+        timespan = 'day',
+        to=end_date.strftime('%Y-%m-%d'),
         limit=50000
     )
+
     
     # Convert to DataFrame
     df = pd.DataFrame(aggs)
+    print(df)
+    print('--------------------------------')
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     df.set_index('timestamp', inplace=True)
     df['ticker'] = symbol
@@ -54,7 +61,7 @@ def download_ticker_data(symbol, config):
     
     # Define date range
     end_date = datetime.now()
-    start_date = end_date - timedelta(days=5 * 365)  # 5 years of data
+    start_date = end_date - timedelta(days=2 * 365)  # 5 years of data
     
     # Store all downloaded data
     all_data = []
@@ -74,6 +81,7 @@ def download_ticker_data(symbol, config):
             print(f"Downloaded {len(df)} rows")
         except Exception as e:
             print(f"Error downloading data: {e}")
+            time.sleep(10);
         
         current_date = next_date
 
