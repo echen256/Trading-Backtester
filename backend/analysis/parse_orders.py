@@ -316,6 +316,15 @@ def compute_realized_trades(orders: Sequence[Order]) -> List[RealizedTrade]:
     return realized
 
 
+def aggregate_contract_pnl(trades: Sequence[RealizedTrade]) -> dict[str, float]:
+    """Return realized PnL aggregated per contract symbol."""
+
+    contract_pnl: dict[str, float] = {}
+    for trade in trades:
+        contract_pnl[trade.symbol] = contract_pnl.get(trade.symbol, 0.0) + trade.pnl
+    return contract_pnl
+
+
 def summarize_daily_realized_pnl(trades: Sequence[RealizedTrade]) -> List[DayPnL]:
     """Aggregate realized trades into daily winner/loser buckets."""
 
@@ -395,25 +404,6 @@ def parse_args() -> argparse.Namespace:
     )
     return parser.parse_args()
 
-
-def analyze_orders(orders: Iterable[Order]) -> dict[str, float]:
-    """Return notional contract PnL aggregated per symbol."""
-
-    contract_pnl: dict[str, float] = {}
-    for order in orders:
-        if order.status.lower() != "filled":
-            continue
-        price = order.price if order.price is not None else order.avg_price
-        if price is None:
-            continue
-        qty = order.total_qty or order.filled
-        if qty == 0:
-            continue
-
-        direction = -1 if order.side.lower() == "buy" else 1
-        contract_pnl.setdefault(order.symbol, 0.0)
-        contract_pnl[order.symbol] += direction * qty * price * CONTRACT_MULTIPLIER
-    return contract_pnl
 
 def analyze_symbols(contract_pnl: Mapping[str, float]) -> dict[str, float]:
     """Return PnL aggregated per symbol."""
@@ -776,10 +766,6 @@ def main() -> None:
     output_path = args.output or args.csv
     save_orders(orders, output_path)
 
-    contract_pnl: dict[str, float] | None = None
-    symbol_pnl: dict[str, float] | None = None
-    symbol_chart_text: str | None = None
-
     try:
         start_date = _parse_iso_date(args.start_date)
         end_date = _parse_iso_date(args.end_date)
@@ -795,8 +781,14 @@ def main() -> None:
     symbol_pnl: dict[str, float] | None = None
     symbol_chart_text: str | None = None
 
-    if (args.show_pnl_chart or args.interactive_report) and analysis_orders:
-        contract_pnl = analyze_orders(analysis_orders)
+    realized_trades: List[RealizedTrade] = []
+    if analysis_orders and (
+        args.show_pnl_chart or args.interactive_report or args.timeline_html
+    ):
+        realized_trades = compute_realized_trades(analysis_orders)
+
+    if (args.show_pnl_chart or args.interactive_report) and realized_trades:
+        contract_pnl = aggregate_contract_pnl(realized_trades)
         if contract_pnl:
             symbol_pnl = analyze_symbols(contract_pnl)
             if symbol_pnl:
@@ -804,18 +796,14 @@ def main() -> None:
 
     if args.show_pnl_chart:
         if not symbol_chart_text:
-            print("No filled orders in the selected date range to analyze.")
+            print("No realized trades in the selected date range to analyze.")
         else:
             print("Symbol PnL:")
             print(symbol_chart_text)
 
     daily_summary: List[DayPnL] | None = None
     if args.interactive_report or args.timeline_html:
-        if analysis_orders:
-            realized_trades = compute_realized_trades(analysis_orders)
-            daily_summary = summarize_daily_realized_pnl(realized_trades)
-        else:
-            daily_summary = []
+        daily_summary = summarize_daily_realized_pnl(realized_trades) if realized_trades else []
 
     if args.interactive_report:
         if not daily_summary:
