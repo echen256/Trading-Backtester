@@ -12,12 +12,17 @@ from polygon import RESTClient
 def polygon_client():
     """Return an authenticated Polygon REST client or skip if no API key is configured."""
     backend_root = Path(__file__).resolve().parents[1]
-    env_path = backend_root / ".env"
+    repo_root = backend_root.parent
+    env_path = repo_root / ".env"
+    if not env_path.exists():
+        env_path = backend_root / ".env"
     load_dotenv(env_path)
 
     api_key = os.getenv("POLYGON_API_KEY")
     if not api_key:
-        pytest.skip("POLYGON_API_KEY is missing. Add it to backend/.env to run integration tests.")
+        pytest.skip(
+            "POLYGON_API_KEY is missing. Add it to the repo-level .env to run integration tests."
+        )
 
     return RESTClient(api_key)
 

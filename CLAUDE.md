@@ -61,7 +61,7 @@ The backend (`/Trading-Backtester/backend/`) implements:
 
 2. **REST API** - Stock data retrieval
    - `/stock/<ticker>` endpoints using Polygon.io API
-   - Requires POLYGON_API_KEY in .env file
+   - Requires POLYGON_API_KEY in the project-root `.env` file
 
 3. **Data Processing**
    - CSV parsing with pandas
@@ -85,7 +85,7 @@ Expected CSV formats are documented in `/backend/README_WEBSOCKETS.md`
 ## Important Technical Details
 
 1. **CORS Configuration**: Currently allows all origins (`*`) - suitable for development only
-2. **Environment Variables**: Sensitive data (API keys) stored in `.env`
+2. **Environment Variables**: Sensitive data (API keys) stored in the repo-level `.env`
 3. **Debug Mode**: Enabled by default in Flask
 4. **No Authentication**: Currently no auth mechanism implemented
 5. **Testing**: No formal test framework currently in place

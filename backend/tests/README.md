@@ -10,4 +10,4 @@ source venv/bin/activate
 pytest tests/test_download_tsla.py
 ```
 
-Make sure `backend/.env` contains `POLYGON_API_KEY` before running. The test will be skipped automatically if the key is missing.
+Make sure the repo-level `.env` (or `backend/.env` as a fallback) contains `POLYGON_API_KEY` before running. The test will be skipped automatically if the key is missing.

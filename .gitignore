@@ -2,7 +2,11 @@ venv/
 env/
 .venv/
 virtualenv/
+.env
 .env/
+.pyc
+*.pyc
+*.csv
 .env.local/
 .env.development.local/
 .env.test.local/
