@@ -5,11 +5,14 @@ REPO_ROOT=$(cd "$(dirname "$0")" && pwd)
 
 DATA_PIPELINE_DIR="$REPO_ROOT/modules/data-pipeline"
 LOG_DIR="$DATA_PIPELINE_DIR/logs"
+WATCHLISTS_DIR="$DATA_PIPELINE_DIR/config/watchlists"
 ENV_FILE="$REPO_ROOT/.env"
-DEFAULT_WATCHLIST="$DATA_PIPELINE_DIR/config/watchlists/NASDAQ.csv"
+DEFAULT_WATCHLIST="$WATCHLISTS_DIR/NASDAQ.csv"
 LOG_FILE="$LOG_DIR/data_download.txt"
 mkdir -p "$LOG_DIR"
 touch "$LOG_FILE"
+
+echo "LOG_FILE: $LOG_FILE"
 
 log() {
   printf '%s [download_data] %s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" "$*"
@@ -39,33 +42,65 @@ else
   log "No .env file found; continuing with current environment"
 fi
 
-ARGS=()
-if [ "$#" -gt 0 ]; then
-  ARGS=("$@")
-fi
 add_watchlist=true
-if [ ${#ARGS[@]} -gt 0 ]; then
-  for arg in "${ARGS[@]}"; do
-    if [[ $arg == --watchlist* ]]; then
+watchlist_name=""
+pass_args=()
+i=1
+while [ $i -le $# ]; do
+  arg="${!i}"
+  case "$arg" in
+    --watchlist-name=*)
+      watchlist_name="${arg#*=}"
+      add_watchlist=true
+      ;;
+    --watchlist-name)
+      ((i++))
+      watchlist_name="${!i:-}"
+      add_watchlist=true
+      ;;
+    --watchlist|--watchlist=*)
       add_watchlist=false
-      break
-    fi
-  done
-fi
+      pass_args+=("$arg")
+      ;;
+    *)
+      pass_args+=("$arg")
+      ;;
+  esac
+  ((i++))
+done
 
-if [[ $add_watchlist == true ]]; then
-  if [[ -f "$DEFAULT_WATCHLIST" ]]; then
-    ARGS=("--watchlist" "$DEFAULT_WATCHLIST" "${ARGS[@]}")
-    log "No --watchlist provided; defaulting to $DEFAULT_WATCHLIST"
+# Resolve watchlist path from name if given
+watchlist_path=""
+run_download() {
+  if ((${#pass_args[@]} > 0)); then
+    trading-data-download "$@" "${pass_args[@]}"
   else
-    log "Default watchlist not found at $DEFAULT_WATCHLIST; running without it"
+    trading-data-download "$@"
   fi
+}
+if [[ -n "$watchlist_name" ]]; then
+  if [[ "$watchlist_name" == *.csv ]]; then
+    watchlist_path="$WATCHLISTS_DIR/$watchlist_name"
+  else
+    watchlist_path="$WATCHLISTS_DIR/${watchlist_name}.csv"
+  fi
+  if [[ -f "$watchlist_path" ]]; then
+    log "Using watchlist $watchlist_name -> $watchlist_path"
+    run_download --watchlist "$watchlist_path"
+  else
+    log "Watchlist not found: $watchlist_path"
+    exit 1
+  fi
+elif [[ $add_watchlist == true ]] && [[ -f "$DEFAULT_WATCHLIST" ]]; then
+  log "No --watchlist provided; defaulting to $DEFAULT_WATCHLIST"
+  run_download --watchlist "$DEFAULT_WATCHLIST"
+elif [[ $add_watchlist == true ]]; then
+  log "Default watchlist not found at $DEFAULT_WATCHLIST; running without it"
+  run_download
 else
-  log "Using caller-provided arguments: ${ARGS[*]:-<none>}"
+  log "Using caller-provided arguments: ${pass_args[*]:-<none>}"
+  run_download
 fi
-
-log "Invoking trading-data-download with args: ${ARGS[*]:-<none>}"
-trading-data-download "${ARGS[@]}"
 status=$?
 log "trading-data-download exited with status $status"
 exit $status

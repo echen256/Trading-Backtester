@@ -3,3 +3,7 @@ polygon-api-client>=1.15
 python-dotenv>=1.0
 requests>=2.32
 google-cloud-bigquery>=3.25
+
+[dev]
+pytest>=8
+pytest-cov>=4

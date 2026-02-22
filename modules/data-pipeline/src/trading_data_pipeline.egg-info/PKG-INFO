@@ -3,13 +3,16 @@ Name: trading-data-pipeline
 Version: 0.1.0
 Summary: Polygon.io download helpers and sync scripts
 Author: Trading Systems
-Requires-Python: >=3.11
+Requires-Python: >=3.10
 Description-Content-Type: text/markdown
 Requires-Dist: pandas>=2.2
 Requires-Dist: polygon-api-client>=1.15
 Requires-Dist: python-dotenv>=1.0
 Requires-Dist: requests>=2.32
 Requires-Dist: google-cloud-bigquery>=3.25
+Provides-Extra: dev
+Requires-Dist: pytest>=8; extra == "dev"
+Requires-Dist: pytest-cov>=4; extra == "dev"
 
 # Trading Data Pipeline
 

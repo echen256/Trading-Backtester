@@ -158,7 +158,11 @@ class PolygonDownloader:
         url = f"https://api.polygon.io/v3/reference/tickers/{symbol}"
         params = {"apiKey": self.api_key}
         response = self.session.get(url, params=params, timeout=10)
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except requests.HTTPError as exc:
+            print(f"[trading-data-pipeline] Reference lookup failed for {symbol}: {exc}")
+            return False
         payload = response.json()
         if payload.get("status") != "OK":
             return False

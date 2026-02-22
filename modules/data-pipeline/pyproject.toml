@@ -17,9 +17,16 @@ dependencies = [
   "google-cloud-bigquery>=3.25",
 ]
 
+[project.optional-dependencies]
+dev = ["pytest>=8", "pytest-cov>=4"]
+
 [project.scripts]
 trading-data-download = "trading_data_pipeline.cli:main"
 trading-data-sync = "trading_data_pipeline.bigquery_sync:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/trading_data_pipeline"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
