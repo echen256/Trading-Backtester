@@ -7,7 +7,7 @@ name = "trading-data-pipeline"
 version = "0.1.0"
 description = "Polygon.io download helpers and sync scripts"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 authors = [{ name = "Trading Systems" }]
 dependencies = [
   "pandas>=2.2",
