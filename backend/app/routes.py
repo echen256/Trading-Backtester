@@ -11,7 +11,7 @@ from pathlib import Path
 import pandas as pd
 import json
 import io
-from data_download import download_historical_data
+from trading_data_pipeline.downloader import download_historical_data
 from backtest import execute, save_backtest_results
 from config import DEFAULT_DATA_RANGE_YEARS, DATA_DIR, SUPPORTED_TIMEFRAMES
 # Supported timeframes

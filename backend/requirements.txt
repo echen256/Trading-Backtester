@@ -11,3 +11,4 @@ flask-cors
 python-socketio
 pytest
 google-cloud-bigquery
+-e ../modules/data-pipeline
