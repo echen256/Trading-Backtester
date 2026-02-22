@@ -56,7 +56,11 @@ class PolygonDownloader:
                 break
             if minimum_market_cap and not self._passes_market_cap(symbol, minimum_market_cap):
                 continue
-            result = self.download_symbol(symbol, settings=resolved_settings)
+            try:
+                result = self.download_symbol(symbol, settings=resolved_settings)
+            except Exception as exc:  # pragma: no cover - guard unexpected API errors
+                print(f"[trading-data-pipeline] Skipping {symbol}: {exc}")
+                continue
             if result:
                 downloaded.append(result)
         return downloaded
@@ -86,7 +90,14 @@ class PolygonDownloader:
         chunk = timedelta(days=resolved_settings.chunk_size_days)
         while current < end:
             window_end = min(current + chunk, end)
-            frame = self._fetch_range(symbol, current, window_end, resolved_settings.interval_minutes)
+            try:
+                frame = self._fetch_range(symbol, current, window_end, resolved_settings.interval_minutes)
+            except Exception as exc:
+                print(
+                    "[trading-data-pipeline] Error fetching "
+                    f"{symbol} {current:%Y-%m-%d}->{window_end:%Y-%m-%d}: {exc}"
+                )
+                break
             if not frame.empty:
                 frames.append(frame)
             current = window_end
