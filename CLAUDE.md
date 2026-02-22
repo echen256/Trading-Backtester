@@ -4,9 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a full-stack trading backtesting and real-time data visualization system consisting of:
-- **Backend**: Python Flask API with WebSocket support for real-time trading data streaming
-- **Frontend**: React + TypeScript dashboard with financial charting capabilities
+This is a full-stack trading/backtesting system split into independent modules:
+- **Backend** (`backend/`): Python Flask API with WebSocket support for real-time trading data streaming
+- **Data Pipeline** (`modules/data-pipeline/`): Polygon.io downloader + BigQuery uploader
+- **Analysis Toolkit** (`modules/analysis/`): Order CSV utilities and Schwab converters
+- **Frontend** (`modules/frontend/`): React + TypeScript dashboard with financial charting capabilities
 
 ## Key Commands
 
@@ -31,7 +33,7 @@ pip freeze > requirements.txt
 ### Frontend Development
 
 ```bash
-cd Trading-Backtester/trading-frontend
+cd Trading-Backtester/modules/frontend
 
 # Install dependencies
 npm install
@@ -68,7 +70,7 @@ The backend (`/Trading-Backtester/backend/`) implements:
 
 ### Frontend Architecture
 
-The frontend (`/Trading-Backtester/trading-frontend/`) features:
+The frontend (`/Trading-Backtester/modules/frontend/`) features:
 - Real-time trading dashboard served at `/`
 - WebSocket client for receiving live updates
 - Lightweight-charts for financial data visualization

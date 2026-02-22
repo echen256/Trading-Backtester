@@ -1,16 +1,18 @@
 #!/bin/bash
-cd ./backend
-mkdir -p logs
+set -euo pipefail
+
+REPO_ROOT=$(cd "$(dirname "$0")" && pwd)
+BACKEND_DIR="$REPO_ROOT/backend"
+LOG_DIR="$BACKEND_DIR/logs"
+mkdir -p "$LOG_DIR"
+
+cd "$BACKEND_DIR"
 source venv/bin/activate
 
-set -a  # Automatically export all variables
-source ./.env
-set +a
-
 if [ -f .env ]; then
-    export $(cat .env | grep -v '^#' | xargs)
+  set -a
+  source .env
+  set +a
 fi
 
-cd ./app/data_download
-# # Start the Flask server
-python -u data_download.py >> ./../../logs/data_download.txt 2>&1
+trading-data-download "$@" >> "$LOG_DIR/data_download.txt" 2>&1

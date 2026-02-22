@@ -1,0 +1,3 @@
+[console_scripts]
+trading-data-download = trading_data_pipeline.cli:main
+trading-data-sync = trading_data_pipeline.bigquery_sync:main

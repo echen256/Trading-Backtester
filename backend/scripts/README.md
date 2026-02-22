@@ -1,13 +1,14 @@
 # Scripts
 
-## upload_to_bigquery.py
+The standalone data-ingestion utilities now live in `modules/data-pipeline` and
+expose CLI entry points once the module is installed.
 
-Uploads the CSV outputs under `app/data_download/data/` into a BigQuery table.
+## Upload CSVs to BigQuery
 
 ```
 cd backend
 source venv/bin/activate
-python scripts/upload_to_bigquery.py \
+trading-data-sync \
   --dataset my_dataset \
   --table equities_1440 \
   --timeframe 1440 \
@@ -15,6 +16,8 @@ python scripts/upload_to_bigquery.py \
 ```
 
 Notes:
-- Authenticate with Google Cloud first (e.g., set `GOOGLE_APPLICATION_CREDENTIALS` to a service-account JSON with BigQuery write access, or run `gcloud auth application-default login`).
+- Authenticate with Google Cloud first (e.g., set `GOOGLE_APPLICATION_CREDENTIALS`
+  to a service-account JSON with BigQuery write access, or run
+  `gcloud auth application-default login`).
 - `--replace` truncates the table before the first load; omit it to append.
 - Use `--limit-files` for dry runs and `--pattern "TSLA-*.csv"` to target specific tickers.
