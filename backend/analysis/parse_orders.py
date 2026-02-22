@@ -6,6 +6,7 @@ import csv
 import json
 import math
 import re
+import shutil
 import statistics
 from collections import defaultdict, deque
 from dataclasses import dataclass, replace
@@ -235,6 +236,94 @@ def save_orders(orders: Iterable[Order], csv_path: Path) -> None:
             writer.writerow(order.to_row())
 
 
+OLD_ORDERS_DIR = "old-orders"
+
+
+def _date_range_label(orders: Sequence[Order]) -> str:
+    """Derive a ``MM-DD-YY-MM-DD-YY`` directory name from order dates."""
+    dates: List[date] = []
+    for order in orders:
+        d = _order_trade_date(order)
+        if d:
+            dates.append(d)
+    if not dates:
+        raise ValueError("No valid dates found in orders to determine a date range.")
+    min_d, max_d = min(dates), max(dates)
+    return (
+        f"{min_d.month:02d}-{min_d.day:02d}-{min_d.strftime('%y')}"
+        f"-{max_d.month:02d}-{max_d.day:02d}-{max_d.strftime('%y')}"
+    )
+
+
+def save_to_archive(csv_path: Path, orders: Sequence[Order]) -> Path:
+    """Copy *csv_path* into ``old-orders/<date-range>/``."""
+    label = _date_range_label(orders)
+    archive_dir = csv_path.parent / OLD_ORDERS_DIR / label
+    archive_dir.mkdir(parents=True, exist_ok=True)
+    dest = archive_dir / csv_path.name
+    shutil.copy2(csv_path, dest)
+    return dest
+
+
+def _list_archives(csv_path: Path) -> List[Path]:
+    """Return sorted list of archive directories under ``old-orders/``."""
+    base = csv_path.parent / OLD_ORDERS_DIR
+    if not base.exists():
+        return []
+    return sorted(
+        (d for d in base.iterdir() if d.is_dir()),
+        key=lambda p: p.name,
+    )
+
+
+def load_from_archive(csv_path: Path, archive_name: str | None = None) -> Path | None:
+    """Replace *csv_path* with an archived orders file.
+
+    When *archive_name* is ``None`` or empty the user is prompted
+    interactively to pick from available archives.
+    """
+    archives = _list_archives(csv_path)
+    if not archives:
+        print("No saved order archives found.")
+        return None
+
+    if not archive_name:
+        print("Available order archives:")
+        for i, d in enumerate(archives, 1):
+            print(f"  [{i}] {d.name}")
+        choice = input("Select archive number (or 'q' to cancel): ").strip()
+        if choice.lower() == "q":
+            return None
+        try:
+            idx = int(choice) - 1
+            if 0 <= idx < len(archives):
+                archive_name = archives[idx].name
+            else:
+                print(f"Invalid selection: {choice}")
+                return None
+        except ValueError:
+            archive_name = choice
+
+    source_dir = csv_path.parent / OLD_ORDERS_DIR / archive_name
+    if not source_dir.exists():
+        print(f"Archive '{archive_name}' not found.")
+        return None
+
+    source_file = source_dir / csv_path.name
+    if not source_file.exists():
+        csvs = list(source_dir.glob("orders.csv"))
+        if not csvs:
+            csvs = list(source_dir.glob("*.csv"))
+        if csvs:
+            source_file = csvs[0]
+        else:
+            print(f"No CSV file found in archive '{archive_name}'.")
+            return None
+
+    shutil.copy2(source_file, csv_path)
+    return csv_path
+
+
 def compute_realized_trades(orders: Sequence[Order]) -> List[RealizedTrade]:
     """Return realized trade events derived from chronological orders."""
 
@@ -402,6 +491,20 @@ def parse_args() -> argparse.Namespace:
         "--end-date",
         help="Filter analytics to orders filled on/before this YYYY-MM-DD date",
     )
+    parser.add_argument(
+        "--save",
+        action="store_true",
+        help="Archive the current orders CSV to old-orders/ using the date range of its contents",
+    )
+    parser.add_argument(
+        "--load",
+        nargs="?",
+        const="",
+        default=None,
+        metavar="ARCHIVE",
+        help="Load an archived orders CSV from old-orders/. "
+        "Pass an archive name directly or omit to pick interactively.",
+    )
     return parser.parse_args()
 
 
@@ -414,14 +517,60 @@ def analyze_symbols(contract_pnl: Mapping[str, float]) -> dict[str, float]:
             symbol_pnl[symbol] = 0.0
         symbol_pnl[symbol] += pnl
     return symbol_pnl
+
+
+def compute_symbol_avg_rr(trades: Sequence[RealizedTrade]) -> dict[str, float]:
+    """Return average risk-reward ratio per underlying symbol.
+
+    R:R is defined as ``avg_win / abs(avg_loss)``.  Symbols with no
+    losing trades or no winning trades get ``float('inf')`` or ``0.0``
+    respectively.
+    """
+    wins_by_symbol: dict[str, List[float]] = defaultdict(list)
+    losses_by_symbol: dict[str, List[float]] = defaultdict(list)
+
+    for trade in trades:
+        symbol = re.split(r'\d+', trade.symbol)[0]
+        if trade.pnl > 0:
+            wins_by_symbol[symbol].append(trade.pnl)
+        elif trade.pnl < 0:
+            losses_by_symbol[symbol].append(trade.pnl)
+
+    all_symbols = set(wins_by_symbol) | set(losses_by_symbol)
+    rr: dict[str, float] = {}
+    for symbol in all_symbols:
+        wins = wins_by_symbol.get(symbol, [])
+        losses = losses_by_symbol.get(symbol, [])
+        avg_win = statistics.mean(wins) if wins else 0.0
+        avg_loss = abs(statistics.mean(losses)) if losses else 0.0
+        if avg_loss == 0:
+            rr[symbol] = float('inf') if avg_win > 0 else 0.0
+        else:
+            rr[symbol] = avg_win / avg_loss
+    return rr
         
 
 
-def render_contract_pnl_chart(contract_pnl: Mapping[str, float]) -> str:
+def render_contract_pnl_chart(
+    contract_pnl: Mapping[str, float],
+    symbol_rr: Mapping[str, float] | None = None,
+) -> str:
     """Render a horizontal ASCII bar chart for contract PnL values."""
 
     sorted_items = sorted(contract_pnl.items(), key=lambda kv: kv[1], reverse=True)
-    labels = [f"{index + 1:03d}. {symbol} ({value:,.2f})" for index, (symbol, value) in enumerate(sorted_items)]
+
+    def _rr_tag(symbol: str) -> str:
+        if symbol_rr is None or symbol not in symbol_rr:
+            return ""
+        rr = symbol_rr[symbol]
+        if math.isinf(rr):
+            return " [R:R inf]"
+        return f" [R:R {rr:.2f}]"
+
+    labels = [
+        f"{index + 1:03d}. {symbol} ({value:,.2f}){_rr_tag(symbol)}"
+        for index, (symbol, value) in enumerate(sorted_items)
+    ]
     magnitudes = [abs(value) for _, value in sorted_items]
     max_label_len = max(len(label) for label in labels)
     all_integer = all(float(magnitude).is_integer() for magnitude in magnitudes)
@@ -454,6 +603,13 @@ def render_contract_pnl_chart(contract_pnl: Mapping[str, float]) -> str:
     win_rate = (wins / denominator) * 100
     loss_rate = (losses / denominator) * 100
 
+    # Compute aggregate R:R across all symbols
+    avg_rr_text = "N/A"
+    if symbol_rr:
+        finite_rrs = [v for v in symbol_rr.values() if not math.isinf(v) and v > 0]
+        if finite_rrs:
+            avg_rr_text = f"{statistics.mean(finite_rrs):.2f}"
+
     lines.append("--------------------------------")
     lines.append(f"Total: {total:,.2f}")
     lines.append(f"Average: {average:,.2f}")
@@ -464,6 +620,19 @@ def render_contract_pnl_chart(contract_pnl: Mapping[str, float]) -> str:
     lines.append(f"Win rate: {win_rate:5.2f}% ({wins}/{len(pnl_list)})")
     lines.append(f"Loss rate: {loss_rate:5.2f}% ({losses}/{len(pnl_list)})")
     lines.append(f"Flat positions: {flats}")
+    lines.append(f"Avg R:R: {avg_rr_text}")
+
+    # Kelly Criterion: K = W - (1 - W) / R
+    kelly_text = "N/A"
+    w = wins / denominator if denominator else 0.0
+    if symbol_rr:
+        finite_rrs = [v for v in symbol_rr.values() if not math.isinf(v) and v > 0]
+        if finite_rrs:
+            r = statistics.mean(finite_rrs)
+            if r > 0:
+                kelly = w - (1 - w) / r
+                kelly_text = f"{kelly * 100:.2f}%"
+    lines.append(f"Kelly Criterion: {kelly_text}")
     lines.append("--------------------------------")
     return "\n".join(lines)
 
@@ -759,6 +928,22 @@ def write_timeline_html(fig: go.Figure, output_path: Path, day_entries: Sequence
 
 def main() -> None:
     args = parse_args()
+
+    # ---------- save / load shortcuts ----------
+    if args.save:
+        orders = load_orders(args.csv)
+        dest = save_to_archive(args.csv, orders)
+        print(f"Archived {args.csv} -> {dest}")
+        return
+
+    if args.load is not None:
+        archive_name = args.load or None
+        result = load_from_archive(args.csv, archive_name)
+        if result:
+            print(f"Loaded archive into {result}")
+        return
+    # -------------------------------------------
+
     orders = load_orders(args.csv)
     orders = filter_orders(orders, symbol=args.symbol)
     orders = scale_quantities(orders, args.quantity_multiplier)
@@ -787,12 +972,14 @@ def main() -> None:
     ):
         realized_trades = compute_realized_trades(analysis_orders)
 
+    symbol_rr: dict[str, float] | None = None
     if (args.show_pnl_chart or args.interactive_report) and realized_trades:
         contract_pnl = aggregate_contract_pnl(realized_trades)
         if contract_pnl:
             symbol_pnl = analyze_symbols(contract_pnl)
+            symbol_rr = compute_symbol_avg_rr(realized_trades)
             if symbol_pnl:
-                symbol_chart_text = render_contract_pnl_chart(symbol_pnl)
+                symbol_chart_text = render_contract_pnl_chart(symbol_pnl, symbol_rr)
 
     if args.show_pnl_chart:
         if not symbol_chart_text:
