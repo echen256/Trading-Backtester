@@ -8,7 +8,7 @@ from typing import Iterable
 
 PACKAGE_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_CONFIG_PATH = PACKAGE_ROOT / "config" / "download.json"
-DEFAULT_WATCHLIST_PATH = PACKAGE_ROOT / "config" / "watchlists" / "primary.csv"
+DEFAULT_WATCHLIST_PATH = PACKAGE_ROOT / "config" / "watchlists" / "NASDAQ.csv"
 
 
 @dataclass(slots=True)

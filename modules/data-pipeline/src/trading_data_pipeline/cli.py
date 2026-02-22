@@ -127,7 +127,7 @@ def main(argv: list[str] | None = None) -> None:
         if args.minimum_market_cap is not None
         else config.minimum_market_cap
     )
-
+    print(f"Downloading watchlist: {watchlist}")
     downloader.download_watchlist(
         watchlist,
         settings=settings,
