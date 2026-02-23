@@ -54,11 +54,11 @@ class PolygonDownloader:
         for symbol in symbols:
             if limit is not None and len(downloaded) >= limit:
                 break
-            if minimum_market_cap and not self._passes_market_cap(symbol, minimum_market_cap):
-                continue
             try:
+                if minimum_market_cap and not self._passes_market_cap(symbol, minimum_market_cap):
+                    continue
                 result = self.download_symbol(symbol, settings=resolved_settings)
-            except Exception as exc:  # pragma: no cover - guard unexpected API errors
+            except Exception as exc:
                 print(f"[trading-data-pipeline] Skipping {symbol}: {exc}")
                 continue
             if result:
@@ -154,22 +154,32 @@ class PolygonDownloader:
             df.set_index("timestamp", inplace=True)
         return df
 
-    def _passes_market_cap(self, symbol: str, minimum_market_cap: int) -> bool:
+    def _passes_market_cap(self, symbol: str, minimum_market_cap: int, *, max_retries: int = 3) -> bool:
         url = f"https://api.polygon.io/v3/reference/tickers/{symbol}"
         params = {"apiKey": self.api_key}
-        response = self.session.get(url, params=params, timeout=10)
-        try:
-            response.raise_for_status()
-        except requests.HTTPError as exc:
-            print(f"[trading-data-pipeline] Reference lookup failed for {symbol}: {exc}")
-            return False
-        payload = response.json()
-        if payload.get("status") != "OK":
-            return False
-        market_cap = (payload.get("results") or {}).get("market_cap")
-        if market_cap is None:
-            return False
-        return int(market_cap) >= int(minimum_market_cap)
+        for attempt in range(1, max_retries + 1):
+            try:
+                response = self.session.get(url, params=params, timeout=15)
+                response.raise_for_status()
+            except requests.HTTPError as exc:
+                print(f"[trading-data-pipeline] Reference lookup failed for {symbol}: {exc}")
+                return False
+            except (requests.ConnectionError, requests.Timeout) as exc:
+                if attempt < max_retries:
+                    wait = 2 ** attempt
+                    print(f"[trading-data-pipeline] {symbol}: retry {attempt}/{max_retries} after {type(exc).__name__}, waiting {wait}s")
+                    time.sleep(wait)
+                    continue
+                print(f"[trading-data-pipeline] {symbol}: giving up after {max_retries} retries: {exc}")
+                return False
+            payload = response.json()
+            if payload.get("status") != "OK":
+                return False
+            market_cap = (payload.get("results") or {}).get("market_cap")
+            if market_cap is None:
+                return False
+            return int(market_cap) >= int(minimum_market_cap)
+        return False
 
     @staticmethod
     def _interval_to_polygon(interval_minutes: int) -> tuple[int, str]:

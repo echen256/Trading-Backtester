@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 from pathlib import Path
 from typing import Iterable
 
@@ -10,9 +11,24 @@ from google.cloud import bigquery
 
 from .downloader import DEFAULT_DATA_DIR
 
+BQ_SCHEMA = [
+    bigquery.SchemaField("ticker", "STRING"),
+    bigquery.SchemaField("timestamp", "TIMESTAMP"),
+    bigquery.SchemaField("open", "FLOAT"),
+    bigquery.SchemaField("high", "FLOAT"),
+    bigquery.SchemaField("low", "FLOAT"),
+    bigquery.SchemaField("close", "FLOAT"),
+    bigquery.SchemaField("volume", "FLOAT"),
+    bigquery.SchemaField("vwap", "FLOAT"),
+    bigquery.SchemaField("transactions", "INTEGER"),
+    bigquery.SchemaField("otc", "STRING"),
+]
+
+COLUMN_ORDER = [field.name for field in BQ_SCHEMA]
+
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description="Sync local CSV data to BigQuery")
     parser.add_argument(
         "--source-dir",
         type=Path,
@@ -29,18 +45,35 @@ def build_parser() -> argparse.ArgumentParser:
         default="*.csv",
         help="Glob pattern inside the timeframe directory (default: %(default)s)",
     )
-    parser.add_argument("--project", help="Optional override for the GCP project ID")
-    parser.add_argument("--dataset", required=True, help="Destination BigQuery dataset")
-    parser.add_argument("--table", required=True, help="Destination BigQuery table name")
+    parser.add_argument(
+        "--project",
+        default=os.getenv("GCP_PROJECT"),
+        help="GCP project ID (default: $GCP_PROJECT or client default)",
+    )
+    parser.add_argument(
+        "--dataset",
+        default=os.getenv("BQ_DATASET"),
+        help="Destination BigQuery dataset (default: $BQ_DATASET)",
+    )
+    parser.add_argument(
+        "--table",
+        default=os.getenv("BQ_TABLE"),
+        help="Destination BigQuery table name (default: $BQ_TABLE)",
+    )
     parser.add_argument(
         "--replace",
         action="store_true",
-        help="Truncate the table before uploading the first file",
+        help="Truncate the table before uploading (full replace)",
     )
     parser.add_argument(
         "--limit-files",
         type=int,
         help="Upload at most N files (useful for dry runs)",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be uploaded without touching BigQuery",
     )
     return parser
 
@@ -52,23 +85,39 @@ def iter_csv_files(source_dir: Path, pattern: str) -> Iterable[Path]:
 
 
 def load_csv(csv_path: Path) -> pd.DataFrame:
+    """Read a CSV and coerce columns to match the BigQuery schema."""
     df = pd.read_csv(csv_path)
+
     if "timestamp" in df.columns:
         df["timestamp"] = pd.to_datetime(df["timestamp"], utc=True)
-    return df
+
+    for col in ("open", "high", "low", "close", "volume", "vwap"):
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
+
+    if "transactions" in df.columns:
+        df["transactions"] = pd.to_numeric(df["transactions"], errors="coerce").astype("Int64")
+
+    for col in ("ticker", "otc"):
+        if col in df.columns:
+            df[col] = df[col].astype(str).replace("nan", None)
+
+    present = [c for c in COLUMN_ORDER if c in df.columns]
+    return df[present]
 
 
 def main(argv: list[str] | None = None) -> None:
     parser = build_parser()
     args = parser.parse_args(argv)
 
+    if not args.dataset:
+        raise SystemExit("--dataset is required (or set $BQ_DATASET)")
+    if not args.table:
+        raise SystemExit("--table is required (or set $BQ_TABLE)")
+
     timeframe_dir = args.source_dir / args.timeframe
     if not timeframe_dir.exists():
         raise SystemExit(f"Timeframe directory not found: {timeframe_dir}")
-
-    client = bigquery.Client(project=args.project) if args.project else bigquery.Client()
-    target_project = args.project or client.project
-    table_id = f"{target_project}.{args.dataset}.{args.table}"
 
     csv_files = list(iter_csv_files(timeframe_dir, args.pattern))
     if not csv_files:
@@ -76,30 +125,46 @@ def main(argv: list[str] | None = None) -> None:
     if args.limit_files:
         csv_files = csv_files[: args.limit_files]
 
-    write_disposition = (
-        bigquery.WriteDisposition.WRITE_TRUNCATE
-        if args.replace
-        else bigquery.WriteDisposition.WRITE_APPEND
-    )
+    print(f"Found {len(csv_files)} CSV file(s) in {timeframe_dir}")
 
+    if args.dry_run:
+        total_rows = 0
+        for csv_file in csv_files:
+            df = load_csv(csv_file)
+            total_rows += len(df)
+            print(f"  [dry-run] {csv_file.name}: {len(df)} rows, columns={list(df.columns)}")
+        print(f"  [dry-run] Total: {total_rows} rows would be uploaded")
+        return
+
+    client = bigquery.Client(project=args.project) if args.project else bigquery.Client()
+    target_project = args.project or client.project
+    table_id = f"{target_project}.{args.dataset}.{args.table}"
+
+    total_rows = 0
     for index, csv_file in enumerate(csv_files):
         df = load_csv(csv_file)
         if df.empty:
-            print(f"Skipping {csv_file.name}: empty file")
+            print(f"  Skipping {csv_file.name}: empty")
             continue
 
-        current_disposition = write_disposition
-        if args.replace and index > 0:
-            current_disposition = bigquery.WriteDisposition.WRITE_APPEND
+        if args.replace and index == 0:
+            disposition = bigquery.WriteDisposition.WRITE_TRUNCATE
+        else:
+            disposition = bigquery.WriteDisposition.WRITE_APPEND
 
-        config = bigquery.LoadJobConfig(write_disposition=current_disposition)
-        print(f"Uploading {csv_file.name} ({len(df)} rows) -> {table_id} ...", end=" ")
-        job = client.load_table_from_dataframe(df, table_id, job_config=config)
+        job_config = bigquery.LoadJobConfig(
+            schema=BQ_SCHEMA,
+            write_disposition=disposition,
+        )
+
+        print(f"  Uploading {csv_file.name} ({len(df)} rows) ...", end=" ", flush=True)
+        job = client.load_table_from_dataframe(df, table_id, job_config=job_config)
         job.result()
+        total_rows += len(df)
         print("done")
 
     table = client.get_table(table_id)
-    print(f"Upload complete. {table_id} now contains {table.num_rows} rows.")
+    print(f"Sync complete. {table_id} has {table.num_rows} rows ({total_rows} uploaded this run).")
 
 
 if __name__ == "__main__":  # pragma: no cover
