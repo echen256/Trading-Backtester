@@ -10,6 +10,7 @@ Requires-Dist: polygon-api-client>=1.15
 Requires-Dist: python-dotenv>=1.0
 Requires-Dist: requests>=2.32
 Requires-Dist: google-cloud-bigquery>=3.25
+Requires-Dist: pyarrow>=23.0.1
 Provides-Extra: dev
 Requires-Dist: pytest>=8; extra == "dev"
 Requires-Dist: pytest-cov>=4; extra == "dev"
