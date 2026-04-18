@@ -32,6 +32,7 @@ pip install -e modules/data-pipeline
 - `trading-data-download`: Download a single ticker or the entire watchlist and
   save the CSV files under `modules/data-pipeline/data/<interval>`.
 - `trading-data-sync`: Upload the generated CSV files to a BigQuery table.
+- `trading-data-pull`: Pull one ticker from BigQuery into a local CSV archive.
 
 Run each command with `--help` to discover the available options.  Configuration
 defaults live under `modules/data-pipeline/config/`.
