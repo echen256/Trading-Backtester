@@ -4,8 +4,10 @@ src/trading_data_pipeline/__init__.py
 src/trading_data_pipeline/bigquery_pull.py
 src/trading_data_pipeline/bigquery_sync.py
 src/trading_data_pipeline/cli.py
+src/trading_data_pipeline/coinmarketcap_downloader.py
 src/trading_data_pipeline/config.py
 src/trading_data_pipeline/downloader.py
+src/trading_data_pipeline/visualize.py
 src/trading_data_pipeline.egg-info/PKG-INFO
 src/trading_data_pipeline.egg-info/SOURCES.txt
 src/trading_data_pipeline.egg-info/dependency_links.txt
@@ -14,4 +16,6 @@ src/trading_data_pipeline.egg-info/requires.txt
 src/trading_data_pipeline.egg-info/top_level.txt
 tests/test_bigquery_pull.py
 tests/test_cli.py
+tests/test_coinmarketcap_downloader.py
 tests/test_download_data_sh.py
+tests/test_visualize.py
