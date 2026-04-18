@@ -393,6 +393,9 @@ def _build_html(rows: list[dict[str, object]], *, ticker: str, timeframe_minutes
         <button class="control-button" data-feature="macd">MACD</button>
         <button class="control-button" data-feature="redMarkers">Red triangles / 10 bars</button>
         <button class="control-button" data-feature="greenMarkers">Green triangles / 7 bars</button>
+        <button class="control-button" data-action="scale-y-in">Y Scale In</button>
+        <button class="control-button" data-action="scale-y-out">Y Scale Out</button>
+        <button class="control-button" data-action="scale-y-reset">Y Scale Reset</button>
       </div>
       <div id="feature-status" class="status-panel"></div>
       <div class="links">
@@ -421,6 +424,7 @@ def _build_html(rows: list[dict[str, object]], *, ticker: str, timeframe_minutes
     const redMarkerPrices = {json.dumps(red_marker_prices)};
     const greenMarkerTimes = {json.dumps(green_marker_times)};
     const greenMarkerPrices = {json.dumps(green_marker_prices)};
+    const defaultPriceRange = [Math.min(...lowValues), Math.max(...highValues)];
 
     function setButtonState(feature) {{
       const button = document.querySelector(`[data-feature="${{feature}}"]`);
@@ -507,6 +511,33 @@ def _build_html(rows: list[dict[str, object]], *, ticker: str, timeframe_minutes
         modeBarButtonsToRemove: ["select2d", "lasso2d", "autoScale2d", "toImage"],
         modeBarButtonsToAdd: ["zoomIn2d", "zoomOut2d", "resetScale2d"]
       }};
+    }}
+
+    function getCurrentPriceRange() {{
+      const chart = document.getElementById("chart");
+      const layout = chart && chart._fullLayout;
+      const current = layout && layout.yaxis && layout.yaxis.range;
+      if (Array.isArray(current) && current.length === 2) {{
+        return [Number(current[0]), Number(current[1])];
+      }}
+      return [...defaultPriceRange];
+    }}
+
+    function scalePriceAxis(factor) {{
+      if (!window.Plotly) return;
+      const [minValue, maxValue] = getCurrentPriceRange();
+      const midpoint = (minValue + maxValue) / 2;
+      const halfRange = ((maxValue - minValue) / 2) * factor;
+      Plotly.relayout("chart", {{
+        "yaxis.range": [midpoint - halfRange, midpoint + halfRange]
+      }});
+    }}
+
+    function resetPriceAxis() {{
+      if (!window.Plotly) return;
+      Plotly.relayout("chart", {{
+        "yaxis.autorange": true
+      }});
     }}
 
     function renderPriceChart() {{
@@ -617,6 +648,19 @@ def _build_html(rows: list[dict[str, object]], *, ticker: str, timeframe_minutes
     function bindControls() {{
       document.querySelectorAll(".control-button").forEach((button) => {{
         button.addEventListener("click", () => {{
+          const action = button.dataset.action;
+          if (action === "scale-y-in") {{
+            scalePriceAxis(0.85);
+            return;
+          }}
+          if (action === "scale-y-out") {{
+            scalePriceAxis(1.15);
+            return;
+          }}
+          if (action === "scale-y-reset") {{
+            resetPriceAxis();
+            return;
+          }}
           const feature = button.dataset.feature;
           state[feature] = !state[feature];
           setButtonState(feature);
