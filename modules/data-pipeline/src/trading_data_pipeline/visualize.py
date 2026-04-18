@@ -403,7 +403,7 @@ def _build_html(rows: list[dict[str, object]], *, ticker: str, timeframe_minutes
       <div id="chart"></div>
       <div id="fisher-chart" class="hidden"></div>
       <div id="macd-chart" class="hidden"></div>
-      <div class="note">The chart uses local OHLCV data from the archive. Toggle buttons update Plotly traces immediately without reloading the page.</div>
+      <div class="note">The chart uses local OHLCV data from the archive. Mouse wheel zoom, drag pan, box zoom, and reset controls are enabled through the Plotly toolbar.</div>
     </section>
   </div>
   <script>
@@ -498,6 +498,17 @@ def _build_html(rows: list[dict[str, object]], *, ticker: str, timeframe_minutes
       }};
     }}
 
+    function plotConfig() {{
+      return {{
+        responsive: true,
+        displaylogo: false,
+        scrollZoom: true,
+        doubleClick: "reset",
+        modeBarButtonsToRemove: ["select2d", "lasso2d", "autoScale2d", "toImage"],
+        modeBarButtonsToAdd: ["zoomIn2d", "zoomOut2d", "resetScale2d"]
+      }};
+    }}
+
     function renderPriceChart() {{
       const traces = [
         {{
@@ -533,7 +544,7 @@ def _build_html(rows: list[dict[str, object]], *, ticker: str, timeframe_minutes
       ];
       const layout = baseLayout(null);
       layout.yaxis.zeroline = false;
-      Plotly.react("chart", traces, layout, {{ responsive: true, displaylogo: false }});
+      Plotly.react("chart", traces, layout, plotConfig());
     }}
 
     function renderFisherChart() {{
@@ -551,7 +562,7 @@ def _build_html(rows: list[dict[str, object]], *, ticker: str, timeframe_minutes
           line: {{ color: "#56b6c2", width: 2 }}
         }}],
         baseLayout(240),
-        {{ responsive: true, displaylogo: false }}
+        plotConfig()
       );
     }}
 
@@ -589,7 +600,7 @@ def _build_html(rows: list[dict[str, object]], *, ticker: str, timeframe_minutes
           }}
         ],
         baseLayout(240),
-        {{ responsive: true, displaylogo: false }}
+        plotConfig()
       );
     }}
 
