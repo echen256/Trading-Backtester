@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import argparse
 import csv
+import importlib
+import inspect
 import json
 import math
 import tempfile
@@ -14,6 +16,7 @@ from typing import Any
 
 PACKAGE_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_DATA_DIR = PACKAGE_ROOT / "data"
+STRATEGIES_DIR = Path(__file__).resolve().parent / "strategies"
 
 
 @dataclass(slots=True)
@@ -29,6 +32,8 @@ def _parse_timeframe(value: str) -> int:
     normalized = value.strip().lower()
     if normalized.endswith("m"):
         normalized = normalized[:-1]
+    elif normalized.endswith("h"):
+        return 60
     elif normalized in {"d", "1d", "day", "daily"}:
         return 1440
     elif normalized in {"w", "1w", "week", "weekly"}:
@@ -278,6 +283,170 @@ def _normalize_marker_points(points: list[dict[str, object]] | None) -> tuple[li
     return times, prices
 
 
+def _strategy_display_name(slug: str) -> str:
+    return slug.replace("_", " ").strip().title()
+
+
+def _discover_strategy_modules() -> list[tuple[str, object]]:
+    discovered: list[tuple[str, object]] = []
+    if not STRATEGIES_DIR.exists():
+        return discovered
+
+    for path in sorted(STRATEGIES_DIR.glob("*.py")):
+        if path.name.startswith("_"):
+            continue
+        module_name = f"{__package__}.strategies.{path.stem}" if __package__ else f"strategies.{path.stem}"
+        try:
+            module = importlib.import_module(module_name)
+        except Exception:
+            continue
+        discovered.append((path.stem, module))
+    return discovered
+
+
+def _select_strategy_callable(module: object) -> object | None:
+    for name in ("compute_strategy", "run_strategy"):
+        candidate = getattr(module, name, None)
+        if callable(candidate):
+            return candidate
+
+    compute_candidates: list[tuple[str, object]] = []
+    for name in dir(module):
+        if not (name.startswith("compute_") and name.endswith("_strategy")):
+            continue
+        candidate = getattr(module, name, None)
+        if callable(candidate):
+            compute_candidates.append((name, candidate))
+    if len(compute_candidates) == 1:
+        return compute_candidates[0][1]
+    return None
+
+
+def _call_strategy(
+    strategy_callable: object,
+    rows: list[dict[str, object]],
+    *,
+    ticker: str,
+    timeframe_minutes: int,
+) -> object:
+    signature = inspect.signature(strategy_callable)
+    kwargs: dict[str, object] = {}
+    if "rows" in signature.parameters:
+        kwargs["rows"] = rows
+    if "ticker" in signature.parameters:
+        kwargs["ticker"] = ticker
+    if "timeframe_minutes" in signature.parameters:
+        kwargs["timeframe_minutes"] = timeframe_minutes
+    if not kwargs and any(
+        parameter.kind in (inspect.Parameter.POSITIONAL_ONLY, inspect.Parameter.POSITIONAL_OR_KEYWORD)
+        for parameter in signature.parameters.values()
+    ):
+        return strategy_callable(rows)
+    return strategy_callable(**kwargs)
+
+
+def _coerce_event_points(points: list[dict[str, object]] | None) -> list[dict[str, object]]:
+    normalized: list[dict[str, object]] = []
+    for point in points or []:
+        raw_time = point.get("time") or point.get("timestamp")
+        raw_price = point.get("price")
+        if raw_time is None or raw_price is None:
+            continue
+        if isinstance(raw_time, datetime):
+            timestamp_value = raw_time.astimezone(timezone.utc) if raw_time.tzinfo else raw_time.replace(tzinfo=timezone.utc)
+            time_value = timestamp_value.strftime("%Y-%m-%dT%H:%M:%SZ")
+        elif isinstance(raw_time, str):
+            time_value = _parse_timestamp(raw_time).strftime("%Y-%m-%dT%H:%M:%SZ")
+        else:
+            continue
+        try:
+            price_value = float(raw_price)
+        except (TypeError, ValueError):
+            continue
+        normalized.append(
+            {
+                "time": time_value,
+                "price": round(price_value, 6),
+                "label": str(point.get("reason") or point.get("label") or ""),
+            }
+        )
+    return normalized
+
+
+def _extract_strategy_payload(slug: str, module: object, result: object) -> dict[str, object] | None:
+    payload: dict[str, object] | None = None
+    build_payload = getattr(module, "build_chart_payload", None)
+    if callable(build_payload):
+        try:
+            maybe_payload = build_payload(result)
+            if isinstance(maybe_payload, dict):
+                payload = maybe_payload
+        except Exception:
+            payload = None
+
+    if payload is None and isinstance(result, dict):
+        payload = result
+
+    if payload is None and hasattr(result, "events"):
+        payload = {
+            "events": getattr(result, "events", {}),
+            "summary": getattr(result, "summary", {}),
+        }
+
+    if payload is None:
+        return None
+
+    events = payload.get("events")
+    if not isinstance(events, dict):
+        return None
+
+    entries: list[dict[str, object]] = []
+    exits: list[dict[str, object]] = []
+    for event_name, event_points in events.items():
+        if not isinstance(event_name, str):
+            continue
+        coerced = _coerce_event_points(event_points if isinstance(event_points, list) else None)
+        if event_name.endswith("_entries") or event_name == "entries":
+            entries.extend(coerced)
+        elif event_name.endswith("_exits") or event_name == "exits":
+            exits.extend(coerced)
+
+    if not entries and not exits:
+        return None
+
+    summary = payload.get("summary")
+    statistics = payload.get("statistics")
+    return {
+        "slug": slug,
+        "name": _strategy_display_name(slug),
+        "summary": summary if isinstance(summary, dict) else {},
+        "statistics": statistics if isinstance(statistics, dict) else {},
+        "entries": entries,
+        "exits": exits,
+    }
+
+
+def _compute_strategy_overlays(
+    rows: list[dict[str, object]],
+    *,
+    ticker: str,
+    timeframe_minutes: int,
+) -> list[dict[str, object]]:
+    overlays: list[dict[str, object]] = []
+    for slug, module in _discover_strategy_modules():
+        strategy_callable = _select_strategy_callable(module)
+        if strategy_callable is None:
+            continue
+        try:
+            result = _call_strategy(strategy_callable, rows, ticker=ticker, timeframe_minutes=timeframe_minutes)
+            payload = _extract_strategy_payload(slug, module, result)
+        except Exception:
+            continue
+        if payload is not None:
+            overlays.append(payload)
+    return overlays
+
+
 def make_chart_payload(
     *,
     ticker: str,
@@ -312,6 +481,11 @@ def make_chart_payload_from_csv(csv_path: Path, *, ticker: str, timeframe_minute
 def render_chart_html(payload: ChartPayload) -> str:
     rows = payload.rows
     latest = rows[-1]
+    strategy_payloads = _compute_strategy_overlays(
+        rows,
+        ticker=payload.ticker,
+        timeframe_minutes=payload.timeframe_minutes,
+    )
     summary = {
         "Ticker": payload.ticker.upper(),
         "Timeframe": f"{payload.timeframe_minutes}m",
@@ -319,6 +493,7 @@ def render_chart_html(payload: ChartPayload) -> str:
         "Start": str(rows[0]["timestamp"]),
         "End": str(latest["timestamp"]),
         "Last Close": f"{latest['close']:.2f}",
+        "Strategies": str(len(strategy_payloads)),
     }
     times = [row["time"] for row in rows]
     open_values = [row["open"] for row in rows]
@@ -336,6 +511,15 @@ def render_chart_html(payload: ChartPayload) -> str:
         "redMarkers": False,
         "greenMarkers": False,
     }
+    strategy_options_html = "".join(
+        [
+            '<option value="">None</option>',
+            *[
+                f'<option value="{strategy["slug"]}">{strategy["name"]}</option>'
+                for strategy in strategy_payloads
+            ],
+        ]
+    )
 
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -424,6 +608,16 @@ def render_chart_html(payload: ChartPayload) -> str:
       border-color: rgba(86, 182, 194, 0.9);
       color: #eefcff;
     }}
+    .control-select {{
+      appearance: none;
+      border: 1px solid rgba(157, 176, 204, 0.28);
+      background: rgba(8, 14, 24, 0.72);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 10px 14px;
+      font: inherit;
+      min-width: 240px;
+    }}
     .stat {{
       background: rgba(8, 14, 24, 0.35);
       border-radius: 12px;
@@ -486,6 +680,55 @@ def render_chart_html(payload: ChartPayload) -> str:
       margin-top: 12px;
       line-height: 1.5;
     }}
+    .strategy-stats-panel {{
+      margin-top: 14px;
+    }}
+    .strategy-stats-panel.hidden {{
+      display: none;
+    }}
+    .strategy-stats-header {{
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: baseline;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }}
+    .strategy-stats-title {{
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }}
+    .strategy-stats-subtitle {{
+      font-size: 12px;
+      color: var(--muted);
+    }}
+    .strategy-stats-table {{
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 12px;
+      background: rgba(8, 14, 24, 0.42);
+    }}
+    .strategy-stats-table th,
+    .strategy-stats-table td {{
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(157, 176, 204, 0.12);
+      text-align: left;
+      font-size: 13px;
+    }}
+    .strategy-stats-table th {{
+      width: 42%;
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }}
+    .strategy-stats-table tr:last-child th,
+    .strategy-stats-table tr:last-child td {{
+      border-bottom: 0;
+    }}
     code {{
       color: var(--accent);
     }}
@@ -534,6 +777,9 @@ def render_chart_html(payload: ChartPayload) -> str:
       </div>
       <div class="note">This viewer now renders the archived CSV directly so the debug controls can reliably change the chart in-place.</div>
       <div class="controls">
+        <select id="strategy-select" class="control-select" aria-label="Strategy overlay">
+          {strategy_options_html}
+        </select>
         <button class="control-button" data-feature="fisher">Fisher 50</button>
         <button class="control-button" data-feature="macd">MACD</button>
         <button class="control-button" data-feature="redMarkers">Red triangles / 10 bars</button>
@@ -551,6 +797,15 @@ def render_chart_html(payload: ChartPayload) -> str:
       <div id="chart"></div>
       <div id="fisher-chart" class="hidden"></div>
       <div id="macd-chart" class="hidden"></div>
+      <div id="strategy-stats-panel" class="strategy-stats-panel hidden">
+        <div class="strategy-stats-header">
+          <div class="strategy-stats-title">Strategy Statistics</div>
+          <div id="strategy-stats-subtitle" class="strategy-stats-subtitle"></div>
+        </div>
+        <table class="strategy-stats-table">
+          <tbody id="strategy-stats-body"></tbody>
+        </table>
+      </div>
       <div class="note">The chart uses local OHLCV data from the archive. Mouse wheel zoom, drag pan, box zoom, reset controls, keyboard y-scaling, and visible y-axis drag handles are enabled.</div>
     </section>
   </div>
@@ -569,8 +824,72 @@ def render_chart_html(payload: ChartPayload) -> str:
     const redMarkerPrices = {json.dumps(red_marker_prices)};
     const greenMarkerTimes = {json.dumps(green_marker_times)};
     const greenMarkerPrices = {json.dumps(green_marker_prices)};
+    const strategyPayloads = {json.dumps(strategy_payloads)};
+    const strategyPayloadBySlug = Object.fromEntries(strategyPayloads.map((strategy) => [strategy.slug, strategy]));
     const defaultPriceRange = [Math.min(...lowValues), Math.max(...highValues)];
     let axisDragCleanup = null;
+
+    function getSelectedStrategy() {{
+      const select = document.getElementById("strategy-select");
+      if (!select || !select.value) return null;
+      return strategyPayloadBySlug[select.value] || null;
+    }}
+
+    function strategySummaryLines(strategy) {{
+      if (!strategy || !strategy.summary || typeof strategy.summary !== "object") return [];
+      return Object.entries(strategy.summary).map(([key, value]) => `${{key}}: ${{value}}`);
+    }}
+
+    function formatStatisticLabel(key) {{
+      return key
+        .replace(/_/g, " ")
+        .replace(/\\b\\w/g, (char) => char.toUpperCase());
+    }}
+
+    function formatStatisticValue(key, value) {{
+      if (value === null || value === undefined || value === "") return "N/A";
+      if (typeof value === "boolean") return value ? "Yes" : "No";
+      if (typeof value === "number") {{
+        if (key.endsWith("_pct")) return `${{value.toFixed(2)}}%`;
+        if (key.includes("profit_factor")) return value.toFixed(2);
+        if (key.includes("bars")) return value.toFixed(2);
+        return value.toFixed(4).replace(/\\.0+$/, "").replace(/(\\.\\d*?)0+$/, "$1");
+      }}
+      if (typeof value === "object") return JSON.stringify(value);
+      return String(value);
+    }}
+
+    function statisticRows(strategy) {{
+      if (!strategy || !strategy.statistics || typeof strategy.statistics !== "object") return [];
+      return Object.entries(strategy.statistics)
+        .filter(([, value]) => value !== null && value !== undefined && value !== "")
+        .map(([key, value]) => {{
+          if (value && typeof value === "object" && !Array.isArray(value)) {{
+            return [formatStatisticLabel(key), Object.entries(value).map(([nestedKey, nestedValue]) => `${{formatStatisticLabel(nestedKey)}}: ${{formatStatisticValue(nestedKey, nestedValue)}}`).join(" | ")];
+          }}
+          return [formatStatisticLabel(key), formatStatisticValue(key, value)];
+        }});
+    }}
+
+    function renderStrategyStatsTable() {{
+      const panel = document.getElementById("strategy-stats-panel");
+      const body = document.getElementById("strategy-stats-body");
+      const subtitle = document.getElementById("strategy-stats-subtitle");
+      const strategy = getSelectedStrategy();
+      if (!panel || !body || !subtitle) return;
+
+      const rows = statisticRows(strategy);
+      if (!strategy || rows.length === 0) {{
+        panel.classList.add("hidden");
+        body.innerHTML = "";
+        subtitle.textContent = "";
+        return;
+      }}
+
+      subtitle.textContent = strategy.name;
+      body.innerHTML = rows.map(([label, value]) => `<tr><th scope="row">${{label}}</th><td>${{value}}</td></tr>`).join("");
+      panel.classList.remove("hidden");
+    }}
 
     function setButtonState(feature) {{
       const button = document.querySelector(`[data-feature="${{feature}}"]`);
@@ -608,12 +927,19 @@ def render_chart_html(payload: ChartPayload) -> str:
     }}
 
     function updateStatus() {{
+      const selectedStrategy = getSelectedStrategy();
       const lines = [
         `Fisher pane: ${{state.fisher ? "on" : "off"}}`,
         `MACD pane: ${{state.macd ? "on" : "off"}}`,
         `Red triangle overlay: ${{state.redMarkers ? "on" : "off"}} (${{redMarkerTimes.length}} markers)`,
-        `Green triangle overlay: ${{state.greenMarkers ? "on" : "off"}} (${{greenMarkerTimes.length}} markers)`
+        `Green triangle overlay: ${{state.greenMarkers ? "on" : "off"}} (${{greenMarkerTimes.length}} markers)`,
+        `Strategy overlay: ${{selectedStrategy ? selectedStrategy.name : "none"}}`
       ];
+      if (selectedStrategy) {{
+        lines.push(`Strategy entries: ${{selectedStrategy.entries.length}}`);
+        lines.push(`Strategy exits: ${{selectedStrategy.exits.length}}`);
+        lines.push(...strategySummaryLines(selectedStrategy));
+      }}
       if (!window.Plotly) {{
         lines.push("Plotly failed to load, so charts cannot render.");
       }}
@@ -765,6 +1091,7 @@ def render_chart_html(payload: ChartPayload) -> str:
     }}
 
     function renderPriceChart() {{
+      const selectedStrategy = getSelectedStrategy();
       const traces = [
         {{
           type: "candlestick",
@@ -797,6 +1124,32 @@ def render_chart_html(payload: ChartPayload) -> str:
           visible: state.greenMarkers
         }}
       ];
+      if (selectedStrategy) {{
+        if (selectedStrategy.entries.length) {{
+          traces.push({{
+            type: "scatter",
+            mode: "markers",
+            x: selectedStrategy.entries.map((point) => point.time),
+            y: selectedStrategy.entries.map((point) => point.price),
+            text: selectedStrategy.entries.map((point) => point.label || selectedStrategy.name),
+            hovertemplate: "%{{x}}<br>Entry: %{{y:.2f}}<br>%{{text}}<extra></extra>",
+            name: `${{selectedStrategy.name}} Entries`,
+            marker: {{ color: "#00e676", size: 12, symbol: "triangle-up" }}
+          }});
+        }}
+        if (selectedStrategy.exits.length) {{
+          traces.push({{
+            type: "scatter",
+            mode: "markers",
+            x: selectedStrategy.exits.map((point) => point.time),
+            y: selectedStrategy.exits.map((point) => point.price),
+            text: selectedStrategy.exits.map((point) => point.label || selectedStrategy.name),
+            hovertemplate: "%{{x}}<br>Exit: %{{y:.2f}}<br>%{{text}}<extra></extra>",
+            name: `${{selectedStrategy.name}} Exits`,
+            marker: {{ color: "#ff5252", size: 12, symbol: "triangle-down" }}
+          }});
+        }}
+      }}
       const layout = baseLayout(null);
       layout.yaxis.zeroline = false;
       Plotly.react("chart", traces, layout, plotConfig()).then(bindAxisDragHandles);
@@ -862,14 +1215,23 @@ def render_chart_html(payload: ChartPayload) -> str:
     function renderChart() {{
       if (!window.Plotly) {{
         updateStatus();
+        renderStrategyStatsTable();
         return;
       }}
       renderPriceChart();
       renderFisherChart();
       renderMacdChart();
+      renderStrategyStatsTable();
     }}
 
     function bindControls() {{
+      const strategySelect = document.getElementById("strategy-select");
+      if (strategySelect) {{
+        strategySelect.addEventListener("change", () => {{
+          updateStatus();
+          renderChart();
+        }});
+      }}
       document.querySelectorAll(".control-button").forEach((button) => {{
         button.addEventListener("click", () => {{
           const action = button.dataset.action;

@@ -16,6 +16,15 @@ except ModuleNotFoundError:  # Allows lighter subcommands to run without full op
     PolygonDownloader = None
     download_historical_data = None
 
+from .strategies.fisher_adaptive_macd import (
+    StrategyConfig,
+    StrategyResult,
+    build_chart_payload,
+    compute_archived_indicator_payload,
+    compute_fisher_adaptive_macd_strategy,
+)
+from .strategy_metrics import StrategyTrade, build_trade, compute_strategy_statistics, serialize_trades
+
 __all__ = [
     "DEFAULT_CONFIG_PATH",
     "DEFAULT_WATCHLIST_PATH",
@@ -23,7 +32,16 @@ __all__ = [
     "DownloadConfig",
     "DownloadSettings",
     "PolygonDownloader",
+    "StrategyConfig",
+    "StrategyTrade",
+    "StrategyResult",
+    "build_chart_payload",
+    "build_trade",
+    "compute_strategy_statistics",
+    "compute_archived_indicator_payload",
+    "compute_fisher_adaptive_macd_strategy",
     "download_historical_data",
     "load_download_config",
     "read_watchlist",
+    "serialize_trades",
 ]

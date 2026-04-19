@@ -27,6 +27,7 @@ trading-data-sync = "trading_data_pipeline.bigquery_sync:main"
 trading-data-pull = "trading_data_pipeline.bigquery_pull:main"
 trading-data-visualize = "trading_data_pipeline.visualize:main"
 trading-data-download-cmc = "trading_data_pipeline.coinmarketcap_downloader:main"
+trading-data-fisher-adaptive = "trading_data_pipeline.strategies.fisher_adaptive_macd:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/trading_data_pipeline"]

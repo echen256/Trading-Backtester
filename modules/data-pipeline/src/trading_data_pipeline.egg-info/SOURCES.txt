@@ -7,6 +7,7 @@ src/trading_data_pipeline/cli.py
 src/trading_data_pipeline/coinmarketcap_downloader.py
 src/trading_data_pipeline/config.py
 src/trading_data_pipeline/downloader.py
+src/trading_data_pipeline/fisher_adaptive_macd.py
 src/trading_data_pipeline/visualize.py
 src/trading_data_pipeline.egg-info/PKG-INFO
 src/trading_data_pipeline.egg-info/SOURCES.txt
@@ -18,4 +19,5 @@ tests/test_bigquery_pull.py
 tests/test_cli.py
 tests/test_coinmarketcap_downloader.py
 tests/test_download_data_sh.py
+tests/test_fisher_adaptive_macd.py
 tests/test_visualize.py
