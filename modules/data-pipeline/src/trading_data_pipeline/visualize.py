@@ -658,20 +658,28 @@ def render_chart_html(payload: ChartPayload) -> str:
     .hidden {{
       display: none;
     }}
-    #chart .draglayer .nsdrag {{
+    #chart .draglayer .nsdrag,
+    #chart .draglayer .ewdrag {{
       fill: rgba(86, 182, 194, 0.001);
       stroke: rgba(86, 182, 194, 0.55);
       stroke-width: 1.5px;
       transition: fill 120ms ease, stroke 120ms ease, opacity 120ms ease;
     }}
+    #chart .draglayer .ewdrag {{
+      cursor: ew-resize;
+    }}
     #chart .draglayer .nsdrag:hover,
     #chart .draglayer .nsdrag.is-hovering,
-    #chart .draglayer .nsdrag.is-dragging {{
+    #chart .draglayer .nsdrag.is-dragging,
+    #chart .draglayer .ewdrag:hover,
+    #chart .draglayer .ewdrag.is-hovering,
+    #chart .draglayer .ewdrag.is-dragging {{
       fill: rgba(86, 182, 194, 0.18);
       stroke: rgba(86, 182, 194, 0.95);
       stroke-width: 2px;
     }}
-    #chart .draglayer .nsdrag.is-dragging {{
+    #chart .draglayer .nsdrag.is-dragging,
+    #chart .draglayer .ewdrag.is-dragging {{
       fill: rgba(86, 182, 194, 0.26);
     }}
     .note {{
@@ -784,6 +792,9 @@ def render_chart_html(payload: ChartPayload) -> str:
         <button class="control-button" data-feature="macd">MACD</button>
         <button class="control-button" data-feature="redMarkers">Red triangles / 10 bars</button>
         <button class="control-button" data-feature="greenMarkers">Green triangles / 7 bars</button>
+        <button class="control-button" data-action="scale-x-in">X Scale In</button>
+        <button class="control-button" data-action="scale-x-out">X Scale Out</button>
+        <button class="control-button" data-action="scale-x-reset">X Scale Reset</button>
         <button class="control-button" data-action="scale-y-in">Y Scale In</button>
         <button class="control-button" data-action="scale-y-out">Y Scale Out</button>
         <button class="control-button" data-action="scale-y-reset">Y Scale Reset</button>
@@ -806,7 +817,7 @@ def render_chart_html(payload: ChartPayload) -> str:
           <tbody id="strategy-stats-body"></tbody>
         </table>
       </div>
-      <div class="note">The chart uses local OHLCV data from the archive. Mouse wheel zoom, drag pan, box zoom, reset controls, keyboard y-scaling, and visible y-axis drag handles are enabled.</div>
+      <div class="note">The chart uses local OHLCV data from the archive. Mouse wheel zoom, drag pan, box zoom, reset controls, keyboard x/y-scaling, and visible x/y-axis drag handles are enabled.</div>
     </section>
   </div>
   <script>
@@ -827,7 +838,10 @@ def render_chart_html(payload: ChartPayload) -> str:
     const strategyPayloads = {json.dumps(strategy_payloads)};
     const strategyPayloadBySlug = Object.fromEntries(strategyPayloads.map((strategy) => [strategy.slug, strategy]));
     const defaultPriceRange = [Math.min(...lowValues), Math.max(...highValues)];
+    const fullTimeRange = [times[0], times[times.length - 1]];
+    const sixMonthWindowMs = 183 * 24 * 60 * 60 * 1000;
     let axisDragCleanup = null;
+    let wheelPanCleanup = null;
 
     function getSelectedStrategy() {{
       const select = document.getElementById("strategy-select");
@@ -978,11 +992,43 @@ def render_chart_html(payload: ChartPayload) -> str:
       return {{
         responsive: true,
         displaylogo: false,
-        scrollZoom: true,
+        scrollZoom: false,
         doubleClick: "reset",
         modeBarButtonsToRemove: ["select2d", "lasso2d", "autoScale2d", "toImage"],
         modeBarButtonsToAdd: ["zoomIn2d", "zoomOut2d", "resetScale2d"]
       }};
+    }}
+
+    function defaultVisibleTimeRange() {{
+      const startMs = new Date(fullTimeRange[0]).getTime();
+      const endMs = new Date(fullTimeRange[1]).getTime();
+      if (!Number.isFinite(startMs) || !Number.isFinite(endMs) || endMs <= startMs) {{
+        return [...fullTimeRange];
+      }}
+      const windowMs = Math.min(sixMonthWindowMs, endMs - startMs);
+      return [
+        new Date(endMs - windowMs).toISOString(),
+        new Date(endMs).toISOString()
+      ];
+    }}
+
+    function clampTimeRange(startMs, endMs) {{
+      const minMs = new Date(fullTimeRange[0]).getTime();
+      const maxMs = new Date(fullTimeRange[1]).getTime();
+      if (!Number.isFinite(minMs) || !Number.isFinite(maxMs) || maxMs <= minMs) {{
+        return [startMs, endMs];
+      }}
+      const span = endMs - startMs;
+      if (span >= maxMs - minMs) {{
+        return [minMs, maxMs];
+      }}
+      if (startMs < minMs) {{
+        return [minMs, minMs + span];
+      }}
+      if (endMs > maxMs) {{
+        return [maxMs - span, maxMs];
+      }}
+      return [startMs, endMs];
     }}
 
     function getCurrentPriceRange() {{
@@ -1009,6 +1055,41 @@ def render_chart_html(payload: ChartPayload) -> str:
       if (!window.Plotly) return;
       Plotly.relayout("chart", {{
         "yaxis.autorange": true
+      }});
+    }}
+
+    function getCurrentTimeRange() {{
+      const chart = document.getElementById("chart");
+      const layout = chart && chart._fullLayout;
+      const current = layout && layout.xaxis && layout.xaxis.range;
+      if (Array.isArray(current) && current.length === 2) {{
+        return [String(current[0]), String(current[1])];
+      }}
+      return defaultVisibleTimeRange();
+    }}
+
+    function scaleTimeAxis(factor) {{
+      if (!window.Plotly) return;
+      const [startValue, endValue] = getCurrentTimeRange();
+      const startMs = new Date(startValue).getTime();
+      const endMs = new Date(endValue).getTime();
+      if (!Number.isFinite(startMs) || !Number.isFinite(endMs) || endMs <= startMs) return;
+      const midpoint = (startMs + endMs) / 2;
+      const halfRange = ((endMs - startMs) / 2) * factor;
+      const [clampedStart, clampedEnd] = clampTimeRange(midpoint - halfRange, midpoint + halfRange);
+      Plotly.relayout("chart", {{
+        "xaxis.range": [
+          new Date(clampedStart).toISOString(),
+          new Date(clampedEnd).toISOString()
+        ]
+      }});
+    }}
+
+    function resetTimeAxis() {{
+      if (!window.Plotly) return;
+      const [defaultStart, defaultEnd] = defaultVisibleTimeRange();
+      Plotly.relayout("chart", {{
+        "xaxis.range": [defaultStart, defaultEnd]
       }});
     }}
 
@@ -1066,9 +1147,94 @@ def render_chart_html(payload: ChartPayload) -> str:
         listeners.push(() => handle.removeEventListener("mousedown", onMouseDown));
       }}
 
+      const xHandles = Array.from(chart.querySelectorAll(".draglayer .ewdrag"));
+      for (const handle of xHandles) {{
+        const onMouseEnter = () => handle.classList.add("is-hovering");
+        const onMouseLeave = () => handle.classList.remove("is-hovering");
+        handle.addEventListener("mouseenter", onMouseEnter);
+        handle.addEventListener("mouseleave", onMouseLeave);
+        listeners.push(() => handle.removeEventListener("mouseenter", onMouseEnter));
+        listeners.push(() => handle.removeEventListener("mouseleave", onMouseLeave));
+
+        const onMouseDown = (event) => {{
+          if (event.button !== 0) return;
+          event.preventDefault();
+          event.stopPropagation();
+          handle.classList.add("is-dragging");
+
+          const startX = event.clientX;
+          const [startFrom, startTo] = getCurrentTimeRange();
+          const startFromMs = new Date(startFrom).getTime();
+          const startToMs = new Date(startTo).getTime();
+          const startMid = (startFromMs + startToMs) / 2;
+          const startHalfRange = (startToMs - startFromMs) / 2;
+
+          const onMouseMove = (moveEvent) => {{
+            const dx = moveEvent.clientX - startX;
+            const factor = Math.max(0.08, 1 + dx * 0.006);
+            Plotly.relayout("chart", {{
+              "xaxis.range": [
+                new Date(startMid - startHalfRange * factor).toISOString(),
+                new Date(startMid + startHalfRange * factor).toISOString()
+              ]
+            }});
+          }};
+
+          const onMouseUp = () => {{
+            handle.classList.remove("is-dragging");
+            window.removeEventListener("mousemove", onMouseMove);
+            window.removeEventListener("mouseup", onMouseUp);
+          }};
+
+          window.addEventListener("mousemove", onMouseMove);
+          window.addEventListener("mouseup", onMouseUp);
+        }};
+
+        handle.addEventListener("mousedown", onMouseDown);
+        listeners.push(() => handle.removeEventListener("mousedown", onMouseDown));
+      }}
+
       axisDragCleanup = () => {{
         for (const cleanup of listeners) cleanup();
       }};
+    }}
+
+    function bindWheelPan() {{
+      if (wheelPanCleanup) {{
+        wheelPanCleanup();
+        wheelPanCleanup = null;
+      }}
+      const chart = document.getElementById("chart");
+      if (!chart) return;
+
+      const onWheel = (event) => {{
+        if (!window.Plotly) return;
+        const target = event.target;
+        if (!(target instanceof Element) || !target.closest(".plotly, #chart")) return;
+        const [startValue, endValue] = getCurrentTimeRange();
+        const startMs = new Date(startValue).getTime();
+        const endMs = new Date(endValue).getTime();
+        if (!Number.isFinite(startMs) || !Number.isFinite(endMs) || endMs <= startMs) return;
+
+        const dominantDelta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+        if (!dominantDelta) return;
+
+        event.preventDefault();
+        const span = endMs - startMs;
+        const width = Math.max(chart.clientWidth, 300);
+        const shiftMs = dominantDelta * (span / width);
+        const [clampedStart, clampedEnd] = clampTimeRange(startMs + shiftMs, endMs + shiftMs);
+
+        Plotly.relayout("chart", {{
+          "xaxis.range": [
+            new Date(clampedStart).toISOString(),
+            new Date(clampedEnd).toISOString()
+          ]
+        }});
+      }};
+
+      chart.addEventListener("wheel", onWheel, {{ passive: false }});
+      wheelPanCleanup = () => chart.removeEventListener("wheel", onWheel);
     }}
 
     function bindKeyboardShortcuts() {{
@@ -1083,8 +1249,15 @@ def render_chart_html(payload: ChartPayload) -> str:
         }} else if (event.key === "-" || event.key === "_") {{
           event.preventDefault();
           scalePriceAxis(1.15);
+        }} else if (event.key === "]") {{
+          event.preventDefault();
+          scaleTimeAxis(0.85);
+        }} else if (event.key === "[") {{
+          event.preventDefault();
+          scaleTimeAxis(1.15);
         }} else if (event.key === "0") {{
           event.preventDefault();
+          resetTimeAxis();
           resetPriceAxis();
         }}
       }});
@@ -1151,8 +1324,12 @@ def render_chart_html(payload: ChartPayload) -> str:
         }}
       }}
       const layout = baseLayout(null);
+      layout.xaxis.range = getCurrentTimeRange();
       layout.yaxis.zeroline = false;
-      Plotly.react("chart", traces, layout, plotConfig()).then(bindAxisDragHandles);
+      Plotly.react("chart", traces, layout, plotConfig()).then(() => {{
+        bindAxisDragHandles();
+        bindWheelPan();
+      }});
     }}
 
     function renderFisherChart() {{
@@ -1235,6 +1412,18 @@ def render_chart_html(payload: ChartPayload) -> str:
       document.querySelectorAll(".control-button").forEach((button) => {{
         button.addEventListener("click", () => {{
           const action = button.dataset.action;
+          if (action === "scale-x-in") {{
+            scaleTimeAxis(0.85);
+            return;
+          }}
+          if (action === "scale-x-out") {{
+            scaleTimeAxis(1.15);
+            return;
+          }}
+          if (action === "scale-x-reset") {{
+            resetTimeAxis();
+            return;
+          }}
           if (action === "scale-y-in") {{
             scalePriceAxis(0.85);
             return;
