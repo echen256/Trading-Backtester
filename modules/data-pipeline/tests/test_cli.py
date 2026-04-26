@@ -33,6 +33,11 @@ class TestBuildParser:
         args = parser.parse_args(["--interval", "60"])
         assert args.interval == 60
 
+    def test_parses_market(self) -> None:
+        parser = build_parser()
+        args = parser.parse_args(["--market", "indices"])
+        assert args.market == "indices"
+
     def test_parses_limit(self) -> None:
         parser = build_parser()
         args = parser.parse_args(["--limit", "10"])
@@ -53,6 +58,7 @@ class TestBuildParser:
         parser = build_parser()
         args = parser.parse_args([])
         assert args.ticker is None
+        assert args.market == "stocks"
         assert args.interval == 1440
         assert args.chunk_days == 30
         assert args.lookback_years == 5
@@ -96,6 +102,19 @@ class TestMain:
         mock_downloader.download_symbol.assert_called_once()
         call_kwargs = mock_downloader.download_symbol.call_args[1]
         assert "settings" in call_kwargs
+        assert call_kwargs["settings"].market == "stocks"
+
+    @patch("trading_data_pipeline.cli.PolygonDownloader")
+    def test_main_single_ticker_supports_indices_market(
+        self, mock_downloader_class: MagicMock, tmp_config: Path
+    ) -> None:
+        mock_downloader = MagicMock()
+        mock_downloader_class.return_value = mock_downloader
+
+        main(["I:SPX", "--market", "indices", "--config", str(tmp_config)])
+
+        call_kwargs = mock_downloader.download_symbol.call_args[1]
+        assert call_kwargs["settings"].market == "indices"
 
     @patch("trading_data_pipeline.cli.PolygonDownloader")
     def test_main_watchlist_calls_download_watchlist(
