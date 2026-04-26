@@ -76,6 +76,11 @@ def test_render_chart_html_includes_strategy_dropdown() -> None:
 
     assert 'id="strategy-select"' in html
     assert 'id="strategy-stats-panel"' in html
+    assert 'data-feature="sessionGaps"' in html
+    assert 'id="gap-min-pct"' in html
+    assert 'id="gap-min-abs"' in html
     assert "Strategy Statistics" in html
     assert "Strategy overlay" in html
     assert 'rangebreaks: [{ bounds: ["sat", "mon"] }]' in html
+    assert "function computeSessionGaps()" in html
+    assert "layout.shapes = state.sessionGaps ? buildGapShapes(sessionGaps) : [];" in html

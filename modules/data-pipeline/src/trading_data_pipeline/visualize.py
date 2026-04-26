@@ -510,6 +510,7 @@ def render_chart_html(payload: ChartPayload) -> str:
         "macd": False,
         "redMarkers": False,
         "greenMarkers": False,
+        "sessionGaps": True,
     }
     strategy_options_html = "".join(
         [
@@ -617,6 +618,33 @@ def render_chart_html(payload: ChartPayload) -> str:
       padding: 10px 14px;
       font: inherit;
       min-width: 240px;
+    }}
+    .control-group {{
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(157, 176, 204, 0.18);
+      background: rgba(8, 14, 24, 0.28);
+      flex-wrap: wrap;
+    }}
+    .control-field {{
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }}
+    .control-input {{
+      width: 92px;
+      border: 1px solid rgba(157, 176, 204, 0.28);
+      background: rgba(8, 14, 24, 0.72);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 8px 10px;
+      font: inherit;
     }}
     .stat {{
       background: rgba(8, 14, 24, 0.35);
@@ -790,8 +818,19 @@ def render_chart_html(payload: ChartPayload) -> str:
         </select>
         <button class="control-button" data-feature="fisher">Fisher 50</button>
         <button class="control-button" data-feature="macd">MACD</button>
+        <button class="control-button" data-feature="sessionGaps">Session Gaps</button>
         <button class="control-button" data-feature="redMarkers">Red triangles / 10 bars</button>
         <button class="control-button" data-feature="greenMarkers">Green triangles / 7 bars</button>
+        <div class="control-group" aria-label="Gap calibration settings">
+          <label class="control-field" for="gap-min-pct">
+            Gap % >=
+            <input id="gap-min-pct" class="control-input" type="number" min="0" step="0.1" value="0.5" />
+          </label>
+          <label class="control-field" for="gap-min-abs">
+            Gap $ >=
+            <input id="gap-min-abs" class="control-input" type="number" min="0" step="0.01" value="0" />
+          </label>
+        </div>
         <button class="control-button" data-action="scale-x-in">X Scale In</button>
         <button class="control-button" data-action="scale-x-out">X Scale Out</button>
         <button class="control-button" data-action="scale-x-reset">X Scale Reset</button>
@@ -837,6 +876,7 @@ def render_chart_html(payload: ChartPayload) -> str:
     const greenMarkerPrices = {json.dumps(green_marker_prices)};
     const strategyPayloads = {json.dumps(strategy_payloads)};
     const strategyPayloadBySlug = Object.fromEntries(strategyPayloads.map((strategy) => [strategy.slug, strategy]));
+    const timeframeMinutes = {json.dumps(payload.timeframe_minutes)};
     const defaultPriceRange = [Math.min(...lowValues), Math.max(...highValues)];
     const fullTimeRange = [times[0], times[times.length - 1]];
     const sixMonthWindowMs = 183 * 24 * 60 * 60 * 1000;
@@ -945,13 +985,20 @@ def render_chart_html(payload: ChartPayload) -> str:
 
     function updateStatus() {{
       const selectedStrategy = getSelectedStrategy();
+      const sessionGaps = computeSessionGaps();
+      const gapSettings = getGapSettings();
       const lines = [
         `Fisher pane: ${{state.fisher ? "on" : "off"}}`,
         `MACD pane: ${{state.macd ? "on" : "off"}}`,
+        `Session gap overlay: ${{state.sessionGaps ? "on" : "off"}} (${{sessionGaps.length}} gaps, min % ${{gapSettings.minPercent.toFixed(2)}}, min $ ${{gapSettings.minAbsolute.toFixed(2)}})`,
         `Red triangle overlay: ${{state.redMarkers ? "on" : "off"}} (${{redMarkerTimes.length}} markers)`,
         `Green triangle overlay: ${{state.greenMarkers ? "on" : "off"}} (${{greenMarkerTimes.length}} markers)`,
         `Strategy overlay: ${{selectedStrategy ? selectedStrategy.name : "none"}}`
       ];
+      if (sessionGaps.length) {{
+        const largestGap = sessionGaps.reduce((best, gap) => (gap.absolutePoints > best.absolutePoints ? gap : best), sessionGaps[0]);
+        lines.push(`Largest gap: ${{largestGap.direction}} ${{largestGap.absolutePoints.toFixed(2)}} pts (${{largestGap.percent.toFixed(2)}}%) on ${{largestGap.currentTime.slice(0, 10)}}`);
+      }}
       if (selectedStrategy) {{
         lines.push(`Strategy entries: ${{selectedStrategy.entries.length}}`);
         lines.push(`Strategy exits: ${{selectedStrategy.exits.length}}`);
@@ -990,6 +1037,93 @@ def render_chart_html(payload: ChartPayload) -> str:
           fixedrange: false
         }}
       }};
+    }}
+
+    function getGapSettings() {{
+      const percentInput = document.getElementById("gap-min-pct");
+      const absoluteInput = document.getElementById("gap-min-abs");
+      const minPercent = Math.max(0, Number.parseFloat(percentInput?.value ?? "0") || 0);
+      const minAbsolute = Math.max(0, Number.parseFloat(absoluteInput?.value ?? "0") || 0);
+      return {{ minPercent, minAbsolute }};
+    }}
+
+    function isSessionBoundary(index) {{
+      if (index <= 0) return false;
+      if (timeframeMinutes >= 1440) return true;
+
+      const previousTime = new Date(times[index - 1]);
+      const currentTime = new Date(times[index]);
+      const previousMs = previousTime.getTime();
+      const currentMs = currentTime.getTime();
+      if (!Number.isFinite(previousMs) || !Number.isFinite(currentMs)) return false;
+
+      const expectedBarMs = Math.max(timeframeMinutes, 1) * 60 * 1000;
+      const dateChanged = previousTime.toISOString().slice(0, 10) !== currentTime.toISOString().slice(0, 10);
+      const hasLargeTimeJump = currentMs - previousMs > expectedBarMs * 1.5;
+      return dateChanged || hasLargeTimeJump;
+    }}
+
+    function computeSessionGaps() {{
+      const {{ minPercent, minAbsolute }} = getGapSettings();
+      const gaps = [];
+
+      for (let index = 1; index < times.length; index += 1) {{
+        if (!isSessionBoundary(index)) continue;
+
+        const previousClose = Number(closeValues[index - 1]);
+        const currentOpen = Number(openValues[index]);
+        if (!Number.isFinite(previousClose) || !Number.isFinite(currentOpen)) continue;
+
+        const gapPoints = currentOpen - previousClose;
+        const absolutePoints = Math.abs(gapPoints);
+        if (absolutePoints <= 0) continue;
+
+        const percent = absolutePoints / Math.max(Math.abs(previousClose), 0.000001) * 100;
+        if (minAbsolute > 0 && absolutePoints < minAbsolute) continue;
+        if (minPercent > 0 && percent < minPercent) continue;
+
+        const previousTime = times[index - 1];
+        const currentTime = times[index];
+        const previousMs = new Date(previousTime).getTime();
+        const currentMs = new Date(currentTime).getTime();
+        const midpointTime = Number.isFinite(previousMs) && Number.isFinite(currentMs)
+          ? new Date((previousMs + currentMs) / 2).toISOString()
+          : currentTime;
+
+        gaps.push({{
+          previousTime,
+          currentTime,
+          midpointTime,
+          lower: Math.min(previousClose, currentOpen),
+          upper: Math.max(previousClose, currentOpen),
+          midpointPrice: (previousClose + currentOpen) / 2,
+          direction: gapPoints > 0 ? "up" : "down",
+          points: gapPoints,
+          absolutePoints,
+          percent,
+        }});
+      }}
+
+      return gaps;
+    }}
+
+    function buildGapShapes(sessionGaps) {{
+      return sessionGaps.map((gap) => {{
+        const stroke = gap.direction === "up" ? "rgba(38, 166, 154, 0.95)" : "rgba(239, 83, 80, 0.95)";
+        const fill = gap.direction === "up" ? "rgba(38, 166, 154, 0.22)" : "rgba(239, 83, 80, 0.22)";
+        return {{
+          type: "rect",
+          xref: "x",
+          yref: "y",
+          x0: gap.previousTime,
+          x1: gap.currentTime,
+          y0: gap.lower,
+          y1: gap.upper,
+          line: {{ color: stroke, width: 1.5 }},
+          fillcolor: fill,
+          layer: "above"
+        }};
+      }});
     }}
 
     function getPlotPanes() {{
@@ -1348,6 +1482,7 @@ def render_chart_html(payload: ChartPayload) -> str:
 
     function renderPriceChart() {{
       const selectedStrategy = getSelectedStrategy();
+      const sessionGaps = computeSessionGaps();
       const traces = [
         {{
           type: "candlestick",
@@ -1409,6 +1544,7 @@ def render_chart_html(payload: ChartPayload) -> str:
       const layout = baseLayout(null);
       layout.xaxis.range = getCurrentTimeRange();
       layout.yaxis.zeroline = false;
+      layout.shapes = state.sessionGaps ? buildGapShapes(sessionGaps) : [];
       Plotly.react("chart", traces, layout, plotConfig()).then(() => {{
         bindAxisDragHandles();
         bindWheelPan();
@@ -1505,6 +1641,17 @@ def render_chart_html(payload: ChartPayload) -> str:
           renderChart();
         }});
       }}
+      ["gap-min-pct", "gap-min-abs"].forEach((inputId) => {{
+        const input = document.getElementById(inputId);
+        if (!input) return;
+        input.addEventListener("input", () => {{
+          if (Number.parseFloat(input.value) < 0) {{
+            input.value = "0";
+          }}
+          updateStatus();
+          renderChart();
+        }});
+      }});
       document.querySelectorAll(".control-button").forEach((button) => {{
         button.addEventListener("click", () => {{
           const action = button.dataset.action;
