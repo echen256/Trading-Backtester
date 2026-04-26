@@ -805,9 +805,9 @@ def render_chart_html(payload: ChartPayload) -> str:
       </div>
     </div>
     <section class="panel">
-      <div id="chart"></div>
-      <div id="fisher-chart" class="hidden"></div>
-      <div id="macd-chart" class="hidden"></div>
+      <div id="chart" data-plot-pane="true"></div>
+      <div id="fisher-chart" class="hidden" data-plot-pane="true"></div>
+      <div id="macd-chart" class="hidden" data-plot-pane="true"></div>
       <div id="strategy-stats-panel" class="strategy-stats-panel hidden">
         <div class="strategy-stats-header">
           <div class="strategy-stats-title">Strategy Statistics</div>
@@ -842,6 +842,9 @@ def render_chart_html(payload: ChartPayload) -> str:
     const sixMonthWindowMs = 183 * 24 * 60 * 60 * 1000;
     let axisDragCleanup = null;
     let wheelPanCleanup = null;
+    let xSyncCleanup = null;
+    let syncingTimeRange = false;
+    let activePaneId = "chart";
 
     function getSelectedStrategy() {{
       const select = document.getElementById("strategy-select");
@@ -975,7 +978,8 @@ def render_chart_html(payload: ChartPayload) -> str:
           showgrid: true,
           gridcolor: "#22324d",
           zeroline: false,
-          type: "date"
+          type: "date",
+          rangebreaks: [{{ bounds: ["sat", "mon"] }}]
         }},
         yaxis: {{
           side: "right",
@@ -986,6 +990,27 @@ def render_chart_html(payload: ChartPayload) -> str:
           fixedrange: false
         }}
       }};
+    }}
+
+    function getPlotPanes() {{
+      return Array.from(document.querySelectorAll('[data-plot-pane="true"]'));
+    }}
+
+    function getVisiblePaneIds() {{
+      return getPlotPanes()
+        .filter((pane) => !pane.classList.contains("hidden"))
+        .map((pane) => pane.id)
+        .filter(Boolean);
+    }}
+
+    function getPrimaryPaneId() {{
+      const visiblePaneIds = getVisiblePaneIds();
+      if (visiblePaneIds.includes(activePaneId)) return activePaneId;
+      return visiblePaneIds[0] || "chart";
+    }}
+
+    function setActivePane(paneId) {{
+      activePaneId = paneId;
     }}
 
     function plotConfig() {{
@@ -1031,8 +1056,8 @@ def render_chart_html(payload: ChartPayload) -> str:
       return [startMs, endMs];
     }}
 
-    function getCurrentPriceRange() {{
-      const chart = document.getElementById("chart");
+    function getCurrentPriceRange(chartId = getPrimaryPaneId()) {{
+      const chart = document.getElementById(chartId);
       const layout = chart && chart._fullLayout;
       const current = layout && layout.yaxis && layout.yaxis.range;
       if (Array.isArray(current) && current.length === 2) {{
@@ -1041,31 +1066,44 @@ def render_chart_html(payload: ChartPayload) -> str:
       return [...defaultPriceRange];
     }}
 
-    function scalePriceAxis(factor) {{
+    function scalePriceAxis(factor, chartId = getPrimaryPaneId()) {{
       if (!window.Plotly) return;
-      const [minValue, maxValue] = getCurrentPriceRange();
+      const [minValue, maxValue] = getCurrentPriceRange(chartId);
       const midpoint = (minValue + maxValue) / 2;
       const halfRange = ((maxValue - minValue) / 2) * factor;
-      Plotly.relayout("chart", {{
+      Plotly.relayout(chartId, {{
         "yaxis.range": [midpoint - halfRange, midpoint + halfRange]
       }});
     }}
 
-    function resetPriceAxis() {{
+    function resetPriceAxis(chartId = getPrimaryPaneId()) {{
       if (!window.Plotly) return;
-      Plotly.relayout("chart", {{
+      Plotly.relayout(chartId, {{
         "yaxis.autorange": true
       }});
     }}
 
     function getCurrentTimeRange() {{
-      const chart = document.getElementById("chart");
+      const chart = document.getElementById(getPrimaryPaneId());
       const layout = chart && chart._fullLayout;
       const current = layout && layout.xaxis && layout.xaxis.range;
       if (Array.isArray(current) && current.length === 2) {{
         return [String(current[0]), String(current[1])];
       }}
       return defaultVisibleTimeRange();
+    }}
+
+    function applyTimeRange(startIso, endIso) {{
+      if (!window.Plotly) return;
+      const paneIds = getVisiblePaneIds();
+      if (!paneIds.length) return;
+      syncingTimeRange = true;
+      const update = {{
+        "xaxis.range": [startIso, endIso]
+      }};
+      Promise.allSettled(paneIds.map((paneId) => Plotly.relayout(paneId, update))).finally(() => {{
+        syncingTimeRange = false;
+      }});
     }}
 
     function scaleTimeAxis(factor) {{
@@ -1077,20 +1115,16 @@ def render_chart_html(payload: ChartPayload) -> str:
       const midpoint = (startMs + endMs) / 2;
       const halfRange = ((endMs - startMs) / 2) * factor;
       const [clampedStart, clampedEnd] = clampTimeRange(midpoint - halfRange, midpoint + halfRange);
-      Plotly.relayout("chart", {{
-        "xaxis.range": [
-          new Date(clampedStart).toISOString(),
-          new Date(clampedEnd).toISOString()
-        ]
-      }});
+      applyTimeRange(
+        new Date(clampedStart).toISOString(),
+        new Date(clampedEnd).toISOString(),
+      );
     }}
 
     function resetTimeAxis() {{
       if (!window.Plotly) return;
       const [defaultStart, defaultEnd] = defaultVisibleTimeRange();
-      Plotly.relayout("chart", {{
-        "xaxis.range": [defaultStart, defaultEnd]
-      }});
+      applyTimeRange(defaultStart, defaultEnd);
     }}
 
     function bindAxisDragHandles() {{
@@ -1098,100 +1132,114 @@ def render_chart_html(payload: ChartPayload) -> str:
         axisDragCleanup();
         axisDragCleanup = null;
       }}
-      const chart = document.getElementById("chart");
-      if (!chart) return;
-
-      const handles = Array.from(chart.querySelectorAll(".draglayer .nsdrag"));
-      if (!handles.length) return;
-
       const listeners = [];
 
-      for (const handle of handles) {{
-        const onMouseEnter = () => handle.classList.add("is-hovering");
-        const onMouseLeave = () => handle.classList.remove("is-hovering");
-        handle.addEventListener("mouseenter", onMouseEnter);
-        handle.addEventListener("mouseleave", onMouseLeave);
-        listeners.push(() => handle.removeEventListener("mouseenter", onMouseEnter));
-        listeners.push(() => handle.removeEventListener("mouseleave", onMouseLeave));
+      for (const chart of getPlotPanes()) {{
+        const chartId = chart.id;
+        if (!chartId || chart.classList.contains("hidden")) continue;
 
-        const onMouseDown = (event) => {{
-          if (event.button !== 0) return;
-          event.preventDefault();
-          event.stopPropagation();
-          handle.classList.add("is-dragging");
+        const onPaneEnter = () => setActivePane(chartId);
+        chart.addEventListener("mouseenter", onPaneEnter);
+        listeners.push(() => chart.removeEventListener("mouseenter", onPaneEnter));
 
-          const startY = event.clientY;
-          const [startMin, startMax] = getCurrentPriceRange();
-          const startMid = (startMin + startMax) / 2;
-          const startHalfRange = (startMax - startMin) / 2;
+        const handles = Array.from(chart.querySelectorAll(".draglayer .nsdrag"));
+        for (const handle of handles) {{
+          const onMouseEnter = () => {{
+            setActivePane(chartId);
+            handle.classList.add("is-hovering");
+          }};
+          const onMouseLeave = () => handle.classList.remove("is-hovering");
+          handle.addEventListener("mouseenter", onMouseEnter);
+          handle.addEventListener("mouseleave", onMouseLeave);
+          listeners.push(() => handle.removeEventListener("mouseenter", onMouseEnter));
+          listeners.push(() => handle.removeEventListener("mouseleave", onMouseLeave));
 
-          const onMouseMove = (moveEvent) => {{
-            const dy = moveEvent.clientY - startY;
-            const factor = Math.max(0.15, 1 + dy * 0.006);
-            Plotly.relayout("chart", {{
-              "yaxis.range": [startMid - startHalfRange * factor, startMid + startHalfRange * factor]
-            }});
+          const onMouseDown = (event) => {{
+            if (event.button !== 0) return;
+            event.preventDefault();
+            event.stopPropagation();
+            setActivePane(chartId);
+            handle.classList.add("is-dragging");
+
+            const startY = event.clientY;
+            const [startMin, startMax] = getCurrentPriceRange(chartId);
+            const startMid = (startMin + startMax) / 2;
+            const startHalfRange = (startMax - startMin) / 2;
+
+            const onMouseMove = (moveEvent) => {{
+              const dy = moveEvent.clientY - startY;
+              const factor = Math.max(0.15, 1 + dy * 0.006);
+              Plotly.relayout(chartId, {{
+                "yaxis.range": [startMid - startHalfRange * factor, startMid + startHalfRange * factor]
+              }});
+            }};
+
+            const onMouseUp = () => {{
+              handle.classList.remove("is-dragging");
+              window.removeEventListener("mousemove", onMouseMove);
+              window.removeEventListener("mouseup", onMouseUp);
+            }};
+
+            window.addEventListener("mousemove", onMouseMove);
+            window.addEventListener("mouseup", onMouseUp);
           }};
 
-          const onMouseUp = () => {{
-            handle.classList.remove("is-dragging");
-            window.removeEventListener("mousemove", onMouseMove);
-            window.removeEventListener("mouseup", onMouseUp);
+          handle.addEventListener("mousedown", onMouseDown);
+          listeners.push(() => handle.removeEventListener("mousedown", onMouseDown));
+        }}
+
+        const xHandles = Array.from(chart.querySelectorAll(".draglayer .ewdrag"));
+        for (const handle of xHandles) {{
+          const onMouseEnter = () => {{
+            setActivePane(chartId);
+            handle.classList.add("is-hovering");
+          }};
+          const onMouseLeave = () => handle.classList.remove("is-hovering");
+          handle.addEventListener("mouseenter", onMouseEnter);
+          handle.addEventListener("mouseleave", onMouseLeave);
+          listeners.push(() => handle.removeEventListener("mouseenter", onMouseEnter));
+          listeners.push(() => handle.removeEventListener("mouseleave", onMouseLeave));
+
+          const onMouseDown = (event) => {{
+            if (event.button !== 0) return;
+            event.preventDefault();
+            event.stopPropagation();
+            setActivePane(chartId);
+            handle.classList.add("is-dragging");
+
+            const startX = event.clientX;
+            const [startFrom, startTo] = getCurrentTimeRange();
+            const startFromMs = new Date(startFrom).getTime();
+            const startToMs = new Date(startTo).getTime();
+            const startMid = (startFromMs + startToMs) / 2;
+            const startHalfRange = (startToMs - startFromMs) / 2;
+
+            const onMouseMove = (moveEvent) => {{
+              const dx = moveEvent.clientX - startX;
+              const factor = Math.max(0.08, 1 + dx * 0.006);
+              const [clampedStart, clampedEnd] = clampTimeRange(
+                startMid - startHalfRange * factor,
+                startMid + startHalfRange * factor,
+              );
+              applyTimeRange(
+                new Date(clampedStart).toISOString(),
+                new Date(clampedEnd).toISOString(),
+              );
+            }};
+
+            const onMouseUp = () => {{
+              handle.classList.remove("is-dragging");
+              window.removeEventListener("mousemove", onMouseMove);
+              window.removeEventListener("mouseup", onMouseUp);
+            }};
+
+            window.addEventListener("mousemove", onMouseMove);
+            window.addEventListener("mouseup", onMouseUp);
           }};
 
-          window.addEventListener("mousemove", onMouseMove);
-          window.addEventListener("mouseup", onMouseUp);
-        }};
-
-        handle.addEventListener("mousedown", onMouseDown);
-        listeners.push(() => handle.removeEventListener("mousedown", onMouseDown));
-      }}
-
-      const xHandles = Array.from(chart.querySelectorAll(".draglayer .ewdrag"));
-      for (const handle of xHandles) {{
-        const onMouseEnter = () => handle.classList.add("is-hovering");
-        const onMouseLeave = () => handle.classList.remove("is-hovering");
-        handle.addEventListener("mouseenter", onMouseEnter);
-        handle.addEventListener("mouseleave", onMouseLeave);
-        listeners.push(() => handle.removeEventListener("mouseenter", onMouseEnter));
-        listeners.push(() => handle.removeEventListener("mouseleave", onMouseLeave));
-
-        const onMouseDown = (event) => {{
-          if (event.button !== 0) return;
-          event.preventDefault();
-          event.stopPropagation();
-          handle.classList.add("is-dragging");
-
-          const startX = event.clientX;
-          const [startFrom, startTo] = getCurrentTimeRange();
-          const startFromMs = new Date(startFrom).getTime();
-          const startToMs = new Date(startTo).getTime();
-          const startMid = (startFromMs + startToMs) / 2;
-          const startHalfRange = (startToMs - startFromMs) / 2;
-
-          const onMouseMove = (moveEvent) => {{
-            const dx = moveEvent.clientX - startX;
-            const factor = Math.max(0.08, 1 + dx * 0.006);
-            Plotly.relayout("chart", {{
-              "xaxis.range": [
-                new Date(startMid - startHalfRange * factor).toISOString(),
-                new Date(startMid + startHalfRange * factor).toISOString()
-              ]
-            }});
-          }};
-
-          const onMouseUp = () => {{
-            handle.classList.remove("is-dragging");
-            window.removeEventListener("mousemove", onMouseMove);
-            window.removeEventListener("mouseup", onMouseUp);
-          }};
-
-          window.addEventListener("mousemove", onMouseMove);
-          window.addEventListener("mouseup", onMouseUp);
-        }};
-
-        handle.addEventListener("mousedown", onMouseDown);
-        listeners.push(() => handle.removeEventListener("mousedown", onMouseDown));
+          handle.addEventListener("mousedown", onMouseDown);
+          listeners.push(() => handle.removeEventListener("mousedown", onMouseDown));
+        }}
       }}
 
       axisDragCleanup = () => {{
@@ -1204,37 +1252,72 @@ def render_chart_html(payload: ChartPayload) -> str:
         wheelPanCleanup();
         wheelPanCleanup = null;
       }}
-      const chart = document.getElementById("chart");
-      if (!chart) return;
+      const cleanups = [];
+      for (const chart of getPlotPanes()) {{
+        const chartId = chart.id;
+        if (!chartId || chart.classList.contains("hidden")) continue;
 
-      const onWheel = (event) => {{
-        if (!window.Plotly) return;
-        const target = event.target;
-        if (!(target instanceof Element) || !target.closest(".plotly, #chart")) return;
-        const [startValue, endValue] = getCurrentTimeRange();
-        const startMs = new Date(startValue).getTime();
-        const endMs = new Date(endValue).getTime();
-        if (!Number.isFinite(startMs) || !Number.isFinite(endMs) || endMs <= startMs) return;
+        const onWheel = (event) => {{
+          if (!window.Plotly) return;
+          const target = event.target;
+          if (!(target instanceof Element) || !target.closest(".plotly, [data-plot-pane='true']")) return;
+          setActivePane(chartId);
+          const [startValue, endValue] = getCurrentTimeRange();
+          const startMs = new Date(startValue).getTime();
+          const endMs = new Date(endValue).getTime();
+          if (!Number.isFinite(startMs) || !Number.isFinite(endMs) || endMs <= startMs) return;
 
-        const dominantDelta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
-        if (!dominantDelta) return;
+          const dominantDelta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+          if (!dominantDelta) return;
 
-        event.preventDefault();
-        const span = endMs - startMs;
-        const width = Math.max(chart.clientWidth, 300);
-        const shiftMs = dominantDelta * (span / width);
-        const [clampedStart, clampedEnd] = clampTimeRange(startMs + shiftMs, endMs + shiftMs);
+          event.preventDefault();
+          const span = endMs - startMs;
+          const width = Math.max(chart.clientWidth, 300);
+          const shiftMs = dominantDelta * (span / width);
+          const [clampedStart, clampedEnd] = clampTimeRange(startMs + shiftMs, endMs + shiftMs);
 
-        Plotly.relayout("chart", {{
-          "xaxis.range": [
+          applyTimeRange(
             new Date(clampedStart).toISOString(),
-            new Date(clampedEnd).toISOString()
-          ]
-        }});
-      }};
+            new Date(clampedEnd).toISOString(),
+          );
+        }};
 
-      chart.addEventListener("wheel", onWheel, {{ passive: false }});
-      wheelPanCleanup = () => chart.removeEventListener("wheel", onWheel);
+        chart.addEventListener("wheel", onWheel, {{ passive: false }});
+        cleanups.push(() => chart.removeEventListener("wheel", onWheel));
+      }}
+
+      wheelPanCleanup = () => {{
+        for (const cleanup of cleanups) cleanup();
+      }};
+    }}
+
+    function bindTimeRangeSync() {{
+      if (xSyncCleanup) {{
+        xSyncCleanup();
+        xSyncCleanup = null;
+      }}
+
+      const cleanups = [];
+      for (const chart of getPlotPanes()) {{
+        const chartId = chart.id;
+        if (!chartId || chart.classList.contains("hidden")) continue;
+
+        const syncHandler = (eventData) => {{
+          if (syncingTimeRange || !eventData) return;
+          const start = eventData["xaxis.range[0]"];
+          const end = eventData["xaxis.range[1]"];
+          if (!start || !end) return;
+          setActivePane(chartId);
+          applyTimeRange(String(start), String(end));
+        }};
+
+        chart.on?.("plotly_relayout", syncHandler);
+        cleanups.push(() => chart.removeListener?.("plotly_relayout", syncHandler));
+      }}
+
+      xSyncCleanup = () => {{
+        for (const cleanup of cleanups) cleanup();
+      }};
     }}
 
     function bindKeyboardShortcuts() {{
@@ -1329,6 +1412,7 @@ def render_chart_html(payload: ChartPayload) -> str:
       Plotly.react("chart", traces, layout, plotConfig()).then(() => {{
         bindAxisDragHandles();
         bindWheelPan();
+        bindTimeRangeSync();
       }});
     }}
 
@@ -1336,6 +1420,8 @@ def render_chart_html(payload: ChartPayload) -> str:
       const container = document.getElementById("fisher-chart");
       container.classList.toggle("hidden", !state.fisher);
       if (!state.fisher) return;
+      const layout = baseLayout(240);
+      layout.xaxis.range = getCurrentTimeRange();
       Plotly.react(
         "fisher-chart",
         [{{
@@ -1346,15 +1432,21 @@ def render_chart_html(payload: ChartPayload) -> str:
           name: "Fisher 50",
           line: {{ color: "#56b6c2", width: 2 }}
         }}],
-        baseLayout(240),
+        layout,
         plotConfig()
-      );
+      ).then(() => {{
+        bindAxisDragHandles();
+        bindWheelPan();
+        bindTimeRangeSync();
+      }});
     }}
 
     function renderMacdChart() {{
       const container = document.getElementById("macd-chart");
       container.classList.toggle("hidden", !state.macd);
       if (!state.macd) return;
+      const layout = baseLayout(240);
+      layout.xaxis.range = getCurrentTimeRange();
       Plotly.react(
         "macd-chart",
         [
@@ -1384,9 +1476,13 @@ def render_chart_html(payload: ChartPayload) -> str:
             line: {{ color: "#f6c85f", width: 2 }}
           }}
         ],
-        baseLayout(240),
+        layout,
         plotConfig()
-      );
+      ).then(() => {{
+        bindAxisDragHandles();
+        bindWheelPan();
+        bindTimeRangeSync();
+      }});
     }}
 
     function renderChart() {{

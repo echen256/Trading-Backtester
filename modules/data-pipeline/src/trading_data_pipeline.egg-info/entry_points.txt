@@ -1,7 +1,7 @@
 [console_scripts]
 trading-data-download = trading_data_pipeline.cli:main
 trading-data-download-cmc = trading_data_pipeline.coinmarketcap_downloader:main
-trading-data-fisher-adaptive = trading_data_pipeline.fisher_adaptive_macd:main
+trading-data-fisher-adaptive = trading_data_pipeline.strategies.fisher_adaptive_macd:main
 trading-data-pull = trading_data_pipeline.bigquery_pull:main
 trading-data-sync = trading_data_pipeline.bigquery_sync:main
 trading-data-visualize = trading_data_pipeline.visualize:main

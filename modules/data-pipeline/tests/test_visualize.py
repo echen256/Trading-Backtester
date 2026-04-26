@@ -78,3 +78,4 @@ def test_render_chart_html_includes_strategy_dropdown() -> None:
     assert 'id="strategy-stats-panel"' in html
     assert "Strategy Statistics" in html
     assert "Strategy overlay" in html
+    assert 'rangebreaks: [{ bounds: ["sat", "mon"] }]' in html
