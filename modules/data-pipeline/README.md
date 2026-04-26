@@ -13,7 +13,8 @@ pip install -e modules/data-pipeline
 ## Commands
 
 - `trading-data-download`: Download a single ticker or the entire watchlist and
-  save the CSV files under `modules/data-pipeline/data/<interval>`.
+  save the CSV files under `modules/data-pipeline/data/<interval>`. Supports
+  `--market stocks` and `--market indices`.
 - `trading-data-sync`: Upload the generated CSV files to a BigQuery table.
 - `trading-data-pull`: Pull one ticker from BigQuery into a local CSV archive.
 - `trading-data-download-cmc`: Download crypto OHLCV from CoinMarketCap into
@@ -30,7 +31,11 @@ defaults live under `modules/data-pipeline/config/`.
 ```bash
 trading-data-visualize AAPL D
 trading-data-visualize MU 1440 --no-open
+trading-data-download I:SPX --market indices --interval 1440
 ```
+
+For `--market indices`, the downloader uses Massive's indices aggregates
+endpoint and skips stock market-cap filtering.
 
 ## Reuse From Python
 

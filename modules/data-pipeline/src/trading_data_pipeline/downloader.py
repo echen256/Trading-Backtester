@@ -22,6 +22,7 @@ DEFAULT_DATA_DIR = PACKAGE_ROOT / "data"
 class DownloadSettings:
     """Controls interval, window sizes, and destination for downloads."""
 
+    market: str = "stocks"
     interval_minutes: int = 1440
     chunk_size_days: int = 30
     lookback_years: int = 5
@@ -55,7 +56,11 @@ class PolygonDownloader:
             if limit is not None and len(downloaded) >= limit:
                 break
             try:
-                if minimum_market_cap and not self._passes_market_cap(symbol, minimum_market_cap):
+                if (
+                    minimum_market_cap
+                    and resolved_settings.market == "stocks"
+                    and not self._passes_market_cap(symbol, minimum_market_cap)
+                ):
                     continue
                 result = self.download_symbol(symbol, settings=resolved_settings)
             except Exception as exc:
@@ -91,7 +96,13 @@ class PolygonDownloader:
         while current < end:
             window_end = min(current + chunk, end)
             try:
-                frame = self._fetch_range(symbol, current, window_end, resolved_settings.interval_minutes)
+                frame = self._fetch_range(
+                    symbol,
+                    current,
+                    window_end,
+                    resolved_settings.interval_minutes,
+                    market=resolved_settings.market,
+                )
             except Exception as exc:
                 print(
                     "[trading-data-pipeline] Error fetching "
@@ -127,7 +138,13 @@ class PolygonDownloader:
     ) -> pd.DataFrame:
         """Return an in-memory DataFrame for ad-hoc use (no persistence)."""
 
-        frame = self._fetch_range(symbol, start_date, end_date, interval_minutes)
+        frame = self._fetch_range(
+            symbol,
+            start_date,
+            end_date,
+            interval_minutes,
+            market=self._normalize_market("stocks", symbol),
+        )
         return frame
 
     def _fetch_range(
@@ -136,22 +153,67 @@ class PolygonDownloader:
         start_date: datetime,
         end_date: datetime,
         interval_minutes: int,
+        *,
+        market: str = "stocks",
     ) -> pd.DataFrame:
+        resolved_market = self._normalize_market(market, symbol)
         multiplier, timespan = self._interval_to_polygon(interval_minutes)
-        aggs = self.client.get_aggs(
-            symbol,
-            multiplier=multiplier,
-            timespan=timespan,
-            from_=start_date.strftime("%Y-%m-%d"),
-            to=end_date.strftime("%Y-%m-%d"),
-            limit=50000,
-        )
-        df = pd.DataFrame(aggs)
+        if resolved_market == "indices":
+            df = self._fetch_index_range(symbol, start_date, end_date, multiplier, timespan)
+        else:
+            aggs = self.client.get_aggs(
+                symbol,
+                multiplier=multiplier,
+                timespan=timespan,
+                from_=start_date.strftime("%Y-%m-%d"),
+                to=end_date.strftime("%Y-%m-%d"),
+                limit=50000,
+            )
+            df = pd.DataFrame(aggs)
         if df.empty:
             return df
         if "timestamp" in df.columns:
             df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms", utc=True)
             df.set_index("timestamp", inplace=True)
+        return df
+
+    def _fetch_index_range(
+        self,
+        symbol: str,
+        start_date: datetime,
+        end_date: datetime,
+        multiplier: int,
+        timespan: str,
+    ) -> pd.DataFrame:
+        url = (
+            f"https://api.polygon.io/v2/aggs/ticker/{symbol}/range/"
+            f"{multiplier}/{timespan}/{start_date:%Y-%m-%d}/{end_date:%Y-%m-%d}"
+        )
+        response = self.session.get(
+            url,
+            params={"apiKey": self.api_key, "limit": 50000},
+            timeout=30,
+        )
+        response.raise_for_status()
+        payload = response.json()
+        results = payload.get("results", [])
+        if not results:
+            return pd.DataFrame()
+
+        df = pd.DataFrame(results)
+        df.rename(
+            columns={
+                "o": "open",
+                "h": "high",
+                "l": "low",
+                "c": "close",
+                "t": "timestamp",
+                "v": "volume",
+                "vw": "vwap",
+                "n": "transactions",
+            },
+            inplace=True,
+        )
         return df
 
     def _passes_market_cap(self, symbol: str, minimum_market_cap: int, *, max_retries: int = 3) -> bool:
@@ -194,6 +256,12 @@ class PolygonDownloader:
     @staticmethod
     def _sanitize_symbol(symbol: str) -> str:
         return symbol.replace(":", "_").replace("/", "-")
+
+    @staticmethod
+    def _normalize_market(market: str, symbol: str) -> str:
+        if symbol.upper().startswith("I:"):
+            return "indices"
+        return market
 
 
 def download_historical_data(

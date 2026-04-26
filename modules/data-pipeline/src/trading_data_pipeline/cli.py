@@ -43,6 +43,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="Destination directory for CSV files (default: %(default)s)",
     )
     parser.add_argument(
+        "--market",
+        choices=("stocks", "indices"),
+        default="stocks",
+        help="Market to query from Massive/Polygon (default: %(default)s)",
+    )
+    parser.add_argument(
         "--interval",
         type=int,
         default=1440,
@@ -99,6 +105,7 @@ def main(argv: list[str] | None = None) -> None:
     config = load_download_config(args.config)
     downloader = PolygonDownloader()
     settings = DownloadSettings(
+        market=args.market,
         interval_minutes=args.interval,
         chunk_size_days=args.chunk_days,
         lookback_years=args.lookback_years,
