@@ -2,6 +2,7 @@ import { useRef, useState, useEffect, useReducer, useCallback } from 'react';
 import './App.css';
 import { CustomChart } from './components/CustomChart';
 import { Watchlist } from './components/Watchlist';
+import { TradeReviewApp } from './components/TradeReviewApp';
 
 
 interface PolygonData {
@@ -36,7 +37,7 @@ const BAR_LOOKBACK = 300;
 const defaultTicker = 'QQQ';
 const defaultTimeframe = '1d';
 
-function App() {
+function MarketChartApp() {
   const defaultEndDate = new Date().toISOString().split('T')[0];
   const defaultStartDate = new Date(Date.now() - BAR_LOOKBACK * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
   const chartContainerRef = useRef(null);
@@ -267,6 +268,14 @@ const ErrorAlert = (props: { error: string | null }) => {
     </div>
 
   )
+}
+
+function App() {
+  const view = new URLSearchParams(window.location.search).get('view');
+  if (view === 'trade-review') {
+    return <TradeReviewApp />;
+  }
+  return <MarketChartApp />;
 }
 
 export default App;

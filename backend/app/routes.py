@@ -12,7 +12,6 @@ import pandas as pd
 import json
 import io
 from trading_data_pipeline.downloader import download_historical_data
-from backtest import execute, save_backtest_results
 from config import DEFAULT_DATA_RANGE_YEARS, DATA_DIR, SUPPORTED_TIMEFRAMES
 # Supported timeframes
 TIMEFRAMES = {
@@ -240,6 +239,11 @@ def execute_backtest_route():
     - end_date: End date (required)
     """
     try:
+        try:
+            from backtest import execute, save_backtest_results
+        except ModuleNotFoundError as exc:
+            return jsonify({'error': f'Backtest module unavailable: {exc}'}), 501
+
         # Get query parameters
         strategy_name = request.args.get('strategy_name')
         ticker = request.args.get('ticker')

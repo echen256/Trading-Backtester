@@ -1,0 +1,3 @@
+[console_scripts]
+trading-parse-orders = trading_analysis.parse_orders:main
+trading-schwab-convert = trading_analysis.schwab.convert:main

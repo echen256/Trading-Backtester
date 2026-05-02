@@ -1,0 +1,113 @@
+---
+project_name: trading-backtester
+loglevel: info
+analyses:
+- analysis_name: backend-python
+  source_directory: __ROOT__/backend
+  git_directory: __ROOT__
+  only_permit_languages:
+  - py
+  only_permit_file_extensions:
+  - .py
+  ignore_directories_containing:
+  - venv
+  - __pycache__
+  file_scan:
+  - source_lines_of_code
+  - dependency_graph
+  - fan_in_out
+  - louvain_modularity
+  - tfidf
+  - ws_complexity
+  - git_metrics
+  export:
+  - directory: __ROOT__/reports/emerge/backend
+  - graphml
+  - json
+  - tabular_file
+  - tabular_console_overall
+  - d3
+- analysis_name: data-pipeline-python
+  source_directory: __ROOT__/modules/data-pipeline
+  git_directory: __ROOT__
+  only_permit_languages:
+  - py
+  only_permit_file_extensions:
+  - .py
+  ignore_directories_containing:
+  - .venv
+  - venv
+  - __pycache__
+  - data
+  - logs
+  - trading_data_pipeline.egg-info
+  - .pytest_cache
+  file_scan:
+  - source_lines_of_code
+  - dependency_graph
+  - fan_in_out
+  - louvain_modularity
+  - tfidf
+  - ws_complexity
+  - git_metrics
+  export:
+  - directory: __ROOT__/reports/emerge/data-pipeline
+  - graphml
+  - json
+  - tabular_file
+  - tabular_console_overall
+  - d3
+- analysis_name: analysis-python
+  source_directory: __ROOT__/modules/analysis
+  git_directory: __ROOT__
+  only_permit_languages:
+  - py
+  only_permit_file_extensions:
+  - .py
+  ignore_directories_containing:
+  - .venv
+  - venv
+  - __pycache__
+  - examples
+  - trading_analysis.egg-info
+  file_scan:
+  - source_lines_of_code
+  - dependency_graph
+  - fan_in_out
+  - louvain_modularity
+  - tfidf
+  - ws_complexity
+  - git_metrics
+  export:
+  - directory: __ROOT__/reports/emerge/analysis
+  - graphml
+  - json
+  - tabular_file
+  - tabular_console_overall
+  - d3
+- analysis_name: frontend-typescript
+  source_directory: __ROOT__/modules/frontend/src
+  git_directory: __ROOT__
+  only_permit_languages:
+  - typescript
+  only_permit_file_extensions:
+  - .ts
+  - .tsx
+  ignore_directories_containing:
+  - node_modules
+  - dist
+  file_scan:
+  - source_lines_of_code
+  - dependency_graph
+  - fan_in_out
+  - louvain_modularity
+  - tfidf
+  - ws_complexity
+  - git_metrics
+  export:
+  - directory: __ROOT__/reports/emerge/frontend
+  - graphml
+  - json
+  - tabular_file
+  - tabular_console_overall
+  - d3

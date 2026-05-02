@@ -20,3 +20,4 @@ modules/data-pipeline/logs/*.log
 **/backend/csv/**    */
 backend/csv/Webull_Orders_Records_Options.csv
 backend/csv/data.csv
+reports/emerge/

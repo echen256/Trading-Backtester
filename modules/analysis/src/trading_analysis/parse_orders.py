@@ -10,12 +10,18 @@ import shutil
 import statistics
 from collections import defaultdict, deque
 from dataclasses import dataclass, replace
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from pathlib import Path
-from typing import Iterable, List, Mapping, Sequence, Tuple
+from typing import Any, Iterable, List, Mapping, Sequence, Tuple
 
-import plotly.graph_objects as go
-from asciichart import asciichart as asciichart_module
+try:
+    import plotly.graph_objects as go
+except ModuleNotFoundError:  # Allows non-Plotly workflows such as JSON export.
+    go = None
+try:
+    from asciichart import asciichart as asciichart_module
+except ModuleNotFoundError:  # Allows non-ASCII-chart workflows such as JSON export.
+    asciichart_module = None
 from statistics import StatisticsError
 
 CONTRACT_MULTIPLIER = 100
@@ -93,6 +99,8 @@ class RealizedTrade:
     price: float
     pnl: float
     open_date: date
+    open_price: float
+    direction: str
 
 
 @dataclass
@@ -368,6 +376,8 @@ def compute_realized_trades(orders: Sequence[Order]) -> List[RealizedTrade]:
                         price=price,
                         pnl=pnl,
                         open_date=lot.opened,
+                        open_price=lot.price,
+                        direction="short",
                     )
                 )
                 lot.quantity -= close_qty
@@ -391,6 +401,8 @@ def compute_realized_trades(orders: Sequence[Order]) -> List[RealizedTrade]:
                         price=price,
                         pnl=pnl,
                         open_date=lot.opened,
+                        open_price=lot.price,
+                        direction="long",
                     )
                 )
                 lot.quantity -= close_qty
@@ -455,7 +467,13 @@ def summarize_daily_realized_pnl(trades: Sequence[RealizedTrade]) -> List[DayPnL
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("csv", type=Path, help="Input order CSV file")
+    parser.add_argument(
+        "csv",
+        nargs="?",
+        default=Path("orders.csv"),
+        type=Path,
+        help="Input order CSV file (default: ./orders.csv relative to cwd)",
+    )
     parser.add_argument("--symbol", help="Only keep orders matching the given symbol")
     parser.add_argument(
         "--quantity-multiplier",
@@ -482,6 +500,14 @@ def parse_args() -> argparse.Namespace:
         "--timeline-html",
         type=Path,
         help="Write an interactive Plotly timeline to the given HTML path",
+    )
+    parser.add_argument(
+        "--trade-review-json",
+        type=Path,
+        help=(
+            "Write a trade-review JSON payload for the frontend viewer. "
+            "A practical target is ../frontend/public/trade-review-data.json."
+        ),
     )
     parser.add_argument(
         "--start-date",
@@ -556,6 +582,9 @@ def render_contract_pnl_chart(
     symbol_rr: Mapping[str, float] | None = None,
 ) -> str:
     """Render a horizontal ASCII bar chart for contract PnL values."""
+
+    if asciichart_module is None:
+        raise RuntimeError("asciichart is required for rendering the ASCII PnL chart.")
 
     sorted_items = sorted(contract_pnl.items(), key=lambda kv: kv[1], reverse=True)
 
@@ -649,6 +678,71 @@ def describe_contract(name: str) -> str:
     else:
         strike_text = f"{strike_value:.3f}".rstrip("0").rstrip(".")
     return f"{symbol} {option_label} {strike_text}"
+
+
+def extract_underlying_symbol(symbol: str) -> str:
+    match = re.match(r"([A-Z]+)(\d{6})([CP])(\d{8})", symbol)
+    if match:
+        return match.group(1)
+    return symbol
+
+
+def build_trade_review_payload(csv_path: Path, trades: Sequence[RealizedTrade]) -> dict[str, object]:
+    grouped: dict[str, list[dict[str, object]]] = defaultdict(list)
+    for index, trade in enumerate(
+        sorted(
+            trades,
+            key=lambda item: (
+                item.trade_date.isoformat(),
+                extract_underlying_symbol(item.symbol),
+                item.open_date.isoformat(),
+                item.symbol,
+                item.pnl,
+            ),
+        ),
+        start=1,
+    ):
+        underlying = extract_underlying_symbol(trade.symbol)
+        chart_start = (trade.open_date - timedelta(days=10)).isoformat()
+        chart_end = (trade.trade_date + timedelta(days=10)).isoformat()
+        grouped[trade.trade_date.isoformat()].append(
+            {
+                "id": index,
+                "contract_symbol": trade.symbol,
+                "contract_label": describe_contract(trade.symbol),
+                "underlying_symbol": underlying,
+                "quantity": trade.quantity,
+                "direction": trade.direction,
+                "pnl": trade.pnl,
+                "open_date": trade.open_date.isoformat(),
+                "close_date": trade.trade_date.isoformat(),
+                "open_price": trade.open_price,
+                "close_price": trade.price,
+                "chart_start": chart_start,
+                "chart_end": chart_end,
+            }
+        )
+
+    days = [
+        {
+            "date": date_label,
+            "trade_count": len(grouped[date_label]),
+            "net_pnl": sum(float(trade["pnl"]) for trade in grouped[date_label]),
+            "trades": grouped[date_label],
+        }
+        for date_label in sorted(grouped.keys())
+    ]
+    return {
+        "source_csv": str(csv_path),
+        "generated_at": datetime.now().isoformat(),
+        "days": days,
+    }
+
+
+def write_trade_review_json(csv_path: Path, output_path: Path, trades: Sequence[RealizedTrade]) -> None:
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    payload = build_trade_review_payload(csv_path, trades)
+    output_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
 
 def _format_currency(value: float) -> str:
@@ -815,7 +909,9 @@ def run_interactive_report(day_entries: Sequence[DayPnL], symbol_chart: str | No
             print(f"Unknown command: {command}")
 
 
-def build_timeline_figure(day_entries: Sequence[DayPnL]) -> go.Figure:
+def build_timeline_figure(day_entries: Sequence[DayPnL]) -> Any:
+    if go is None:
+        raise RuntimeError("plotly is required for timeline HTML generation.")
     if not day_entries:
         raise ValueError("No realized PnL data available for plotting.")
 
@@ -852,7 +948,7 @@ def build_timeline_figure(day_entries: Sequence[DayPnL]) -> go.Figure:
     return fig
 
 
-def write_timeline_html(fig: go.Figure, output_path: Path, day_entries: Sequence[DayPnL]) -> None:
+def write_timeline_html(fig: Any, output_path: Path, day_entries: Sequence[DayPnL]) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     breakdown = {
         day.date_label: {
@@ -968,7 +1064,7 @@ def main() -> None:
 
     realized_trades: List[RealizedTrade] = []
     if analysis_orders and (
-        args.show_pnl_chart or args.interactive_report or args.timeline_html
+        args.show_pnl_chart or args.interactive_report or args.timeline_html or args.trade_review_json
     ):
         realized_trades = compute_realized_trades(analysis_orders)
 
@@ -1005,6 +1101,13 @@ def main() -> None:
             fig = build_timeline_figure(daily_summary)
             write_timeline_html(fig, args.timeline_html, daily_summary)
             print(f"Wrote realized PnL timeline to {args.timeline_html}")
+
+    if args.trade_review_json:
+        if not realized_trades:
+            print("No realized trades available to export for trade review.")
+        else:
+            write_trade_review_json(args.csv, args.trade_review_json, realized_trades)
+            print(f"Wrote trade review data to {args.trade_review_json}")
 
 
 if __name__ == "__main__":

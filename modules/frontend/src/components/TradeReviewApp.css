@@ -1,0 +1,131 @@
+.trade-review-app {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 360px minmax(0, 1fr);
+  gap: 20px;
+  padding: 20px;
+  background:
+    radial-gradient(circle at top left, rgba(29, 78, 216, 0.22), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(16, 185, 129, 0.18), transparent 24%),
+    #09111b;
+  color: #e8eef5;
+}
+
+.trade-review-sidebar,
+.trade-review-main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 0;
+}
+
+.trade-review-panel {
+  background: rgba(11, 18, 30, 0.88);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.24);
+}
+
+.trade-review-panel h1,
+.trade-review-panel h2 {
+  margin: 0 0 8px;
+}
+
+.trade-review-meta {
+  margin: 0;
+  color: #9db0c2;
+  font-size: 0.92rem;
+}
+
+.trade-review-toolbar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.trade-review-toolbar button,
+.trade-review-day-item,
+.trade-review-trade-item {
+  background: #132033;
+  color: #edf3fa;
+  border: 1px solid rgba(96, 165, 250, 0.24);
+}
+
+.trade-review-toolbar button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.trade-review-day-list,
+.trade-review-trade-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 260px;
+  overflow: auto;
+}
+
+.trade-review-day-item,
+.trade-review-trade-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 12px;
+  text-align: left;
+}
+
+.trade-review-day-item.active,
+.trade-review-trade-item.active {
+  background: linear-gradient(135deg, #1d4ed8, #0f766e);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.trade-review-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.trade-review-stats {
+  display: flex;
+  gap: 20px;
+}
+
+.trade-review-stats div {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.trade-review-stats span {
+  color: #9db0c2;
+  font-size: 0.85rem;
+}
+
+.trade-review-chart {
+  flex: 1;
+  min-height: 0;
+}
+
+.trade-review-error,
+.trade-review-error-inline {
+  color: #fca5a5;
+}
+
+@media (max-width: 1024px) {
+  .trade-review-app {
+    grid-template-columns: 1fr;
+  }
+
+  .trade-review-header {
+    flex-direction: column;
+  }
+
+  .trade-review-stats {
+    width: 100%;
+    justify-content: space-between;
+  }
+}

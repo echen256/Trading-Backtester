@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Architecture Diagram: modules/analysis</title>
+  <style>
+    :root {
+      --bg: #fcfaf6;
+      --panel: #fffdf8;
+      --ink: #182026;
+      --muted: #5c6975;
+      --accent: #1f4b73;
+      --line: #d8d2c7;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(180deg, #f5efe5 0%, var(--bg) 120px);
+      color: var(--ink);
+    }
+    main {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 32px 24px 48px;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 2rem;
+    }
+    .meta {
+      color: var(--muted);
+      margin-bottom: 24px;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 320px minmax(0, 1fr);
+      gap: 24px;
+      align-items: start;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 10px 30px rgba(24, 32, 38, 0.06);
+    }
+    ul {
+      margin: 8px 0 0;
+      padding-left: 20px;
+    }
+    details {
+      margin-bottom: 12px;
+    }
+    summary {
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .scope {
+      border-top: 1px solid var(--line);
+      padding-top: 12px;
+    }
+    .scope-body {
+      margin-top: 12px;
+    }
+    .graph {
+      width: 100%;
+      height: auto;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+      margin-bottom: 12px;
+    }
+    .function-graph {
+      background: #fffaf1;
+    }
+    .node-label {
+      font-size: 14px;
+      font-weight: 700;
+      fill: var(--ink);
+    }
+    .node-subtitle {
+      font-size: 12px;
+      fill: var(--muted);
+    }
+    .edge-label {
+      font-size: 12px;
+      text-anchor: middle;
+      fill: var(--muted);
+    }
+    .empty {
+      color: var(--muted);
+      font-style: italic;
+    }
+    .file-list {
+      margin-bottom: 16px;
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.92em;
+    }
+    @media (max-width: 980px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Architecture Diagram</h1>
+    <div class="meta">
+      <div><strong>Module:</strong> <code>modules/analysis</code></div>
+      <div><strong>Source files:</strong> 4 | <strong>Internal edges:</strong> 2</div>
+      <div><strong>Functions mapped:</strong> 50 | <strong>Function-call edges:</strong> 53</div>
+      <div><strong>How to use:</strong> expand a scope to see only that level's child graph, then keep drilling down.</div>
+    </div>
+    <div class="layout">
+      <aside class="panel">
+        <h2>Tree</h2>
+        <ul><li><details open><summary>Module root</summary><ul><li><details><summary>examples</summary><ul><li><details><summary>old-orders</summary><ul><li><details><summary>01-01-24-12-31-24</summary><ul></ul></details></li><li><details><summary>01-01-25-12-19-25</summary><ul></ul></details></li><li><details><summary>01-01-26-02-13-26</summary><ul></ul></details></li><li><details><summary>01-01-26-2-06-26</summary><ul></ul></details></li><li><details><summary>1-1-25-12-12-25</summary><ul></ul></details></li><li><details><summary>1-1-25-12-31-25</summary><ul></ul></details></li><li><details><summary>1-1-25-12-5-25</summary><ul></ul></details></li><li><details><summary>1-1-26-1-20-26</summary><ul></ul></details></li></ul></details></li><li><details><summary>schwab</summary><ul></ul></details></li></ul></details></li><li><details><summary>src</summary><ul><li><details><summary>trading_analysis</summary><ul><li><code>__init__.py</code></li><li><code>parse_orders.py</code></li><li><details><summary>schwab</summary><ul><li><code>__init__.py</code></li><li><code>convert.py</code></li></ul></details></li></ul></details></li></ul></details></li></ul></details></li></ul>
+      </aside>
+      <section class="panel">
+        <h2>Nested Graphs</h2>
+        <details class='scope' open><summary>Module root</summary><div class='scope-body'><svg viewBox='0 0 568 144' class='graph' role='img' aria-label='. dependency graph'><defs><marker id='arrow' markerWidth='10' markerHeight='10' refX='8' refY='3' orient='auto'><path d='M0,0 L0,6 L9,3 z' fill='#5d6d7e'></path></marker></defs><rect x='40' y='40' width='220' height='64' rx='12' fill='#d9e6f2' stroke='#1f4b73' stroke-width='2'></rect><text x='54' y='68' class='node-label'>examples</text><text x='54' y='88' class='node-subtitle'>directory</text><rect x='308' y='40' width='220' height='64' rx='12' fill='#d9e6f2' stroke='#1f4b73' stroke-width='2'></rect><text x='322' y='68' class='node-label'>src</text><text x='322' y='88' class='node-subtitle'>directory</text></svg><details class='scope'><summary>examples</summary><div class='scope-body'><svg viewBox='0 0 568 144' class='graph' role='img' aria-label='examples dependency graph'><defs><marker id='arrow' markerWidth='10' markerHeight='10' refX='8' refY='3' orient='auto'><path d='M0,0 L0,6 L9,3 z' fill='#5d6d7e'></path></marker></defs><rect x='40' y='40' width='220' height='64' rx='12' fill='#d9e6f2' stroke='#1f4b73' stroke-width='2'></rect><text x='54' y='68' class='node-label'>old-orders</text><text x='54' y='88' class='node-subtitle'>directory</text><rect x='308' y='40' width='220' height='64' rx='12' fill='#d9e6f2' stroke='#1f4b73' stroke-width='2'></rect><text x='322' y='68' class='node-label'>schwab</text><text x='322' y='88' class='node-subtitle'>directory</text></svg><details class='scope'><summary>examples/old-orders</summary><div class='scope-body'><svg viewBox='0 0 836 368' class='graph' role='img' aria-label='examples/old-orders dependency graph'><defs><marker id='arrow' markerWidth='10' markerHeight='10' refX='8' refY='3' orient='auto'><path d='M0,0 L0,6 L9,3 z' fill='#5d6d7e'></path></marker></defs><rect x='40' y='40' width='220' height='64' rx='12' fill='#d9e6f2' stroke='#1f4b73' stroke-width='2'></rect><text x='54' y='68' class='node-label'>01-01-24-12-31-24</text><text x='54' y='88' class='node-subtitle'>directory</text><rect x='308' y='40' width='220' height='64' rx='12' fill='#d9e6f2' stroke='#1f4b73' stroke-width='2'></rect><text x='322' y='68' class='node-label'>01-01-25-12-19-25</text><text x='322' y='88' class='node-subtitle'>directory</text><rect x='576' y='40' width='220' height='64' rx='12' fill='#d9e6f2' stroke='#1f4b73' stroke-width='2'></rect><text x='590' y='68' class='node-label'>01-01-26-02-13-26</text><text x='590' y='88' class='node-subtitle'>directory</text><rect x='40' y='152' width='220' height='64' rx='12' fill='#d9e6f2' stroke='#1f4b73' stroke-width='2'></rect><text x='54' y='180' class='node-label'>01-01-26-2-06-26</text><text x='54' y='200' class='node-subtitle'>directory</text><rect x='308' y='152' width='220' height='64' rx='12' fill='#d9e6f2' stroke='#1f4b73' stroke-width='2'></rect><text x='322' y='180' class='node-label'>1-1-25-12-12-25</text><text x='322' y='200' class='node-subtitle'>directory</text><rect x='576' y='152' width='220' height='64' rx='12' fill='#d9e6f2' stroke='#1f4b73' stroke-width='2'></rect><text x='590' y='180' class='node-label'>1-1-25-12-31-25</text><text x='590' y='200' class='node-subtitle'>directory</text><rect x='40' y='264' width='220' height='64' rx='12' fill='#d9e6f2' stroke='#1f4b73' stroke-width='2'></rect><text x='54' y='292' class='node-label'>1-1-25-12-5-25</text><text x='54' y='312' class='node-subtitle'>directory</text><rect x='308' y='264' width='220' height='64' rx='12' fill='#d9e6f2' stroke='#1f4b73' stroke-width='2'></rect><text x='322' y='292' class='node-label'>1-1-26-1-20-26</text><text x='322' y='312' class='node-subtitle'>directory</text></svg><details class='scope'><summary>examples/old-orders/01-01-24-12-31-24</summary><div class='scope-body'><p class='empty'>No supported source files below this scope.</p></div></details><details class='scope'><summary>examples/old-orders/01-01-25-12-19-25</summary><div class='scope-body'><p class='empty'>No supported source files below this scope.</p></div></details><details class='scope'><summary>examples/old-orders/01-01-26-02-13-26</summary><div class='scope-body'><p class='empty'>No supported source files below this scope.</p></div></details><details class='scope'><summary>examples/old-orders/01-01-26-2-06-26</summary><div class='scope-body'><p class='empty'>No supported source files below this scope.</p></div></details><details class='scope'><summary>examples/old-orders/1-1-25-12-12-25</summary><div class='scope-body'><p class='empty'>No supported source files below this scope.</p></div></details><details class='scope'><summary>examples/old-orders/1-1-25-12-31-25</summary><div class='scope-body'><p class='empty'>No supported source files below this scope.</p></div></details><details class='scope'><summary>examples/old-orders/1-1-25-12-5-25</summary><div class='scope-body'><p class='empty'>No supported source files below this scope.</p></div></details><details class='scope'><summary>examples/old-orders/1-1-26-1-20-26</summary><div class='scope-body'><p class='empty'>No supported source files below this scope.</p></div></details></div></details><details class='scope'><summary>examples/schwab</summary><div class='scope-body'><p class='empty'>No supported source files below this scope.</p></div></details></div></details><details class='scope'><summary>src</summary><div class='scope-body'><svg viewBox='0 0 300 144' class='graph' role='img' aria-label='src dependency graph'><defs><marker id='arrow' markerWidth='10' markerHeight='10' refX='8' refY='3' orient='auto'><path d='M0,0 L0,6 L9,3 z' fill='#5d6d7e'></path></marker></defs><rect x='40' y='40' width='220' height='64' rx='12' fill='#d9e6f2' stroke='#1f4b73' stroke-width='2'></rect><text x='54' y='68' class='node-label'>trading_analysis</text><text x='54' y='88' class='node-subtitle'>directory</text></svg><details class='scope'><summary>src/trading_analysis</summary><div class='scope-body'><svg viewBox='0 0 568 256' class='graph' role='img' aria-label='src/trading_analysis dependency graph'><defs><marker id='arrow' markerWidth='10' markerHeight='10' refX='8' refY='3' orient='auto'><path d='M0,0 L0,6 L9,3 z' fill='#5d6d7e'></path></marker></defs><rect x='40' y='40' width='220' height='64' rx='12' fill='#f4f1ea' stroke='#1f4b73' stroke-width='2'></rect><text x='54' y='68' class='node-label'>__init__.py</text><text x='54' y='88' class='node-subtitle'>py</text><rect x='308' y='40' width='220' height='64' rx='12' fill='#f4f1ea' stroke='#1f4b73' stroke-width='2'></rect><text x='322' y='68' class='node-label'>parse_orders.py</text><text x='322' y='88' class='node-subtitle'>py</text><rect x='40' y='152' width='220' height='64' rx='12' fill='#d9e6f2' stroke='#1f4b73' stroke-width='2'></rect><text x='54' y='180' class='node-label'>schwab</text><text x='54' y='200' class='node-subtitle'>directory</text></svg><div class='file-list'><strong>Files in this scope</strong><ul><li><code>src/trading_analysis/__init__.py</code></li><li><code>src/trading_analysis/parse_orders.py</code></li></ul></div><details class='scope'><summary>src/trading_analysis/schwab</summary><div class='scope-body'><svg viewBox='0 0 568 144' class='graph' role='img' aria-label='src/trading_analysis/schwab dependency graph'><defs><marker id='arrow' markerWidth='10' markerHeight='10' refX='8' refY='3' orient='auto'><path d='M0,0 L0,6 L9,3 z' fill='#5d6d7e'></path></marker></defs><rect x='40' y='40' width='220' height='64' rx='12' fill='#f4f1ea' stroke='#1f4b73' stroke-width='2'></rect><text x='54' y='68' class='node-label'>__init__.py</text><text x='54' y='88' class='node-subtitle'>py</text><rect x='308' y='40' width='220' height='64' rx='12' fill='#f4f1ea' stroke='#1f4b73' stroke-width='2'></rect><text x='322' y='68' class='node-label'>convert.py</text><text x='322' y='88' class='node-subtitle'>py</text></svg><div class='file-list'><strong>Files in this scope</strong><ul><li><code>src/trading_analysis/schwab/__init__.py</code></li><li><code>src/trading_analysis/schwab/convert.py</code></li></ul></div></div></details></div></details></div></details></div></details>
+      </section>
+    </div>
+    <script type="application/json" id="graph-summary">{&quot;module&quot;: &quot;modules/analysis&quot;, &quot;files&quot;: 4, &quot;edges&quot;: 2, &quot;functions&quot;: 50, &quot;function_edges&quot;: 53}</script>
+  </main>
+</body>
+</html>

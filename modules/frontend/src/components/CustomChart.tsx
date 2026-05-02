@@ -48,6 +48,14 @@ interface CustomChartProps {
     data: LineData[]
     options?: CustomPlotOptions
   }>
+  tradeMarkers?: Array<{
+    time: Time
+    position: "aboveBar" | "belowBar" | "inBar"
+    shape: "circle" | "square" | "arrowUp" | "arrowDown"
+    color: string
+    text?: string
+    id?: string
+  }>
 }
 
 export function CustomChart({
@@ -63,12 +71,14 @@ export function CustomChart({
   requestMore,
   onResetChart,
   customIndicators = [],
+  tradeMarkers = [],
 }: CustomChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null)
   const [chartCreated, setChartCreated] = useState(false)
   // Chart instance and series references
   const chartRef = useRef<any>(null)
   const candlestickSeriesRef = useRef<any>(null)
+  const markersApiRef = useRef<any>(null)
   const customSeriesRefs = useRef<any[]>([])
   const loadingRef = useRef(false)
   const [internalTicker, setInternalTicker] = useState<string>('')
@@ -126,6 +136,7 @@ export function CustomChart({
     // Store references
     chartRef.current = chart
     candlestickSeriesRef.current = candlestickSeries
+    markersApiRef.current = LightweightCharts.createSeriesMarkers(candlestickSeries, tradeMarkers)
  
     setChartCreated(true)
     const handleVisibleLogicalRangeChange = async () => {
@@ -168,6 +179,11 @@ export function CustomChart({
       chart.remove()
     }
   }, [width, height, theme, autosize, timeVisible])
+
+  useEffect(() => {
+    if (!markersApiRef.current) return
+    markersApiRef.current.setMarkers(tradeMarkers)
+  }, [tradeMarkers])
 
   
   useEffect(() => {
