@@ -3,21 +3,15 @@ from __future__ import annotations
 
 import argparse
 import csv
-import json
 import math
 import re
 import shutil
 import statistics
 from collections import defaultdict, deque
 from dataclasses import dataclass, replace
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 from pathlib import Path
-from typing import Any, Iterable, List, Mapping, Sequence, Tuple
-
-try:
-    import plotly.graph_objects as go
-except ModuleNotFoundError:  # Allows non-Plotly workflows such as JSON export.
-    go = None
+from typing import Iterable, List, Mapping, Sequence, Tuple
 try:
     from asciichart import asciichart as asciichart_module
 except ModuleNotFoundError:  # Allows non-ASCII-chart workflows such as JSON export.
@@ -516,21 +510,9 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--interactive-report",
-        action="store_true",
-        help="Launch an interactive ASCII timeline for realized PnL",
-    )
-    parser.add_argument(
-        "--timeline-html",
-        type=Path,
-        help="Write an interactive Plotly timeline to the given HTML path",
-    )
-    parser.add_argument(
-        "--trade-review-json",
-        type=Path,
-        help=(
-            "Write a trade-review JSON payload for the frontend viewer. "
-            "A practical target is ../frontend/public/trade-review-data.json."
-        ),
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Launch an interactive ASCII timeline for realized PnL (default: enabled)",
     )
     parser.add_argument(
         "--start-date",
@@ -710,64 +692,6 @@ def extract_underlying_symbol(symbol: str) -> str:
     return symbol
 
 
-def build_trade_review_payload(csv_path: Path, trades: Sequence[RealizedTrade]) -> dict[str, object]:
-    grouped: dict[str, list[dict[str, object]]] = defaultdict(list)
-    for index, trade in enumerate(
-        sorted(
-            trades,
-            key=lambda item: (
-                item.trade_date.isoformat(),
-                extract_underlying_symbol(item.symbol),
-                item.open_date.isoformat(),
-                item.symbol,
-                item.pnl,
-            ),
-        ),
-        start=1,
-    ):
-        underlying = extract_underlying_symbol(trade.symbol)
-        chart_start = (trade.open_date - timedelta(days=10)).isoformat()
-        chart_end = (trade.trade_date + timedelta(days=10)).isoformat()
-        grouped[trade.trade_date.isoformat()].append(
-            {
-                "id": index,
-                "contract_symbol": trade.symbol,
-                "contract_label": describe_contract(trade.symbol),
-                "underlying_symbol": underlying,
-                "quantity": trade.quantity,
-                "direction": trade.direction,
-                "pnl": trade.pnl,
-                "open_date": trade.open_date.isoformat(),
-                "close_date": trade.trade_date.isoformat(),
-                "open_price": trade.open_price,
-                "close_price": trade.price,
-                "chart_start": chart_start,
-                "chart_end": chart_end,
-            }
-        )
-
-    days = [
-        {
-            "date": date_label,
-            "trade_count": len(grouped[date_label]),
-            "net_pnl": sum(float(trade["pnl"]) for trade in grouped[date_label]),
-            "trades": grouped[date_label],
-        }
-        for date_label in sorted(grouped.keys())
-    ]
-    return {
-        "source_csv": str(csv_path),
-        "generated_at": datetime.now().isoformat(),
-        "days": days,
-    }
-
-
-def write_trade_review_json(csv_path: Path, output_path: Path, trades: Sequence[RealizedTrade]) -> None:
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    payload = build_trade_review_payload(csv_path, trades)
-    output_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
-
-
 def _format_currency(value: float) -> str:
     sign = "-" if value < 0 else "+"
     return f"{sign}${abs(value):,.2f}"
@@ -811,10 +735,10 @@ def _render_timeline_page(day_entries: Sequence[DayPnL], page: int, page_size: i
         lines.append(
             f"  Losers  {_format_currency(day.losers_total):>12}: {losers_bar or '(flat)'}"
         )
-        lines.append("")
+    lines.append("")
 
     lines.append(
-        "Navigation: [Enter day #] View | [N] Next page | [P] Previous page | [S] Symbol PnL | [Q] Quit"
+        "Navigation: [Enter day #] View | [N] Next page | [P] Previous page | [S] Symbol PnL | [T] Profitable timeline | [Q] Quit"
     )
     return "\n".join(lines)
 
@@ -844,22 +768,114 @@ def _render_day_detail(day_entries: Sequence[DayPnL], index: int) -> str:
     else:
         lines.append("  - None")
     lines.append("=" * 72)
-    lines.append("Navigation: [B] Back | [N] Next day | [P] Previous day | [S] Symbol PnL | [Q] Quit")
+    lines.append("Navigation: [B] Back | [N] Next day | [P] Previous day | [S] Symbol PnL | [T] Profitable timeline | [Q] Quit")
     return "\n".join(lines)
 
 
-def run_interactive_report(day_entries: Sequence[DayPnL], symbol_chart: str | None = None) -> None:
+def _render_symbol_trade_breakdown(symbol: str, trades: Sequence[RealizedTrade]) -> str:
+    total_pnl = sum(trade.pnl for trade in trades)
+    wins = sum(1 for trade in trades if trade.pnl > 0)
+    losses = sum(1 for trade in trades if trade.pnl < 0)
+    flats = len(trades) - wins - losses
+
+    lines: List[str] = []
+    lines.append("=" * 72)
+    lines.append(f"Trade Breakdown - {symbol}")
+    lines.append(f"Trades: {len(trades)}")
+    lines.append(f"Net PnL: {_format_currency(total_pnl)}")
+    lines.append(f"Wins: {wins} | Losses: {losses} | Flats: {flats}")
+    lines.append("-" * 72)
+    for index, trade in enumerate(
+        sorted(
+            trades,
+            key=lambda item: (
+                item.trade_date.isoformat(),
+                item.open_date.isoformat(),
+                item.symbol,
+                item.pnl,
+            ),
+        ),
+        start=1,
+    ):
+        lines.append("")
+        lines.append(f"[{index:03d}] {describe_contract(trade.symbol)}")
+        lines.append(f"  Direction : {trade.direction}")
+        lines.append(f"  Quantity  : {trade.quantity:g}")
+        lines.append(f"  Open      : {trade.open_date.isoformat()} @ {trade.open_price:.2f}")
+        lines.append(f"  Close     : {trade.trade_date.isoformat()} @ {trade.price:.2f}")
+        lines.append(f"  PnL       : {_format_currency(trade.pnl)}")
+        lines.append("  " + "-" * 66)
+    lines.append("")
+    lines.append("=" * 72)
+    lines.append("Navigation: [B] Back | [N] Next symbol | [P] Previous symbol | [F] Filter symbol | [Q] Quit")
+    return "\n".join(lines)
+
+
+def _render_all_trades(trades: Sequence[RealizedTrade]) -> str:
+    total_pnl = sum(trade.pnl for trade in trades)
+    wins = sum(1 for trade in trades if trade.pnl > 0)
+    losses = sum(1 for trade in trades if trade.pnl < 0)
+    flats = len(trades) - wins - losses
+
+    lines: List[str] = []
+    lines.append("=" * 72)
+    lines.append("All Trades")
+    lines.append(f"Trades: {len(trades)}")
+    lines.append(f"Net PnL: {_format_currency(total_pnl)}")
+    lines.append(f"Wins: {wins} | Losses: {losses} | Flats: {flats}")
+    lines.append("-" * 72)
+    for index, trade in enumerate(
+        sorted(
+            trades,
+            key=lambda item: (
+                item.open_date.isoformat(),
+                item.trade_date.isoformat(),
+                extract_underlying_symbol(item.symbol),
+                item.symbol,
+                item.pnl,
+            ),
+        ),
+        start=1,
+    ):
+        lines.append("")
+        lines.append(
+            f"[{index:03d}] {extract_underlying_symbol(trade.symbol)} | {describe_contract(trade.symbol)}"
+        )
+        lines.append(f"  Direction : {trade.direction}")
+        lines.append(f"  Quantity  : {trade.quantity:g}")
+        lines.append(f"  Open      : {trade.open_date.isoformat()} @ {trade.open_price:.2f}")
+        lines.append(f"  Close     : {trade.trade_date.isoformat()} @ {trade.price:.2f}")
+        lines.append(f"  PnL       : {_format_currency(trade.pnl)}")
+        lines.append("  " + "-" * 66)
+    lines.append("")
+    lines.append("=" * 72)
+    lines.append("Navigation: [B] Back | [Q] Quit")
+    return "\n".join(lines)
+
+
+def run_interactive_report(
+    day_entries: Sequence[DayPnL],
+    realized_trades: Sequence[RealizedTrade],
+    symbol_chart: str | None = None,
+) -> None:
     if not day_entries:
         print("No realized trades available to display.")
         return
+
+    trades_by_symbol: dict[str, List[RealizedTrade]] = defaultdict(list)
+    for trade in realized_trades:
+        trades_by_symbol[extract_underlying_symbol(trade.symbol)].append(trade)
 
     page = 0
     page_size = 20
     total_days = len(day_entries)
     total_pages = max(1, math.ceil(total_days / page_size))
-    view_mode = "timeline"
+    view_mode = "symbol" if symbol_chart else "timeline"
     selected_index = 0
     previous_view = "timeline"
+    selected_symbol: str | None = None
+    symbol_order = sorted(trades_by_symbol.keys())
+    selected_symbol_index = -1
 
     while True:
         if view_mode == "timeline":
@@ -881,6 +897,10 @@ def run_interactive_report(day_entries: Sequence[DayPnL], symbol_chart: str | No
                     view_mode = "symbol"
                 else:
                     print("Symbol PnL chart unavailable.")
+                continue
+            if command == "t":
+                previous_view = "timeline"
+                view_mode = "all-trades"
                 continue
             if command.isdigit():
                 idx = int(command) - 1
@@ -908,6 +928,10 @@ def run_interactive_report(day_entries: Sequence[DayPnL], symbol_chart: str | No
                 else:
                     print("Symbol PnL chart unavailable.")
                 continue
+            if command == "t":
+                previous_view = "detail"
+                view_mode = "all-trades"
+                continue
             if command == "n":
                 selected_index = (selected_index + 1) % total_days
                 continue
@@ -916,134 +940,81 @@ def run_interactive_report(day_entries: Sequence[DayPnL], symbol_chart: str | No
                 continue
             print(f"Unknown command: {command}")
         else:
-            print("=" * 72)
-            print("Symbol PnL Chart")
-            print(symbol_chart or "No data available.")
-            print("=" * 72)
-            print("Navigation: [B] Back | [Q] Quit")
-            command = input("Command: ").strip().lower()
-            if not command:
-                continue
-            if command == "q":
-                break
-            if command == "b":
-                view_mode = previous_view
-                continue
-            print(f"Unknown command: {command}")
-
-
-def build_timeline_figure(day_entries: Sequence[DayPnL]) -> Any:
-    if go is None:
-        raise RuntimeError("plotly is required for timeline HTML generation.")
-    if not day_entries:
-        raise ValueError("No realized PnL data available for plotting.")
-
-    dates = [day.date_label for day in day_entries]
-    winners = [day.winners_total for day in day_entries]
-    losers = [day.losers_total for day in day_entries]
-
-    fig = go.Figure()
-    fig.add_bar(
-        name="Winners",
-        x=dates,
-        y=winners,
-        marker_color="#2ca02c",
-        hovertemplate="%{x}<br>Winners: %{y:$,.2f}<extra></extra>",
-    )
-    fig.add_bar(
-        name="Losers",
-        x=dates,
-        y=losers,
-        marker_color="#d62728",
-        hovertemplate="%{x}<br>Losers: %{y:$,.2f}<extra></extra>",
-    )
-    fig.update_layout(
-        title="Daily Realized Contract PnL",
-        barmode="relative",
-        bargap=0.25,
-        template="plotly_white",
-        xaxis_title="Date",
-        yaxis_title="Realized PnL (USD)",
-        hovermode="x unified",
-        legend_title_text="",
-    )
-    fig.update_traces(marker_line_width=1, marker_line_color="#222")
-    return fig
-
-
-def write_timeline_html(fig: Any, output_path: Path, day_entries: Sequence[DayPnL]) -> None:
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    breakdown = {
-        day.date_label: {
-            "Winners": {
-                "total": day.winners_total,
-                "lines": [[summary, detail] for summary, detail in day.winners_lines],
-            },
-            "Losers": {
-                "total": day.losers_total,
-                "lines": [[summary, detail] for summary, detail in day.losers_lines],
-            },
-        }
-        for day in day_entries
-    }
-    breakdown_json = json.dumps(breakdown)
-    div_id = "daily-pnl-timeline"
-    post_script = f""";(function() {{
-  const pnlBreakdown = {breakdown_json};
-  const graphDiv = document.getElementById('{div_id}');
-  if (!graphDiv || typeof graphDiv.on !== 'function') {{
-    return;
-  }}
-  graphDiv.on('plotly_click', function(eventData) {{
-    if (!eventData.points || !eventData.points.length) {{
-      return;
-    }}
-    const point = eventData.points[0];
-    const date = point.x;
-    const traceName = point.data.name;
-    const dayData = pnlBreakdown[date];
-    const bucket = dayData ? dayData[traceName] : null;
-    if (!bucket) {{
-      window.alert(traceName + ' on ' + date + '\\n\\nNo trades recorded.');
-      return;
-    }}
-    const total = typeof bucket.total === 'number' ? bucket.total : 0;
-    const formatter = new Intl.NumberFormat('en-US', {{ style: 'currency', currency: 'USD' }});
-    const totalText = formatter.format(total);
-    let details = '';
-    const lines = Array.isArray(bucket.lines) ? bucket.lines : [];
-    if (lines.length === 0) {{
-      details = 'No trades recorded.';
-    }} else {{
-      for (const pair of lines) {{
-        if (Array.isArray(pair)) {{
-          if (pair[0]) {{
-            details += pair[0] + '\\n';
-          }}
-          if (pair[1]) {{
-            details += '  ' + pair[1] + '\\n';
-          }}
-        }} else if (typeof pair === 'string') {{
-          details += pair + '\\n';
-        }}
-      }}
-      details = details.trimEnd();
-    }}
-    let message = traceName + ' on ' + date + '\\nTotal: ' + totalText;
-    if (details) {{
-      message += '\\n\\n' + details;
-    }}
-    window.alert(message);
-  }});
-}})();
-"""
-    fig.write_html(
-        output_path,
-        include_plotlyjs="cdn",
-        full_html=True,
-        div_id=div_id,
-        post_script=post_script,
-    )
+            if view_mode == "symbol":
+                print("=" * 72)
+                print("Symbol PnL Chart")
+                print(symbol_chart or "No data available.")
+                print("=" * 72)
+                print("Navigation: [B] Back | [F] Filter symbol | [T] Profitable timeline | [Q] Quit")
+                command = input("Command: ").strip().lower()
+                if not command:
+                    continue
+                if command == "q":
+                    break
+                if command == "b":
+                    view_mode = previous_view
+                    continue
+                if command == "f":
+                    symbol_input = input("Symbol: ").strip().upper()
+                    if not symbol_input:
+                        continue
+                    if symbol_input not in trades_by_symbol:
+                        print(f"No trades found for symbol: {symbol_input}")
+                        continue
+                    selected_symbol = symbol_input
+                    selected_symbol_index = symbol_order.index(symbol_input)
+                    previous_view = "symbol"
+                    view_mode = "symbol-detail"
+                    continue
+                if command == "t":
+                    previous_view = "symbol"
+                    view_mode = "all-trades"
+                    continue
+                print(f"Unknown command: {command}")
+            elif view_mode == "symbol-detail":
+                print(_render_symbol_trade_breakdown(selected_symbol or "", trades_by_symbol.get(selected_symbol or "", [])))
+                command = input("Command: ").strip().lower()
+                if not command:
+                    continue
+                if command == "q":
+                    break
+                if command == "b":
+                    view_mode = previous_view
+                    continue
+                if command == "f":
+                    symbol_input = input("Symbol: ").strip().upper()
+                    if not symbol_input:
+                        continue
+                    if symbol_input not in trades_by_symbol:
+                        print(f"No trades found for symbol: {symbol_input}")
+                        continue
+                    selected_symbol = symbol_input
+                    selected_symbol_index = symbol_order.index(symbol_input)
+                    continue
+                if command == "n":
+                    if not symbol_order:
+                        continue
+                    selected_symbol_index = (selected_symbol_index + 1) % len(symbol_order)
+                    selected_symbol = symbol_order[selected_symbol_index]
+                    continue
+                if command == "p":
+                    if not symbol_order:
+                        continue
+                    selected_symbol_index = (selected_symbol_index - 1) % len(symbol_order)
+                    selected_symbol = symbol_order[selected_symbol_index]
+                    continue
+                print(f"Unknown command: {command}")
+            else:
+                print(_render_all_trades(realized_trades))
+                command = input("Command: ").strip().lower()
+                if not command:
+                    continue
+                if command == "q":
+                    break
+                if command == "b":
+                    view_mode = previous_view
+                    continue
+                print(f"Unknown command: {command}")
 
 
 def load_and_prepare_orders(args: argparse.Namespace) -> PreparedOrders:
@@ -1074,7 +1045,7 @@ def compute_analysis_outputs(
 ) -> AnalysisComputation:
     should_compute_trades = bool(
         analysis_orders
-        and (args.show_pnl_chart or args.interactive_report or args.timeline_html or args.trade_review_json)
+        and (args.show_pnl_chart or args.interactive_report)
     )
     realized_trades = compute_realized_trades(analysis_orders) if should_compute_trades else []
 
@@ -1092,7 +1063,7 @@ def compute_analysis_outputs(
                 symbol_chart_text = render_contract_pnl_chart(symbol_pnl, symbol_rr)
 
     daily_summary: List[DayPnL] | None = None
-    if args.interactive_report or args.timeline_html:
+    if args.interactive_report:
         daily_summary = summarize_daily_realized_pnl(realized_trades) if realized_trades else []
 
     return AnalysisComputation(
@@ -1134,7 +1105,11 @@ def main() -> None:
         if not computed.daily_summary:
             print("No realized trades available to display.")
         else:
-            run_interactive_report(computed.daily_summary, computed.symbol_chart_text)
+            run_interactive_report(
+                computed.daily_summary,
+                computed.realized_trades,
+                computed.symbol_chart_text,
+            )
 
 
 if __name__ == "__main__":
