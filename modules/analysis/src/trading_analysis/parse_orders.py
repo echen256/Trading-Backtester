@@ -25,6 +25,7 @@ except ModuleNotFoundError:  # Allows non-ASCII-chart workflows such as JSON exp
 from statistics import StatisticsError
 
 CONTRACT_MULTIPLIER = 100
+DEFAULT_ORDERS_CSV = Path(__file__).resolve().parents[2] / "order-data" / "orders.csv"
 
 
 # Column names used by ``orders.csv``
@@ -119,6 +120,25 @@ class PositionLot:
     opened: date
 
 
+@dataclass
+class PreparedOrders:
+    orders: List[Order]
+    analysis_orders: List[Order]
+    output_path: Path
+    start_date: date | None
+    end_date: date | None
+
+
+@dataclass
+class AnalysisComputation:
+    realized_trades: List[RealizedTrade]
+    contract_pnl: dict[str, float] | None
+    symbol_pnl: dict[str, float] | None
+    symbol_chart_text: str | None
+    symbol_rr: dict[str, float] | None
+    daily_summary: List[DayPnL] | None
+
+
 def _parse_numeric(value: str | None) -> float | None:
     """Parse broker-style numeric strings (optionally prefixed with '@')."""
 
@@ -202,10 +222,13 @@ def filter_orders_by_date(
 
 def load_orders(csv_path: Path) -> List[Order]:
     """Read orders from a CSV file."""
-
-    with csv_path.open(newline="", encoding="utf-8") as handle:
-        reader = csv.DictReader(handle)
-        return [Order.from_row(row) for row in reader]
+    try:
+        with csv_path.open(newline="", encoding="utf-8") as handle:
+            reader = csv.DictReader(handle)
+            return [Order.from_row(row) for row in reader]
+    except FileNotFoundError as exc:
+        resolved_path = csv_path.expanduser().resolve(strict=False)
+        raise FileNotFoundError(f"Could not find orders file: {resolved_path}") from exc
 
 
 def filter_orders(orders: Iterable[Order], *, symbol: str | None) -> List[Order]:
@@ -470,9 +493,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "csv",
         nargs="?",
-        default=Path("orders.csv"),
+        default=DEFAULT_ORDERS_CSV,
         type=Path,
-        help="Input order CSV file (default: ./orders.csv relative to cwd)",
+        help="Input order CSV file (default: modules/analysis/order-data/orders.csv)",
     )
     parser.add_argument("--symbol", help="Only keep orders matching the given symbol")
     parser.add_argument(
@@ -1022,6 +1045,65 @@ def write_timeline_html(fig: Any, output_path: Path, day_entries: Sequence[DayPn
         post_script=post_script,
     )
 
+
+def load_and_prepare_orders(args: argparse.Namespace) -> PreparedOrders:
+    orders = load_orders(args.csv)
+    orders = filter_orders(orders, symbol=args.symbol)
+    orders = scale_quantities(orders, args.quantity_multiplier)
+
+    output_path = args.output or args.csv
+    save_orders(orders, output_path)
+
+    start_date = _parse_iso_date(args.start_date)
+    end_date = _parse_iso_date(args.end_date)
+    if start_date and end_date and start_date > end_date:
+        raise ValueError("Start date must be on or before end date.")
+
+    analysis_orders = filter_orders_by_date(orders, start_date, end_date)
+    return PreparedOrders(
+        orders=orders,
+        analysis_orders=analysis_orders,
+        output_path=output_path,
+        start_date=start_date,
+        end_date=end_date,
+    )
+
+
+def compute_analysis_outputs(
+    analysis_orders: Sequence[Order], args: argparse.Namespace
+) -> AnalysisComputation:
+    should_compute_trades = bool(
+        analysis_orders
+        and (args.show_pnl_chart or args.interactive_report or args.timeline_html or args.trade_review_json)
+    )
+    realized_trades = compute_realized_trades(analysis_orders) if should_compute_trades else []
+
+    contract_pnl: dict[str, float] | None = None
+    symbol_pnl: dict[str, float] | None = None
+    symbol_chart_text: str | None = None
+    symbol_rr: dict[str, float] | None = None
+
+    if (args.show_pnl_chart or args.interactive_report) and realized_trades:
+        contract_pnl = aggregate_contract_pnl(realized_trades)
+        if contract_pnl:
+            symbol_pnl = analyze_symbols(contract_pnl)
+            symbol_rr = compute_symbol_avg_rr(realized_trades)
+            if symbol_pnl:
+                symbol_chart_text = render_contract_pnl_chart(symbol_pnl, symbol_rr)
+
+    daily_summary: List[DayPnL] | None = None
+    if args.interactive_report or args.timeline_html:
+        daily_summary = summarize_daily_realized_pnl(realized_trades) if realized_trades else []
+
+    return AnalysisComputation(
+        realized_trades=realized_trades,
+        contract_pnl=contract_pnl,
+        symbol_pnl=symbol_pnl,
+        symbol_chart_text=symbol_chart_text,
+        symbol_rr=symbol_rr,
+        daily_summary=daily_summary,
+    )
+
 def main() -> None:
     args = parse_args()
 
@@ -1040,74 +1122,19 @@ def main() -> None:
         return
     # -------------------------------------------
 
-    orders = load_orders(args.csv)
-    orders = filter_orders(orders, symbol=args.symbol)
-    orders = scale_quantities(orders, args.quantity_multiplier)
-
-    output_path = args.output or args.csv
-    save_orders(orders, output_path)
-
     try:
-        start_date = _parse_iso_date(args.start_date)
-        end_date = _parse_iso_date(args.end_date)
-        if start_date and end_date and start_date > end_date:
-            raise ValueError("Start date must be on or before end date.")
+        prepared = load_and_prepare_orders(args)
     except ValueError as exc:
         print(exc)
         return
 
-    analysis_orders = filter_orders_by_date(orders, start_date, end_date)
-
-    contract_pnl: dict[str, float] | None = None
-    symbol_pnl: dict[str, float] | None = None
-    symbol_chart_text: str | None = None
-
-    realized_trades: List[RealizedTrade] = []
-    if analysis_orders and (
-        args.show_pnl_chart or args.interactive_report or args.timeline_html or args.trade_review_json
-    ):
-        realized_trades = compute_realized_trades(analysis_orders)
-
-    symbol_rr: dict[str, float] | None = None
-    if (args.show_pnl_chart or args.interactive_report) and realized_trades:
-        contract_pnl = aggregate_contract_pnl(realized_trades)
-        if contract_pnl:
-            symbol_pnl = analyze_symbols(contract_pnl)
-            symbol_rr = compute_symbol_avg_rr(realized_trades)
-            if symbol_pnl:
-                symbol_chart_text = render_contract_pnl_chart(symbol_pnl, symbol_rr)
-
-    if args.show_pnl_chart:
-        if not symbol_chart_text:
-            print("No realized trades in the selected date range to analyze.")
-        else:
-            print("Symbol PnL:")
-            print(symbol_chart_text)
-
-    daily_summary: List[DayPnL] | None = None
-    if args.interactive_report or args.timeline_html:
-        daily_summary = summarize_daily_realized_pnl(realized_trades) if realized_trades else []
+    computed = compute_analysis_outputs(prepared.analysis_orders, args)
 
     if args.interactive_report:
-        if not daily_summary:
+        if not computed.daily_summary:
             print("No realized trades available to display.")
         else:
-            run_interactive_report(daily_summary, symbol_chart_text)
-
-    if args.timeline_html:
-        if not daily_summary:
-            print("No realized trades available to plot a timeline.")
-        else:
-            fig = build_timeline_figure(daily_summary)
-            write_timeline_html(fig, args.timeline_html, daily_summary)
-            print(f"Wrote realized PnL timeline to {args.timeline_html}")
-
-    if args.trade_review_json:
-        if not realized_trades:
-            print("No realized trades available to export for trade review.")
-        else:
-            write_trade_review_json(args.csv, args.trade_review_json, realized_trades)
-            print(f"Wrote trade review data to {args.trade_review_json}")
+            run_interactive_report(computed.daily_summary, computed.symbol_chart_text)
 
 
 if __name__ == "__main__":
