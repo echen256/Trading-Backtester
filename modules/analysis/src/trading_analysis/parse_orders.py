@@ -17,6 +17,8 @@ from .trade_timeline import run_interactive_report
 
 CONTRACT_MULTIPLIER = 100
 DEFAULT_ORDERS_CSV = Path(__file__).resolve().parents[2] / "order-data" / "orders.csv"
+WEBULL_OPTIONS_GLOB = "Webull_Orders_Records_Options*.csv"
+OPTION_CONTRACT_NAME_RE = re.compile(r"^[A-Z]{1,6}\d{6}[CP]\d{8}$")
 
 
 # Column names used by ``orders.csv``
@@ -93,6 +95,8 @@ class RealizedTrade:
     open_date: date
     open_price: float
     direction: str
+    trade_datetime: datetime | None = None
+    open_datetime: datetime | None = None
 
 
 @dataclass
@@ -109,6 +113,7 @@ class PositionLot:
     quantity: float
     price: float
     opened: date
+    opened_at: datetime | None = None
 
 
 @dataclass
@@ -225,10 +230,21 @@ def load_orders(csv_path: Path) -> List[Order]:
 def filter_orders(orders: Iterable[Order], *, symbol: str | None) -> List[Order]:
     """Return orders filtered by symbol when provided."""
 
+    def include_order(order: Order) -> bool:
+        name = order.name.strip().upper()
+        if not name:
+            return False
+        if "vertical" in order.symbol.lower() or "vertical" in order.name.lower():
+            return False
+        if not OPTION_CONTRACT_NAME_RE.fullmatch(name):
+            return False
+        return True
+
+    filtered = [order for order in orders if include_order(order)]
     if not symbol:
-        return list(orders)
+        return filtered
     symbol = symbol.lower()
-    return [order for order in orders if order.symbol.lower() == symbol]
+    return [order for order in filtered if order.symbol.lower() == symbol]
 
 
 def scale_quantities(orders: Iterable[Order], multiplier: float) -> List[Order]:
@@ -285,6 +301,27 @@ def save_to_archive(csv_path: Path, orders: Sequence[Order]) -> Path:
     dest = archive_dir / csv_path.name
     shutil.copy2(csv_path, dest)
     return dest
+
+
+def _find_latest_webull_options_csv() -> Path | None:
+    download_roots = [Path.home() / "Downloads"]
+    candidates: List[Path] = []
+    for root in download_roots:
+        if not root.exists():
+            continue
+        candidates.extend(path for path in root.rglob(WEBULL_OPTIONS_GLOB) if path.is_file())
+    if not candidates:
+        return None
+    return max(candidates, key=lambda path: path.stat().st_mtime)
+
+
+def _load_latest_webull_options_csv(csv_path: Path) -> Path | None:
+    source = _find_latest_webull_options_csv()
+    if source is None:
+        return None
+    csv_path.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(source, csv_path)
+    return source
 
 
 def _list_archives(csv_path: Path) -> List[Path]:
@@ -363,6 +400,7 @@ def compute_realized_trades(orders: Sequence[Order]) -> List[RealizedTrade]:
     for order in sorted_orders:
         if order.status.lower() != "filled":
             continue
+        trade_datetime = _parse_order_datetime(order.filled_time) or _parse_order_datetime(order.placed_time)
         trade_date = _order_trade_date(order)
         if trade_date is None:
             continue
@@ -392,6 +430,8 @@ def compute_realized_trades(orders: Sequence[Order]) -> List[RealizedTrade]:
                         open_date=lot.opened,
                         open_price=lot.price,
                         direction="short",
+                        trade_datetime=trade_datetime,
+                        open_datetime=lot.opened_at,
                     )
                 )
                 lot.quantity -= close_qty
@@ -400,7 +440,12 @@ def compute_realized_trades(orders: Sequence[Order]) -> List[RealizedTrade]:
                     instrument["short"].popleft()
             if remaining > 0:
                 instrument["long"].append(
-                    PositionLot(quantity=remaining, price=price, opened=trade_date)
+                    PositionLot(
+                        quantity=remaining,
+                        price=price,
+                        opened=trade_date,
+                        opened_at=trade_datetime,
+                    )
                 )
         elif side == "sell":
             while remaining > 0 and instrument["long"]:
@@ -417,6 +462,8 @@ def compute_realized_trades(orders: Sequence[Order]) -> List[RealizedTrade]:
                         open_date=lot.opened,
                         open_price=lot.price,
                         direction="long",
+                        trade_datetime=trade_datetime,
+                        open_datetime=lot.opened_at,
                     )
                 )
                 lot.quantity -= close_qty
@@ -425,7 +472,12 @@ def compute_realized_trades(orders: Sequence[Order]) -> List[RealizedTrade]:
                     instrument["long"].popleft()
             if remaining > 0:
                 instrument["short"].append(
-                    PositionLot(quantity=remaining, price=price, opened=trade_date)
+                    PositionLot(
+                        quantity=remaining,
+                        price=price,
+                        opened=trade_date,
+                        opened_at=trade_datetime,
+                    )
                 )
 
     return realized
@@ -495,6 +547,12 @@ def parse_args() -> argparse.Namespace:
         metavar="ARCHIVE",
         help="Load an archived orders CSV from old-orders/. "
         "Pass an archive name directly or omit to pick interactively.",
+    )
+    parser.add_argument(
+        "--load-webull",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="On startup, load the newest Webull options CSV from ~/Downloads into orders.csv (default: enabled).",
     )
     return parser.parse_args()
 
@@ -574,6 +632,11 @@ def main() -> None:
             print(f"Loaded archive into {result}")
         return
     # -------------------------------------------
+
+    if args.load_webull and args.csv == DEFAULT_ORDERS_CSV:
+        latest_webull = _load_latest_webull_options_csv(args.csv)
+        if latest_webull is not None:
+            print(f"Loaded latest Webull options CSV into {args.csv}: {latest_webull}")
 
     try:
         prepared = load_and_prepare_orders(args)

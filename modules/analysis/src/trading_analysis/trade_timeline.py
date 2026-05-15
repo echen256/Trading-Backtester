@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import math
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, time
 from typing import TYPE_CHECKING, List, Sequence
 
 from .daily_timeline import render_day_detail, render_timeline_page
@@ -311,10 +311,38 @@ def _analyze_trade_from_list(
         input("Press Enter to continue...")
         return
 
-    print("Fetching market data and building trade analysis...")
-    output_path = analyze_trade(ordered_trades[trade_index])
-    print(f"Opened trade analysis: {output_path}")
-    input("Press Enter to continue...")
+    while True:
+        trade = ordered_trades[trade_index]
+        print("Fetching market data and building trade analysis...")
+        output_path = analyze_trade(trade)
+        print(f"Opened trade analysis: {output_path}")
+        print(f"[{trade_index + 1:03d}/{len(ordered_trades):03d}] {extract_underlying_symbol(trade.symbol)} | {describe_contract(trade.symbol)}")
+        print(
+            f"Date: {trade.trade_date.isoformat()} | Open: {trade.open_date.isoformat()} | "
+            f"Contracts: {trade.quantity:g} | PnL: ${trade.pnl:,.2f}"
+        )
+        open_time_label = _format_trade_time_label(trade.open_datetime)
+        close_time_label = _format_trade_time_label(trade.trade_datetime)
+        if open_time_label or close_time_label:
+            print(
+                f"Opened at: {open_time_label or 'unknown'} | "
+                f"Closed at: {close_time_label or 'unknown'}"
+            )
+        timing_detail = describe_contract_timing(trade.symbol, trade.open_date)
+        if timing_detail:
+            print(f"Timing: {timing_detail}")
+        navigation = input(
+            "Trade loaded. Press Enter to return, 'a' for previous trade, or 'd' for next trade: "
+        ).strip().lower()
+        if not navigation:
+            return
+        if navigation == "a":
+            trade_index = (trade_index - 1) % len(ordered_trades)
+            continue
+        if navigation == "d":
+            trade_index = (trade_index + 1) % len(ordered_trades)
+            continue
+        print(f"Unknown command: {navigation}")
 
 
 def _sort_trade_list(trades: Sequence[RealizedTrade]) -> list[RealizedTrade]:
@@ -340,6 +368,23 @@ def _sort_symbol_trade_list(trades: Sequence[RealizedTrade]) -> list[RealizedTra
             item.pnl,
         ),
     )
+
+
+def _format_trade_time_label(value: datetime | None) -> str | None:
+    if value is None:
+        return None
+    return f"{value.strftime('%H:%M:%S')} ({_session_bucket(value)})"
+
+
+def _session_bucket(value: datetime) -> str:
+    current = value.time()
+    first_hour_end = time(10, 30)
+    last_hour_start = time(15, 0)
+    if current < first_hour_end:
+        return "first hour"
+    if current >= last_hour_start:
+        return "last hour"
+    return "middle"
 
 
 def _prompt_for_timeline_filter(day_entries: Sequence[DayPnL]) -> tuple[list[DayPnL], str | None]:
