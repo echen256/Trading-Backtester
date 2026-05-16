@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Iterable, List, Sequence, Tuple
 
 from .daily_timeline import summarize_daily_realized_pnl
+from .display_common import extract_contract_expiration
 from .symbol_pnl import analyze_symbols, compute_symbol_avg_rr, render_contract_pnl_chart
 from .trade_timeline import run_interactive_report
 

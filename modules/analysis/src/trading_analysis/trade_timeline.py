@@ -12,6 +12,7 @@ from .display_common import (
     extract_underlying_symbol,
     format_currency,
 )
+from .symbol_pnl import analyze_symbols, compute_symbol_avg_rr, render_contract_pnl_chart
 from .trade_review import analyze_trade
 
 if TYPE_CHECKING:
@@ -45,7 +46,7 @@ def render_symbol_trade_breakdown(symbol: str, trades: Sequence[RealizedTrade]) 
         lines.append("  " + "-" * 66)
     lines.append("")
     lines.append("=" * 72)
-    lines.append("Navigation: [B] Back | [N] Next symbol | [P] Previous symbol | [F] Filter symbol | [A] Analyze trade | [Q] Quit")
+    lines.append("Navigation: [B] Back | [R] Date range | [N] Next symbol | [P] Previous symbol | [F] Filter symbol | [A] Analyze trade | [Q] Quit")
     return "\n".join(lines)
 
 
@@ -76,7 +77,7 @@ def render_all_trades(trades: Sequence[RealizedTrade]) -> str:
         lines.append("  " + "-" * 66)
     lines.append("")
     lines.append("=" * 72)
-    lines.append("Navigation: [B] Back | [A] Analyze trade | [Q] Quit")
+    lines.append("Navigation: [B] Back | [R] Date range | [A] Analyze trade | [Q] Quit")
     return "\n".join(lines)
 
 
@@ -90,18 +91,20 @@ def run_interactive_report(
         return
 
     all_day_entries = list(day_entries)
+    all_realized_trades = list(realized_trades)
     visible_day_entries = list(day_entries)
-    trades_by_symbol: dict[str, List[RealizedTrade]] = defaultdict(list)
-    for trade in realized_trades:
-        trades_by_symbol[extract_underlying_symbol(trade.symbol)].append(trade)
+    visible_realized_trades = list(realized_trades)
+    trades_by_symbol, symbol_order, current_symbol_chart = _build_symbol_context(
+        visible_realized_trades,
+        fallback_chart=symbol_chart,
+    )
 
     page = 0
     page_size = 20
-    view_mode = "symbol" if symbol_chart else "timeline"
+    view_mode = "symbol" if current_symbol_chart else "timeline"
     selected_index = 0
     previous_view = "timeline"
     selected_symbol: str | None = None
-    symbol_order = sorted(trades_by_symbol.keys())
     selected_symbol_index = -1
     timeline_filter_label: str | None = None
 
@@ -136,7 +139,7 @@ def run_interactive_report(
                 page = (page - 1) % total_pages
                 continue
             if command == "s":
-                if symbol_chart:
+                if current_symbol_chart:
                     previous_view = "timeline"
                     view_mode = "symbol"
                 else:
@@ -146,10 +149,21 @@ def run_interactive_report(
                 previous_view = "timeline"
                 view_mode = "all-trades"
                 continue
-            if command == "f":
-                filtered_entries, filter_label = _prompt_for_timeline_filter(all_day_entries)
-                visible_day_entries = filtered_entries
-                timeline_filter_label = filter_label
+            if command == "r":
+                (
+                    visible_day_entries,
+                    visible_realized_trades,
+                    timeline_filter_label,
+                ) = _prompt_for_global_date_filter(all_day_entries, all_realized_trades)
+                trades_by_symbol, symbol_order, current_symbol_chart = _build_symbol_context(
+                    visible_realized_trades,
+                    fallback_chart=symbol_chart,
+                )
+                if selected_symbol and selected_symbol not in trades_by_symbol:
+                    selected_symbol = None
+                    selected_symbol_index = -1
+                    if view_mode == "symbol-detail":
+                        view_mode = "symbol"
                 page = 0
                 selected_index = 0
                 continue
@@ -178,7 +192,7 @@ def run_interactive_report(
                 view_mode = "timeline"
                 continue
             if command == "s":
-                if symbol_chart:
+                if current_symbol_chart:
                     previous_view = "detail"
                     view_mode = "symbol"
                 else:
@@ -187,6 +201,23 @@ def run_interactive_report(
             if command == "t":
                 previous_view = "detail"
                 view_mode = "all-trades"
+                continue
+            if command == "r":
+                (
+                    visible_day_entries,
+                    visible_realized_trades,
+                    timeline_filter_label,
+                ) = _prompt_for_global_date_filter(all_day_entries, all_realized_trades)
+                trades_by_symbol, symbol_order, current_symbol_chart = _build_symbol_context(
+                    visible_realized_trades,
+                    fallback_chart=symbol_chart,
+                )
+                page = 0
+                selected_index = 0
+                if selected_symbol and selected_symbol not in trades_by_symbol:
+                    selected_symbol = None
+                    selected_symbol_index = -1
+                view_mode = "timeline"
                 continue
             if command == "n":
                 selected_index = (selected_index + 1) % total_days
@@ -199,9 +230,9 @@ def run_interactive_report(
             if view_mode == "symbol":
                 print("=" * 72)
                 print("Symbol PnL Chart")
-                print(symbol_chart or "No data available.")
+                print(current_symbol_chart or "No data available.")
                 print("=" * 72)
-                print("Navigation: [B] Back | [F] Filter symbol | [T] Profitable timeline | [Q] Quit")
+                print("Navigation: [B] Back | [F] Filter symbol | [R] Date range | [T] Profitable timeline | [Q] Quit")
                 command = input("Command: ").strip().lower()
                 if not command:
                     continue
@@ -226,6 +257,22 @@ def run_interactive_report(
                     previous_view = "symbol"
                     view_mode = "all-trades"
                     continue
+                if command == "r":
+                    (
+                        visible_day_entries,
+                        visible_realized_trades,
+                        timeline_filter_label,
+                    ) = _prompt_for_global_date_filter(all_day_entries, all_realized_trades)
+                    trades_by_symbol, symbol_order, current_symbol_chart = _build_symbol_context(
+                        visible_realized_trades,
+                        fallback_chart=symbol_chart,
+                    )
+                    page = 0
+                    selected_index = 0
+                    if selected_symbol and selected_symbol not in trades_by_symbol:
+                        selected_symbol = None
+                        selected_symbol_index = -1
+                    continue
                 print(f"Unknown command: {command}")
             elif view_mode == "symbol-detail":
                 current_symbol_trades = trades_by_symbol.get(selected_symbol or "", [])
@@ -248,6 +295,23 @@ def run_interactive_report(
                     selected_symbol = symbol_input
                     selected_symbol_index = symbol_order.index(symbol_input)
                     continue
+                if command == "r":
+                    (
+                        visible_day_entries,
+                        visible_realized_trades,
+                        timeline_filter_label,
+                    ) = _prompt_for_global_date_filter(all_day_entries, all_realized_trades)
+                    trades_by_symbol, symbol_order, current_symbol_chart = _build_symbol_context(
+                        visible_realized_trades,
+                        fallback_chart=symbol_chart,
+                    )
+                    page = 0
+                    selected_index = 0
+                    if selected_symbol and selected_symbol not in trades_by_symbol:
+                        selected_symbol = None
+                        selected_symbol_index = -1
+                        view_mode = "symbol"
+                    continue
                 if command == "n":
                     if not symbol_order:
                         continue
@@ -269,7 +333,7 @@ def run_interactive_report(
                     continue
                 print(f"Unknown command: {command}")
             else:
-                print(render_all_trades(realized_trades))
+                print(render_all_trades(visible_realized_trades))
                 command = input("Command: ").strip().lower()
                 if not command:
                     continue
@@ -278,9 +342,22 @@ def run_interactive_report(
                 if command == "b":
                     view_mode = previous_view
                     continue
+                if command == "r":
+                    (
+                        visible_day_entries,
+                        visible_realized_trades,
+                        timeline_filter_label,
+                    ) = _prompt_for_global_date_filter(all_day_entries, all_realized_trades)
+                    trades_by_symbol, symbol_order, current_symbol_chart = _build_symbol_context(
+                        visible_realized_trades,
+                        fallback_chart=symbol_chart,
+                    )
+                    page = 0
+                    selected_index = 0
+                    continue
                 if command == "a":
                     try:
-                        _analyze_trade_from_list(realized_trades, sorter=_sort_trade_list)
+                        _analyze_trade_from_list(visible_realized_trades, sorter=_sort_trade_list)
                     except Exception as exc:
                         print(exc)
                         input("Press Enter to continue...")
@@ -387,17 +464,20 @@ def _session_bucket(value: datetime) -> str:
     return "middle"
 
 
-def _prompt_for_timeline_filter(day_entries: Sequence[DayPnL]) -> tuple[list[DayPnL], str | None]:
+def _prompt_for_global_date_filter(
+    day_entries: Sequence[DayPnL],
+    realized_trades: Sequence[RealizedTrade],
+) -> tuple[list[DayPnL], list[RealizedTrade], str | None]:
     start_text = input("Start date YYYY-MM-DD (blank to clear filter): ").strip()
     if not start_text:
-        return list(day_entries), None
+        return list(day_entries), list(realized_trades), None
 
     try:
         start_date = datetime.strptime(start_text, "%Y-%m-%d").date()
     except ValueError:
         print(f"Invalid start date: {start_text}")
         input("Press Enter to continue...")
-        return list(day_entries), None
+        return list(day_entries), list(realized_trades), None
 
     end_text = input("End date YYYY-MM-DD (blank to use start date): ").strip()
     if end_text:
@@ -406,26 +486,53 @@ def _prompt_for_timeline_filter(day_entries: Sequence[DayPnL]) -> tuple[list[Day
         except ValueError:
             print(f"Invalid end date: {end_text}")
             input("Press Enter to continue...")
-            return list(day_entries), None
+            return list(day_entries), list(realized_trades), None
     else:
         end_date = start_date
 
     if start_date > end_date:
         print("Start date must be on or before end date.")
         input("Press Enter to continue...")
-        return list(day_entries), None
+        return list(day_entries), list(realized_trades), None
 
     filtered_entries = [
         entry
         for entry in day_entries
         if start_date <= datetime.strptime(entry.date_label, "%Y-%m-%d").date() <= end_date
     ]
+    filtered_trades = [
+        trade
+        for trade in realized_trades
+        if start_date <= trade.trade_date <= end_date
+    ]
     filter_label = (
         start_date.isoformat()
         if start_date == end_date
         else f"{start_date.isoformat()} to {end_date.isoformat()}"
     )
-    if not filtered_entries:
+    if not filtered_entries and not filtered_trades:
         print(f"No timeline entries found for {filter_label}.")
         input("Press Enter to continue...")
-    return filtered_entries, filter_label
+    return filtered_entries, filtered_trades, filter_label
+
+
+def _build_symbol_context(
+    trades: Sequence[RealizedTrade],
+    *,
+    fallback_chart: str | None = None,
+) -> tuple[dict[str, List[RealizedTrade]], list[str], str | None]:
+    trades_by_symbol: dict[str, List[RealizedTrade]] = defaultdict(list)
+    for trade in trades:
+        trades_by_symbol[extract_underlying_symbol(trade.symbol)].append(trade)
+    symbol_order = sorted(trades_by_symbol.keys())
+    if not trades:
+        return trades_by_symbol, symbol_order, None
+    contract_pnl: dict[str, float] = {}
+    for trade in trades:
+        contract_pnl[trade.symbol] = contract_pnl.get(trade.symbol, 0.0) + trade.pnl
+    if not contract_pnl:
+        return trades_by_symbol, symbol_order, fallback_chart
+    symbol_pnl = analyze_symbols(contract_pnl)
+    symbol_rr = compute_symbol_avg_rr(trades)
+    chart_text = render_contract_pnl_chart(symbol_pnl, symbol_rr) if symbol_pnl else fallback_chart
+    return trades_by_symbol, symbol_order, chart_text
