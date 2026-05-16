@@ -7,7 +7,7 @@ from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
 DEFAULT_INPUT_PATH = (
-    REPO_ROOT / "modules" / "analysis" / "order-data" / "trade-hold-review-2025-01-01-to-2026-04-29.json"
+    REPO_ROOT / "modules" / "analysis" / "order-data" / "trade-hold-review-2025-01-01-to-2026-05-15.json"
 )
 
 

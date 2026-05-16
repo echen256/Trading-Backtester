@@ -22,7 +22,7 @@ POLYGON_API_BASE_URL = "https://api.polygon.io/v2/aggs/ticker"
 REPO_ROOT = Path(__file__).resolve().parents[4]
 DEFAULT_ENV_PATH = REPO_ROOT / ".env"
 DEFAULT_OUTPUT_PATH = (
-    REPO_ROOT / "modules" / "analysis" / "order-data" / "trade-hold-review-2025-01-01-to-2026-04-29.json"
+    REPO_ROOT / "modules" / "analysis" / "order-data" / "trade-hold-review-2025-01-01-to-2026-05-15.json"
 )
 
 
@@ -45,7 +45,7 @@ class LaterOutcome:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Export trade profitability review JSON.")
     parser.add_argument("--start-date", default="2025-01-01", help="Inclusive trade open/close filter start date (YYYY-MM-DD)")
-    parser.add_argument("--end-date", default="2026-04-29", help="Inclusive trade open/close filter end date (YYYY-MM-DD)")
+    parser.add_argument("--end-date", default="2026-05-15", help="Inclusive trade open/close filter end date (YYYY-MM-DD)")
     parser.add_argument("--csv", type=Path, default=DEFAULT_ORDERS_CSV, help="Orders CSV path")
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT_PATH, help="JSON output path")
     parser.add_argument("--throttle-seconds", type=float, default=0.0, help="Delay between Polygon requests")

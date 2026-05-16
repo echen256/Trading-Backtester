@@ -17,6 +17,7 @@ dependencies = [
 [project.scripts]
 trading-parse-orders = "trading_analysis.parse_orders:main"
 trading-schwab-convert = "trading_analysis.schwab.convert:main"
+trading-bucket-analysis = "trading_analysis.bucket_analysis:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/trading_analysis"]
