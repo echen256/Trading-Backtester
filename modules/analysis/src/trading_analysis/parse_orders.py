@@ -57,7 +57,7 @@ class Order:
     @classmethod
     def from_row(cls, row: dict[str, str]) -> "Order":
         return cls(
-            name=row.get("Name", ""),
+            name=row.get("Name", "") or row.get("Symbol", ""),
             symbol=row.get("Symbol", ""),
             side=row.get("Side", ""),
             status=row.get("Status", ""),
@@ -481,6 +481,28 @@ def compute_realized_trades(orders: Sequence[Order]) -> List[RealizedTrade]:
                     )
                 )
 
+    today = date.today()
+    for symbol, instrument in positions.items():
+        expiry = extract_contract_expiration(symbol)
+        if expiry is None or expiry >= today:
+            continue
+        for lot in instrument["long"]:
+            pnl = -lot.price * lot.quantity * CONTRACT_MULTIPLIER
+            realized.append(
+                RealizedTrade(
+                    trade_date=expiry,
+                    symbol=symbol,
+                    quantity=lot.quantity,
+                    price=0.0,
+                    pnl=pnl,
+                    open_date=lot.opened,
+                    open_price=lot.price,
+                    direction="long",
+                    trade_datetime=datetime.combine(expiry, datetime.min.time()),
+                    open_datetime=lot.opened_at,
+                )
+            )
+
     return realized
 
 
@@ -553,9 +575,45 @@ def parse_args() -> argparse.Namespace:
         "--load-webull",
         action=argparse.BooleanOptionalAction,
         default=True,
-        help="On startup, load the newest Webull options CSV from ~/Downloads into orders.csv (default: enabled).",
+        help="If the default orders.csv is missing, load the newest Webull options CSV from ~/Downloads into it (default: enabled).",
+    )
+    parser.add_argument(
+        "--merge-archives",
+        action="store_true",
+        help="Merge all archived orders into orders.csv, recovering trades missing from the active file.",
     )
     return parser.parse_args()
+
+
+def merge_archives(csv_path: Path) -> int:
+    """Merge all archived orders into *csv_path*, deduplicating by placed_time key.
+
+    Returns the number of net-new rows added.
+    """
+    current = load_orders(csv_path)
+    seen: set[tuple[str, str, str]] = {
+        (o.symbol, o.side.lower(), o.placed_time) for o in current
+    }
+    added: List[Order] = []
+    for archive_dir in _list_archives(csv_path):
+        archive_file = archive_dir / csv_path.name
+        if not archive_file.exists():
+            continue
+        for order in load_orders(archive_file):
+            key = (order.symbol, order.side.lower(), order.placed_time)
+            if key not in seen:
+                seen.add(key)
+                added.append(order)
+    if added:
+        merged = list(current) + added
+        merged.sort(
+            key=lambda o: _parse_order_datetime(o.filled_time)
+            or _parse_order_datetime(o.placed_time)
+            or datetime.min,
+            reverse=True,
+        )
+        save_orders(merged, csv_path)
+    return len(added)
 
 
 def load_and_prepare_orders(args: argparse.Namespace) -> PreparedOrders:
@@ -632,12 +690,17 @@ def main() -> None:
         if result:
             print(f"Loaded archive into {result}")
         return
+
+    if args.merge_archives:
+        added = merge_archives(args.csv)
+        print(f"Merged archives into {args.csv}: {added} new rows added.")
+        return
     # -------------------------------------------
 
-    if args.load_webull and args.csv == DEFAULT_ORDERS_CSV:
+    if args.load_webull and args.csv == DEFAULT_ORDERS_CSV and not args.csv.exists():
         latest_webull = _load_latest_webull_options_csv(args.csv)
         if latest_webull is not None:
-            print(f"Loaded latest Webull options CSV into {args.csv}: {latest_webull}")
+            print(f"orders.csv not found. Loaded latest Webull options CSV into {args.csv}: {latest_webull}")
 
     try:
         prepared = load_and_prepare_orders(args)
