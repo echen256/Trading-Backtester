@@ -5,7 +5,7 @@ import argparse
 import csv
 import re
 from collections import Counter, defaultdict, deque
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import date, datetime
 from pathlib import Path
 from typing import Deque, Iterable, Sequence
@@ -205,6 +205,19 @@ def filter_orders_by_date(
         if end_date and trade_date > end_date:
             continue
         filtered.append(order)
+    return filtered
+
+
+def filter_trades_by_close_date(
+    trades: Sequence[RealizedTrade], start_date: date | None, end_date: date | None
+) -> list[RealizedTrade]:
+    filtered: list[RealizedTrade] = []
+    for trade in trades:
+        if start_date and trade.trade_date < start_date:
+            continue
+        if end_date and trade.trade_date > end_date:
+            continue
+        filtered.append(trade)
     return filtered
 
 
@@ -589,29 +602,31 @@ def main() -> None:
 
     orders = load_orders(args.csv)
     orders = filter_orders(orders, symbol=args.symbol, instrument_type=args.instrument_type)
-    orders = filter_orders_by_date(orders, start_date, end_date)
+    orders = filter_orders_by_date(orders, None, end_date)
     result = analyze_orders(orders)
+    report_trades = filter_trades_by_close_date(result.realized_trades, start_date, end_date)
+    report_result = replace(result, realized_trades=report_trades)
 
     if args.summary:
-        _print_totals(result)
-    if result.realized_trades and not args.interactive_report:
-        _print_group("PnL By Underlying", aggregate_pnl(result.realized_trades, "underlying"), args.limit)
-        _print_group("PnL By Symbol", aggregate_pnl(result.realized_trades, "symbol"), args.limit)
-        _print_largest_trades(result.realized_trades, args.limit)
+        _print_totals(report_result)
+    if report_trades and not args.interactive_report:
+        _print_group("PnL By Underlying", aggregate_pnl(report_trades, "underlying"), args.limit)
+        _print_group("PnL By Symbol", aggregate_pnl(report_trades, "symbol"), args.limit)
+        _print_largest_trades(report_trades, args.limit)
     if not args.no_open_positions and (args.summary or not args.interactive_report):
         _print_open_positions(result, args.limit)
     if args.realized_output:
-        write_realized_csv(result.realized_trades, args.realized_output)
+        write_realized_csv(report_trades, args.realized_output)
         print(f"\nWrote realized trades to {args.realized_output}")
     if args.interactive_report:
         from .daily_timeline import summarize_daily_realized_pnl as summarize_timeline_pnl
         from .trade_timeline import run_interactive_report
 
-        day_entries = summarize_timeline_pnl(result.realized_trades)
+        day_entries = summarize_timeline_pnl(report_trades)
         run_interactive_report(
             day_entries,
-            result.realized_trades,
-            symbol_chart=_build_symbol_chart(result.realized_trades),
+            report_trades,
+            symbol_chart=_build_symbol_chart(report_trades),
         )
 
 

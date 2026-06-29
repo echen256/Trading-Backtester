@@ -38,7 +38,7 @@ import sys
 import time
 from decimal import Decimal, InvalidOperation
 from dataclasses import dataclass, field
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from threading import Event, Lock, Thread
 from typing import Any, Callable, Dict, List, Optional, Sequence
@@ -52,6 +52,7 @@ WEBULL_MAX_PAGE_SIZE = 100
 DEFAULT_ORDER_PAGE_SIZE = WEBULL_MAX_PAGE_SIZE
 WEBULL_ORDER_HISTORY_DELAY_SECONDS = 1.25
 WEBULL_RATE_LIMIT_BACKOFF_SECONDS = (2.0, 5.0, 10.0)
+WEBULL_ORDER_HISTORY_MAX_DAYS = 730
 DEFAULT_ORDERS_DIR = REPO_ROOT / "modules" / "analysis" / "order-data"
 DEFAULT_ANALYSIS_ORDERS_CSV = DEFAULT_ORDERS_DIR / "orders.csv"
 
@@ -179,6 +180,25 @@ def _webull_date_arg(raw_value: str) -> str:
         return _normalize_webull_date(raw_value)
     except ValueError as exc:
         raise argparse.ArgumentTypeError(str(exc)) from exc
+
+
+def _parse_webull_iso_date(value: str) -> date:
+    return datetime.strptime(value, "%Y-%m-%d").date()
+
+
+def _validate_order_history_date_range(start_date: str, end_date: str) -> None:
+    start = _parse_webull_iso_date(start_date)
+    end = _parse_webull_iso_date(end_date)
+    if start > end:
+        raise ValueError("Start date must be on or before end date.")
+
+    max_start = end - timedelta(days=WEBULL_ORDER_HISTORY_MAX_DAYS)
+    if start < max_start:
+        raise ValueError(
+            "Webull order history only supports about two years per request. "
+            f"Requested {start.isoformat()} to {end.isoformat()} "
+            f"({(end - start).days} days); use {max_start.isoformat()} or later."
+        )
 
 
 def _default_start_date() -> str:
@@ -466,6 +486,7 @@ class WebullBridge:
         page_size = _validate_order_page_size(page_size)
         start_date = _normalize_webull_date(start_date)
         end_date = _normalize_webull_date(end_date)
+        _validate_order_history_date_range(start_date, end_date)
 
         self._ensure_clients()
         account_id = self.resolve_account_id()
@@ -893,6 +914,12 @@ def main(argv: Sequence[str] | None = None) -> None:
             f"({config.endpoint}); results are not live brokerage data.",
             file=sys.stderr,
         )
+
+    if args.command in {"orders", "export-csv", "sync-analysis", "trade-hold-review"}:
+        try:
+            _validate_order_history_date_range(args.start_date, args.end_date)
+        except ValueError as exc:
+            parser.error(str(exc))
 
     bridge = WebullBridge(config)
 

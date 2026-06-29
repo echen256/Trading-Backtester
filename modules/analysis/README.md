@@ -24,4 +24,15 @@ After installation these commands are available:
   `modules/analysis/order-data/orders.csv` using the analysis-ready option
   contract schema.
 
+For YTD analysis, fetch a warmup window inside Webull's roughly two-year order
+history limit, then report only the desired close-date window:
+
+```bash
+trading-webull-bridge orders --start-date 2025-01-01 --end-date 2026-06-29
+trading-parse-orders modules/analysis/order-data/webull_orders_2025-01-01_to_2026-06-29.csv --start-date 2026-01-01 --end-date 2026-06-29
+```
+
+The parser keeps earlier orders for cost basis and open lots, but filters
+realized PnL by close date.
+
 Sample CSV files remain under `examples/` for quick experiments.
