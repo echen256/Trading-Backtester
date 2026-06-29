@@ -482,6 +482,27 @@ def _print_open_positions(result: AnalysisResult, limit: int) -> None:
         print(f"{symbol:<24} {side:<5} qty={qty:g} avg={avg_price:g}")
 
 
+def _build_symbol_chart(trades: Sequence[RealizedTrade]) -> str | None:
+    if not trades:
+        return None
+    try:
+        from .symbol_pnl import analyze_symbols, compute_symbol_avg_rr, render_contract_pnl_chart
+    except Exception as exc:
+        print(f"Symbol chart unavailable: {exc}")
+        return None
+
+    contract_pnl = aggregate_pnl(trades, "symbol")
+    symbol_pnl = analyze_symbols(contract_pnl)
+    symbol_rr = compute_symbol_avg_rr(trades)
+    if not symbol_pnl:
+        return None
+    try:
+        return render_contract_pnl_chart(symbol_pnl, symbol_rr)
+    except Exception as exc:
+        print(f"Symbol chart unavailable: {exc}")
+        return None
+
+
 def write_realized_csv(trades: Sequence[RealizedTrade], output_path: Path) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     fieldnames = [
@@ -538,6 +559,18 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--end-date", help="Only include orders on/before YYYY-MM-DD")
     parser.add_argument("--limit", type=int, default=25, help="Rows to show in each section")
     parser.add_argument("--realized-output", type=Path, help="Write realized trades to CSV")
+    parser.add_argument(
+        "--interactive-report",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Launch the interactive timeline report after parsing (default: true)",
+    )
+    parser.add_argument(
+        "--summary",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Print the console summary before any interactive report (default: true)",
+    )
     parser.add_argument("--no-open-positions", action="store_true", help="Hide open positions")
     return parser.parse_args()
 
@@ -559,16 +592,27 @@ def main() -> None:
     orders = filter_orders_by_date(orders, start_date, end_date)
     result = analyze_orders(orders)
 
-    _print_totals(result)
-    if result.realized_trades:
+    if args.summary:
+        _print_totals(result)
+    if result.realized_trades and not args.interactive_report:
         _print_group("PnL By Underlying", aggregate_pnl(result.realized_trades, "underlying"), args.limit)
         _print_group("PnL By Symbol", aggregate_pnl(result.realized_trades, "symbol"), args.limit)
         _print_largest_trades(result.realized_trades, args.limit)
-    if not args.no_open_positions:
+    if not args.no_open_positions and (args.summary or not args.interactive_report):
         _print_open_positions(result, args.limit)
     if args.realized_output:
         write_realized_csv(result.realized_trades, args.realized_output)
         print(f"\nWrote realized trades to {args.realized_output}")
+    if args.interactive_report:
+        from .daily_timeline import summarize_daily_realized_pnl as summarize_timeline_pnl
+        from .trade_timeline import run_interactive_report
+
+        day_entries = summarize_timeline_pnl(result.realized_trades)
+        run_interactive_report(
+            day_entries,
+            result.realized_trades,
+            symbol_chart=_build_symbol_chart(result.realized_trades),
+        )
 
 
 if __name__ == "__main__":

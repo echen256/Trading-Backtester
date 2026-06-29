@@ -87,7 +87,7 @@ def render_timeline_page(
         lines.append(f"  Losers  {format_currency(day.losers_total):>12}: {losers_bar or '(flat)'}")
     lines.append("")
     lines.append(
-        "Navigation: [Enter day #] View | [R] Date range | [N] Next page | [P] Previous page | [S] Symbol PnL | [T] Profitable timeline | [Q] Quit"
+        "Navigation: [Enter day #] View | [R] Date range | [N] Next page | [P] Previous page | [S] Symbol PnL | [K] Kelly | [T] Profitable timeline | [Q] Quit"
     )
     return "\n".join(lines)
 
@@ -117,7 +117,7 @@ def render_day_detail(day_entries: Sequence[DayPnL], index: int) -> str:
     else:
         lines.append("  - None")
     lines.append("=" * 72)
-    lines.append("Navigation: [B] Back | [R] Date range | [N] Next day | [P] Previous day | [S] Symbol PnL | [T] Profitable timeline | [Q] Quit")
+    lines.append("Navigation: [B] Back | [R] Date range | [N] Next day | [P] Previous day | [S] Symbol PnL | [K] Kelly | [T] Profitable timeline | [Q] Quit")
     return "\n".join(lines)
 
 
