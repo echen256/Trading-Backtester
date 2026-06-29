@@ -13,11 +13,15 @@ pip install -e modules/analysis
 
 ## CLI entry points
 
-After installation two commands are available:
+After installation these commands are available:
 
-- `trading-parse-orders` – run the `parse_orders.py` workflow against a broker
-  `orders.csv` export.  Run with `--help` to see the available filters.
+- `trading-parse-orders` – analyze a Webull OpenAPI orders CSV such as
+  `modules/analysis/order-data/webull_orders_2026.csv`, including realized
+  PnL for options and equities. Run with `--help` to see the available filters.
 - `trading-schwab-convert` – convert Schwab exports into the normalized
   `orders.csv` schema before analysis.
+- `trading-webull-bridge sync-analysis` – fetch Webull OpenAPI orders into
+  `modules/analysis/order-data/orders.csv` using the analysis-ready option
+  contract schema.
 
 Sample CSV files remain under `examples/` for quick experiments.

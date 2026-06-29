@@ -36,6 +36,7 @@ import os
 import re
 import sys
 import time
+from decimal import Decimal, InvalidOperation
 from dataclasses import dataclass, field
 from datetime import date, datetime
 from pathlib import Path
@@ -52,6 +53,7 @@ DEFAULT_ORDER_PAGE_SIZE = WEBULL_MAX_PAGE_SIZE
 WEBULL_ORDER_HISTORY_DELAY_SECONDS = 1.25
 WEBULL_RATE_LIMIT_BACKOFF_SECONDS = (2.0, 5.0, 10.0)
 DEFAULT_ORDERS_DIR = REPO_ROOT / "modules" / "analysis" / "order-data"
+DEFAULT_ANALYSIS_ORDERS_CSV = DEFAULT_ORDERS_DIR / "orders.csv"
 
 for _logger_name in (
     "webull",
@@ -295,6 +297,30 @@ def _is_rate_limit_error(exc: Exception) -> bool:
     )
 
 
+def _build_occ_option_symbol(
+    underlying: str,
+    expiration_date: str,
+    option_type: str,
+    strike_price: str,
+) -> str | None:
+    if not underlying or not expiration_date or not option_type or not strike_price:
+        return None
+
+    try:
+        expiry = datetime.strptime(expiration_date[:10], "%Y-%m-%d").date()
+        strike = Decimal(str(strike_price).strip())
+    except (ValueError, InvalidOperation):
+        return None
+
+    option_code = option_type.strip().upper()[:1]
+    if option_code not in {"C", "P"}:
+        return None
+
+    root = re.sub(r"[^A-Z0-9]", "", underlying.upper())
+    strike_code = int(strike * Decimal("1000"))
+    return f"{root}{expiry:%y%m%d}{option_code}{strike_code:08d}"
+
+
 # ---------------------------------------------------------------------------
 # Data Models — normalized order with position_intent
 # ---------------------------------------------------------------------------
@@ -504,40 +530,62 @@ class WebullBridge:
 
     def _normalize_orders(self, raw: dict[str, Any]) -> list[WebullOrder]:
         """Convert raw API response dict to one or more WebullOrder objects."""
-        legs = raw.get("orders") or raw.get("legs") or [raw]
-        orders = []
+        child_orders = raw.get("orders")
+        if isinstance(child_orders, list):
+            orders: list[WebullOrder] = []
+            for child in child_orders:
+                if isinstance(child, dict):
+                    orders.extend(self._normalize_orders(child))
+            return orders
+
+        source_legs = raw.get("legs") if raw.get("instrument_type") == "OPTION" else None
+        legs = source_legs if isinstance(source_legs, list) and source_legs else [raw]
+        normalized_orders = []
         for leg in legs:
             if not isinstance(leg, dict):
                 continue
             intent = _first_present(
-                leg,
+                raw,
                 "position_intent",
                 "positionIntent",
                 "position_effect",
                 "positionEffect",
-            ) or _first_present(raw, "position_intent", "positionIntent")
-            filled_price_raw = _first_present(leg, "filled_price", "filledPrice", "avg_price", "avgPrice")
+            )
+            filled_price_raw = _first_present(raw, "filled_price", "filledPrice", "avg_price", "avgPrice")
+            instrument_type = str(_first_present(raw, "instrument_type", "instrumentType") or "").upper()
+
+            symbol = str(_first_present(raw, "symbol") or "")
+            if instrument_type == "OPTION":
+                symbol = (
+                    _build_occ_option_symbol(
+                        str(_first_present(leg, "symbol") or symbol),
+                        str(_first_present(leg, "option_expire_date", "optionExpireDate") or ""),
+                        str(_first_present(leg, "option_type", "optionType") or ""),
+                        str(_first_present(leg, "strike_price", "strikePrice") or ""),
+                    )
+                    or symbol
+                )
             
-            orders.append(WebullOrder(
-                client_order_id=str(_first_present(leg, "client_order_id", "clientOrderId") or _first_present(raw, "client_order_id", "clientOrderId") or ""),
-                order_id=str(_first_present(leg, "order_id", "orderId") or _first_present(raw, "order_id", "orderId") or ""),
-                symbol=str(_first_present(leg, "symbol") or _first_present(raw, "symbol") or ""),
+            normalized_orders.append(WebullOrder(
+                client_order_id=str(_first_present(raw, "client_order_id", "clientOrderId") or ""),
+                order_id=str(_first_present(raw, "order_id", "orderId") or ""),
+                symbol=symbol,
                 side=str(_first_present(leg, "side") or _first_present(raw, "side") or "").upper(),
-                status=str(_first_present(leg, "status") or _first_present(raw, "status") or "").upper(),
-                instrument_type=str(_first_present(leg, "instrument_type", "instrumentType") or _first_present(raw, "instrument_type", "instrumentType") or "").upper(),
+                status=str(_first_present(raw, "status") or "").upper(),
+                instrument_type=instrument_type,
                 position_intent=str(intent).upper() if intent else None,
-                total_quantity=_safe_float(_first_present(leg, "total_quantity", "totalQuantity") or _first_present(raw, "total_quantity", "totalQuantity")) or 0.0,
-                filled_quantity=_safe_float(_first_present(leg, "filled_quantity", "filledQuantity") or _first_present(raw, "filled_quantity", "filledQuantity")) or 0.0,
-                limit_price=_safe_float(_first_present(leg, "limit_price", "limitPrice") or _first_present(raw, "limit_price", "limitPrice")),
+                total_quantity=_safe_float(_first_present(leg, "quantity") or _first_present(raw, "total_quantity", "totalQuantity")) or 0.0,
+                filled_quantity=_safe_float(_first_present(raw, "filled_quantity", "filledQuantity")) or 0.0,
+                limit_price=_safe_float(_first_present(raw, "limit_price", "limitPrice")),
                 filled_price=_safe_float(filled_price_raw),
-                order_type=str(_first_present(leg, "order_type", "orderType") or _first_present(raw, "order_type", "orderType") or "").upper(),
-                time_in_force=str(_first_present(leg, "time_in_force", "timeInForce") or _first_present(raw, "time_in_force", "timeInForce") or "").upper(),
-                placed_time=str(_first_present(leg, "placed_time_at", "placedTimeAt", "placed_time", "placedTime", "place_time_at", "placeTimeAt", "place_time", "placeTime") or ""),
-                filled_time=str(_first_present(leg, "filled_time_at", "filledTimeAt", "filled_time", "filledTime") or ""),
-                commission=_safe_commission_value(leg),
-                fees=_safe_fee_value(leg),
+                order_type=str(_first_present(raw, "order_type", "orderType") or "").upper(),
+                time_in_force=str(_first_present(raw, "time_in_force", "timeInForce") or "").upper(),
+                placed_time=str(_first_present(raw, "placed_time_at", "placedTimeAt", "placed_time", "placedTime", "place_time_at", "placeTimeAt", "place_time", "placeTime") or ""),
+                filled_time=str(_first_present(raw, "filled_time_at", "filledTimeAt", "filled_time", "filledTime") or ""),
+                commission=_safe_commission_value(raw),
+                fees=_safe_fee_value(raw),
             ))
-        return orders
+        return normalized_orders
 
     # ------------------------------------------------------------------
     # Option Historical Bars — replaces Polygon
@@ -642,6 +690,13 @@ ORDERS_CSV_FIELDS = [
     "Time-in-Force", "Placed Time", "Filled Time",
 ]
 
+ANALYSIS_CSV_FIELDS = [
+    "Name", "Symbol", "Side", "Status", "Filled", "Total Qty", "Price",
+    "Avg Price", "Time-in-Force", "Placed Time", "Filled Time",
+]
+
+ANALYSIS_OPTION_SYMBOL_RE = re.compile(r"^[A-Z]{1,6}\d{6}[CP]\d{8}$")
+
 
 def export_orders_csv(orders: list[WebullOrder], output_path: Path):
     """Write orders to CSV including the Action column (BTO/BTC/STO/STC)."""
@@ -667,6 +722,34 @@ def export_orders_csv(orders: list[WebullOrder], output_path: Path):
                 "Filled Time": order.filled_time or "",
             })
     print(f"Wrote {len(orders)} orders to {output_path}")
+
+
+def export_analysis_orders_csv(orders: list[WebullOrder], output_path: Path) -> int:
+    analysis_orders = [
+        order
+        for order in orders
+        if order.instrument_type == "OPTION" and ANALYSIS_OPTION_SYMBOL_RE.fullmatch(order.symbol)
+    ]
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with output_path.open("w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=ANALYSIS_CSV_FIELDS)
+        writer.writeheader()
+        for order in analysis_orders:
+            writer.writerow({
+                "Name": order.symbol,
+                "Symbol": order.symbol,
+                "Side": order.side,
+                "Status": order.status,
+                "Filled": str(order.filled_quantity),
+                "Total Qty": str(order.total_quantity),
+                "Price": f"@{order.limit_price}" if order.limit_price else "",
+                "Avg Price": str(order.filled_price) if order.filled_price else "",
+                "Time-in-Force": order.time_in_force,
+                "Placed Time": order.placed_time,
+                "Filled Time": order.filled_time or "",
+            })
+    print(f"Wrote {len(analysis_orders)} analysis-ready option orders to {output_path}")
+    return len(analysis_orders)
 
 
 def print_orders_table(orders: list[WebullOrder]) -> None:
@@ -748,6 +831,18 @@ def build_parser() -> argparse.ArgumentParser:
     p_export.add_argument("--start-date", type=_webull_date_arg, default=default_start, help=f"Start date (default: {default_start})")
     p_export.add_argument("--end-date", type=_webull_date_arg, default=default_end, help=f"End date (default: {default_end})")
 
+    # --- sync-analysis ---
+    p_sync = sub.add_parser("sync-analysis", help="Fetch Webull orders into the analysis module's orders.csv schema")
+    p_sync.add_argument("-o", "--output", type=Path, default=DEFAULT_ANALYSIS_ORDERS_CSV, help=f"Analysis CSV output path (default: {DEFAULT_ANALYSIS_ORDERS_CSV})")
+    p_sync.add_argument("--start-date", type=_webull_date_arg, default=default_start, help=f"Start date (default: {default_start})")
+    p_sync.add_argument("--end-date", type=_webull_date_arg, default=default_end, help=f"End date (default: {default_end})")
+    p_sync.add_argument(
+        "--page-size",
+        type=_order_page_size_arg,
+        default=DEFAULT_ORDER_PAGE_SIZE,
+        help=f"Orders per request ({WEBULL_MIN_PAGE_SIZE}-{WEBULL_MAX_PAGE_SIZE}; default: {DEFAULT_ORDER_PAGE_SIZE})",
+    )
+
     # --- option-bars ---
     p_bars = sub.add_parser("option-bars", help="Fetch option historical OHLCV bars")
     p_bars.add_argument("symbol", help="OCC option symbol (e.g. TSLA260717C00420000)")
@@ -820,6 +915,15 @@ def main(argv: Sequence[str] | None = None) -> None:
         orders = fetch_orders_with_progress(bridge, args.start_date, args.end_date)
         output_path = args.output or _default_orders_output_path(args.start_date, args.end_date)
         export_orders_csv(orders, output_path)
+
+    elif args.command == "sync-analysis":
+        orders = fetch_orders_with_progress(
+            bridge,
+            args.start_date,
+            args.end_date,
+            page_size=args.page_size,
+        )
+        export_analysis_orders_csv(orders, args.output)
 
     elif args.command == "option-bars":
         bars = bridge.get_option_bars(args.symbol, args.timespan, args.count)
