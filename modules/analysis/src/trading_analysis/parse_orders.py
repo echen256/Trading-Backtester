@@ -84,6 +84,10 @@ class Order:
         match = OPTION_CONTRACT_RE.fullmatch(self.symbol)
         return match.group(1) if match else self.symbol
 
+    @property
+    def option_type(self) -> str:
+        return _option_type_label(self.symbol) if self.instrument_type == "OPTION" else "EQUITY"
+
 
 @dataclass
 class PositionLot:
@@ -108,6 +112,7 @@ class RealizedTrade:
     open_datetime: datetime | None = None
     underlying: str = ""
     instrument_type: str = ""
+    option_type: str = ""
     open_action: str = ""
     close_action: str = ""
 
@@ -172,6 +177,13 @@ def _parse_order_datetime(value: str | None) -> datetime | None:
 def _infer_instrument_type(row: dict[str, str]) -> str:
     symbol = (row.get("Symbol") or row.get("Name") or "").strip().upper()
     return "OPTION" if OPTION_CONTRACT_RE.fullmatch(symbol) else "EQUITY"
+
+
+def _option_type_label(symbol: str) -> str:
+    match = OPTION_CONTRACT_RE.fullmatch(symbol)
+    if not match:
+        return "UNKNOWN"
+    return "CALL" if match.group(3) == "C" else "PUT"
 
 
 def _parse_iso_date(value: str | None) -> date | None:
@@ -294,6 +306,7 @@ def _close_lots(
                 open_datetime=lot.opened_at,
                 underlying=order.underlying,
                 instrument_type=order.instrument_type,
+                option_type=order.option_type,
                 open_action=lot.action,
                 close_action=order.action,
             )
@@ -407,6 +420,24 @@ def aggregate_pnl(trades: Sequence[RealizedTrade], attr: str) -> dict[str, float
     return dict(totals)
 
 
+def summarize_by_option_type(trades: Sequence[RealizedTrade]) -> dict[str, dict[str, float]]:
+    summary: dict[str, dict[str, float]] = defaultdict(
+        lambda: {"trades": 0.0, "wins": 0.0, "losses": 0.0, "flats": 0.0, "pnl": 0.0}
+    )
+    for trade in trades:
+        key = trade.option_type or ("EQUITY" if trade.instrument_type == "EQUITY" else "UNKNOWN")
+        bucket = summary[key]
+        bucket["trades"] += 1
+        bucket["pnl"] += trade.pnl
+        if trade.pnl > 0:
+            bucket["wins"] += 1
+        elif trade.pnl < 0:
+            bucket["losses"] += 1
+        else:
+            bucket["flats"] += 1
+    return dict(summary)
+
+
 def summarize_daily_realized_pnl(trades: Sequence[RealizedTrade]) -> list[DayPnL]:
     by_day: dict[str, list[RealizedTrade]] = defaultdict(list)
     for trade in trades:
@@ -439,6 +470,7 @@ def _print_totals(result: AnalysisResult) -> None:
     losses = sum(1 for trade in trades if trade.pnl < 0)
     flats = len(trades) - wins - losses
     by_instrument = aggregate_pnl(trades, "instrument_type")
+    by_option_type = summarize_by_option_type(trades)
 
     print("Webull PnL Analysis")
     print("=" * 72)
@@ -451,6 +483,25 @@ def _print_totals(result: AnalysisResult) -> None:
     print(f"Unmatched closes:   {len(result.unmatched_closes):>8}")
     for instrument, pnl in sorted(by_instrument.items()):
         print(f"{instrument.title():<18}{_money(pnl):>12}")
+    if by_option_type:
+        print()
+        print("Calls/Puts Split")
+        print("-" * 72)
+        for option_type in ("CALL", "PUT", "EQUITY", "UNKNOWN"):
+            bucket = by_option_type.get(option_type)
+            if not bucket:
+                continue
+            trades_count = int(bucket["trades"])
+            wins_count = int(bucket["wins"])
+            losses_count = int(bucket["losses"])
+            flats_count = int(bucket["flats"])
+            win_rate = (wins_count / trades_count) if trades_count else 0.0
+            print(
+                f"{option_type.title():<8} trades={trades_count:>5} "
+                f"pnl={_money(bucket['pnl']):>12} "
+                f"win={win_rate:>6.2%} "
+                f"W/L/F={wins_count}/{losses_count}/{flats_count}"
+            )
 
 
 def _print_group(title: str, totals: dict[str, float], limit: int) -> None:
@@ -521,6 +572,7 @@ def write_realized_csv(trades: Sequence[RealizedTrade], output_path: Path) -> No
     fieldnames = [
         "Trade Date",
         "InstrumentType",
+        "OptionType",
         "Underlying",
         "Symbol",
         "Direction",
@@ -539,6 +591,7 @@ def write_realized_csv(trades: Sequence[RealizedTrade], output_path: Path) -> No
             writer.writerow({
                 "Trade Date": trade.trade_date.isoformat(),
                 "InstrumentType": trade.instrument_type,
+                "OptionType": trade.option_type,
                 "Underlying": trade.underlying,
                 "Symbol": trade.symbol,
                 "Direction": trade.direction,

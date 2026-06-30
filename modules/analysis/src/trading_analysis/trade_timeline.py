@@ -88,9 +88,18 @@ def render_kelly_breakdown(
     title: str = "Kelly Criterion Breakdown",
 ) -> str:
     rows: list[tuple[str, Sequence[RealizedTrade]]] = [("ALL", trades)]
+    trades_by_option_type: dict[str, list[RealizedTrade]] = defaultdict(list)
     trades_by_symbol: dict[str, list[RealizedTrade]] = defaultdict(list)
     for trade in trades:
+        option_type = _trade_option_type(trade)
+        if option_type in {"CALL", "PUT"}:
+            trades_by_option_type[option_type].append(trade)
         trades_by_symbol[_trade_underlying(trade)].append(trade)
+    rows.extend(
+        (option_type, trades_by_option_type[option_type])
+        for option_type in ("CALL", "PUT")
+        if trades_by_option_type.get(option_type)
+    )
     rows.extend(
         sorted(
             trades_by_symbol.items(),
@@ -555,6 +564,17 @@ def _format_ratio(value: float) -> str:
 def _trade_underlying(trade: RealizedTrade) -> str:
     underlying = getattr(trade, "underlying", "")
     return underlying or extract_underlying_symbol(trade.symbol)
+
+
+def _trade_option_type(trade: RealizedTrade) -> str:
+    option_type = getattr(trade, "option_type", "")
+    if option_type:
+        return option_type
+    if " Call " in describe_contract(trade.symbol):
+        return "CALL"
+    if " Put " in describe_contract(trade.symbol):
+        return "PUT"
+    return "UNKNOWN"
 
 
 def _sort_trade_list(trades: Sequence[RealizedTrade]) -> list[RealizedTrade]:

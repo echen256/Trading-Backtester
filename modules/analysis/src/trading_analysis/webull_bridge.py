@@ -55,6 +55,17 @@ WEBULL_RATE_LIMIT_BACKOFF_SECONDS = (2.0, 5.0, 10.0)
 WEBULL_ORDER_HISTORY_MAX_DAYS = 730
 DEFAULT_ORDERS_DIR = REPO_ROOT / "modules" / "analysis" / "order-data"
 DEFAULT_ANALYSIS_ORDERS_CSV = DEFAULT_ORDERS_DIR / "orders.csv"
+WEBULL_OPTION_BAR_TIMESPANS = {
+    "min": "M1",
+    "1min": "M1",
+    "5min": "M5",
+    "15min": "M15",
+    "30min": "M30",
+    "hour": "M60",
+    "day": "D",
+    "week": "W",
+    "month": "M",
+}
 
 for _logger_name in (
     "webull",
@@ -625,12 +636,13 @@ class WebullBridge:
         Timespan options: 'min', '5min', '15min', '30min', 'hour', 'day', 'week', 'month'
         """
         self._ensure_clients()
-        category = "usoption"
+        category = "US_OPTION"
+        api_timespan = WEBULL_OPTION_BAR_TIMESPANS.get(timespan, timespan)
 
         result = self._market_data_client.option_market_data.get_option_history_bars(
             symbols=option_symbol,
             category=category,
-            timespan=timespan,
+            timespan=api_timespan,
             count=count,
         )
 
