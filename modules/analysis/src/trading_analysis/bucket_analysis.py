@@ -15,10 +15,21 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import Any
 
+from .display_common import extract_contract_expiration, extract_underlying_symbol
+from .parse_orders import (
+    DEFAULT_ORDERS_CSV,
+    RealizedTrade,
+    compute_realized_trades,
+    filter_orders_by_date,
+    filter_trades_by_close_date,
+    load_orders,
+)
+
 REPO_ROOT = Path(__file__).resolve().parents[4]
-DEFAULT_INPUT_PATH = (
+DEFAULT_REVIEW_INPUT_PATH = (
     REPO_ROOT / "modules" / "analysis" / "order-data" / "trade-hold-review-2025-01-01-to-2026-05-15.json"
 )
+DEFAULT_WEBULL_BRIDGE_INPUT_PATH = REPO_ROOT / "modules" / "analysis" / "order-data" / "orders.csv"
 DEFAULT_ENV_PATH = REPO_ROOT / ".env"
 POLYGON_API_BASE_URL = "https://api.polygon.io/v2/aggs/ticker"
 
@@ -44,8 +55,21 @@ MONEYNESS_BUCKETS: list[tuple[str, float, float]] = [
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "--input", type=Path, default=DEFAULT_INPUT_PATH,
-        help="Path to trade-hold-review JSON",
+        "--input", type=Path, default=_default_input_path(),
+        help="Path to Webull orders CSV or trade-hold-review JSON",
+    )
+    parser.add_argument(
+        "--start-date",
+        help="Only include CSV realized trades closed on/after YYYY-MM-DD",
+    )
+    parser.add_argument(
+        "--end-date",
+        help="Only include CSV realized trades closed on/before YYYY-MM-DD",
+    )
+    parser.add_argument(
+        "--include-all-trades",
+        action="store_true",
+        help="For CSV input, include short option and non-option realized trades instead of long options only",
     )
     parser.add_argument(
         "--no-moneyness", action="store_true",
@@ -58,13 +82,21 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _default_input_path() -> Path:
+    for path in (DEFAULT_WEBULL_BRIDGE_INPUT_PATH, DEFAULT_ORDERS_CSV):
+        if path.exists():
+            return path
+    return DEFAULT_REVIEW_INPUT_PATH
+
+
 def main() -> None:
     args = build_parser().parse_args()
 
-    payload = json.loads(args.input.read_text(encoding="utf-8"))
-    trades: list[dict[str, Any]] = (
-        list(payload.get("profitable_trades") or [])
-        + list(payload.get("unprofitable_trades") or [])
+    trades = _load_input_trades(
+        args.input,
+        start_date=_parse_cli_date(args.start_date),
+        end_date=_parse_cli_date(args.end_date),
+        long_options_only=not args.include_all_trades,
     )
 
     spot_map: dict[tuple[str, str], float | None] = {}
@@ -81,6 +113,78 @@ def main() -> None:
         _print_moneyness_table(trades, spot_map)
         print()
         _print_crosstab(trades, spot_map)
+
+
+def _load_input_trades(
+    input_path: Path,
+    *,
+    start_date: date | None,
+    end_date: date | None,
+    long_options_only: bool,
+) -> list[dict[str, Any]]:
+    if input_path.suffix.lower() == ".json":
+        return _load_review_json(input_path)
+    return _load_orders_csv(
+        input_path,
+        start_date=start_date,
+        end_date=end_date,
+        long_options_only=long_options_only,
+    )
+
+
+def _load_review_json(input_path: Path) -> list[dict[str, Any]]:
+    payload = json.loads(input_path.read_text(encoding="utf-8"))
+    return (
+        list(payload.get("profitable_trades") or [])
+        + list(payload.get("unprofitable_trades") or [])
+    )
+
+
+def _load_orders_csv(
+    input_path: Path,
+    *,
+    start_date: date | None,
+    end_date: date | None,
+    long_options_only: bool,
+) -> list[dict[str, Any]]:
+    orders = load_orders(input_path)
+    orders = filter_orders_by_date(orders, None, end_date)
+    realized_trades = filter_trades_by_close_date(
+        compute_realized_trades(orders),
+        start_date,
+        end_date,
+    )
+    if long_options_only:
+        realized_trades = [
+            trade for trade in realized_trades
+            if trade.direction == "long" and extract_contract_expiration(trade.symbol) is not None
+        ]
+    return [_serialize_realized_trade(trade) for trade in realized_trades]
+
+
+def _serialize_realized_trade(trade: RealizedTrade) -> dict[str, Any]:
+    expiration = extract_contract_expiration(trade.symbol)
+    return {
+        "symbol": trade.symbol,
+        "underlying_symbol": trade.underlying or extract_underlying_symbol(trade.symbol),
+        "direction": trade.direction,
+        "quantity": trade.quantity,
+        "open_date": trade.open_date.isoformat(),
+        "open_price": trade.open_price,
+        "close_date": trade.trade_date.isoformat(),
+        "close_price": trade.price,
+        "realized_pnl": trade.pnl,
+        "expiration_date": expiration.isoformat() if expiration else None,
+    }
+
+
+def _parse_cli_date(value: str | None) -> date | None:
+    if not value:
+        return None
+    try:
+        return datetime.strptime(value, "%Y-%m-%d").date()
+    except ValueError as exc:
+        raise SystemExit(f"Invalid date '{value}'. Expected YYYY-MM-DD.") from exc
 
 
 # ---------------------------------------------------------------------------

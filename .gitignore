@@ -21,3 +21,7 @@ modules/data-pipeline/logs/*.log
 backend/csv/Webull_Orders_Records_Options.csv
 backend/csv/data.csv
 reports/emerge/
+
+# Webull OpenAPI local outputs
+webull_trade_sdk.log
+modules/analysis/order-data/webull_orders*.csv

@@ -1,3 +1,5 @@
 [console_scripts]
+trading-bucket-analysis = trading_analysis.bucket_analysis:main
 trading-parse-orders = trading_analysis.parse_orders:main
 trading-schwab-convert = trading_analysis.schwab.convert:main
+trading-webull-bridge = trading_analysis.webull_bridge:main

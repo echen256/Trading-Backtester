@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+import statistics
 from collections import defaultdict
 from datetime import datetime, time
 from typing import TYPE_CHECKING, List, Sequence
@@ -46,7 +47,7 @@ def render_symbol_trade_breakdown(symbol: str, trades: Sequence[RealizedTrade]) 
         lines.append("  " + "-" * 66)
     lines.append("")
     lines.append("=" * 72)
-    lines.append("Navigation: [B] Back | [R] Date range | [N] Next symbol | [P] Previous symbol | [F] Filter symbol | [A] Analyze trade | [Q] Quit")
+    lines.append("Navigation: [B] Back | [R] Date range | [N] Next symbol | [P] Previous symbol | [F] Filter symbol | [K] Kelly | [A] Analyze trade | [Q] Quit")
     return "\n".join(lines)
 
 
@@ -77,7 +78,66 @@ def render_all_trades(trades: Sequence[RealizedTrade]) -> str:
         lines.append("  " + "-" * 66)
     lines.append("")
     lines.append("=" * 72)
-    lines.append("Navigation: [B] Back | [R] Date range | [A] Analyze trade | [Q] Quit")
+    lines.append("Navigation: [B] Back | [R] Date range | [K] Kelly | [A] Analyze trade | [Q] Quit")
+    return "\n".join(lines)
+
+
+def render_kelly_breakdown(
+    trades: Sequence[RealizedTrade],
+    *,
+    title: str = "Kelly Criterion Breakdown",
+) -> str:
+    rows: list[tuple[str, Sequence[RealizedTrade]]] = [("ALL", trades)]
+    trades_by_option_type: dict[str, list[RealizedTrade]] = defaultdict(list)
+    trades_by_symbol: dict[str, list[RealizedTrade]] = defaultdict(list)
+    for trade in trades:
+        option_type = _trade_option_type(trade)
+        if option_type in {"CALL", "PUT"}:
+            trades_by_option_type[option_type].append(trade)
+        trades_by_symbol[_trade_underlying(trade)].append(trade)
+    rows.extend(
+        (option_type, trades_by_option_type[option_type])
+        for option_type in ("CALL", "PUT")
+        if trades_by_option_type.get(option_type)
+    )
+    rows.extend(
+        sorted(
+            trades_by_symbol.items(),
+            key=lambda item: sum(trade.pnl for trade in item[1]),
+            reverse=True,
+        )
+    )
+
+    lines: List[str] = []
+    lines.append("=" * 118)
+    lines.append(title)
+    lines.append("Kelly = W - ((1 - W) / R), where W = win rate and R = average win / average loss")
+    lines.append("-" * 118)
+    lines.append(
+        f"{'Symbol':<10} {'Trades':>6} {'Wins':>5} {'Loss':>5} {'Flat':>5} "
+        f"{'Win %':>8} {'Avg Win':>12} {'Avg Loss':>12} {'R':>8} "
+        f"{'Exp/Trade':>12} {'Kelly':>9} {'Half':>9} {'Net PnL':>12}"
+    )
+    lines.append("-" * 118)
+
+    for symbol, symbol_trades in rows:
+        metrics = _kelly_metrics(symbol_trades)
+        lines.append(
+            f"{symbol[:10]:<10} {metrics['trades']:>6.0f} {metrics['wins']:>5.0f} "
+            f"{metrics['losses']:>5.0f} {metrics['flats']:>5.0f} "
+            f"{_format_rate(metrics['win_rate']):>8} "
+            f"{format_currency(metrics['avg_win']):>12} "
+            f"{format_currency(-metrics['avg_loss']):>12} "
+            f"{_format_ratio(metrics['payoff_ratio']):>8} "
+            f"{format_currency(metrics['expectancy']):>12} "
+            f"{_format_rate(metrics['kelly']):>9} "
+            f"{_format_rate(metrics['half_kelly']):>9} "
+            f"{format_currency(metrics['net_pnl']):>12}"
+        )
+
+    lines.append("-" * 118)
+    lines.append("Avg Loss is shown as a negative dollar value for readability. Kelly is a sizing model, not a risk cap.")
+    lines.append("=" * 118)
     return "\n".join(lines)
 
 
@@ -101,7 +161,7 @@ def run_interactive_report(
 
     page = 0
     page_size = 20
-    view_mode = "symbol" if current_symbol_chart else "timeline"
+    view_mode = "timeline"
     selected_index = 0
     previous_view = "timeline"
     selected_symbol: str | None = None
@@ -144,6 +204,9 @@ def run_interactive_report(
                     view_mode = "symbol"
                 else:
                     print("Symbol PnL chart unavailable.")
+                continue
+            if command == "k":
+                _show_kelly_breakdown(visible_realized_trades)
                 continue
             if command == "t":
                 previous_view = "timeline"
@@ -198,6 +261,11 @@ def run_interactive_report(
                 else:
                     print("Symbol PnL chart unavailable.")
                 continue
+            if command == "k":
+                selected_day = datetime.strptime(visible_day_entries[selected_index].date_label, "%Y-%m-%d").date()
+                day_trades = [trade for trade in visible_realized_trades if trade.trade_date == selected_day]
+                _show_kelly_breakdown(day_trades, title=f"Kelly Criterion Breakdown - {selected_day.isoformat()}")
+                continue
             if command == "t":
                 previous_view = "detail"
                 view_mode = "all-trades"
@@ -232,7 +300,7 @@ def run_interactive_report(
                 print("Symbol PnL Chart")
                 print(current_symbol_chart or "No data available.")
                 print("=" * 72)
-                print("Navigation: [B] Back | [F] Filter symbol | [R] Date range | [T] Profitable timeline | [Q] Quit")
+                print("Navigation: [B] Back | [F] Filter symbol | [R] Date range | [K] Kelly | [T] Profitable timeline | [Q] Quit")
                 command = input("Command: ").strip().lower()
                 if not command:
                     continue
@@ -252,6 +320,9 @@ def run_interactive_report(
                     selected_symbol_index = symbol_order.index(symbol_input)
                     previous_view = "symbol"
                     view_mode = "symbol-detail"
+                    continue
+                if command == "k":
+                    _show_kelly_breakdown(visible_realized_trades)
                     continue
                 if command == "t":
                     previous_view = "symbol"
@@ -324,6 +395,12 @@ def run_interactive_report(
                     selected_symbol_index = (selected_symbol_index - 1) % len(symbol_order)
                     selected_symbol = symbol_order[selected_symbol_index]
                     continue
+                if command == "k":
+                    _show_kelly_breakdown(
+                        current_symbol_trades,
+                        title=f"Kelly Criterion Breakdown - {selected_symbol or ''}",
+                    )
+                    continue
                 if command == "a":
                     try:
                         _analyze_trade_from_list(current_symbol_trades, sorter=_sort_symbol_trade_list)
@@ -354,6 +431,9 @@ def run_interactive_report(
                     )
                     page = 0
                     selected_index = 0
+                    continue
+                if command == "k":
+                    _show_kelly_breakdown(visible_realized_trades)
                     continue
                 if command == "a":
                     try:
@@ -420,6 +500,81 @@ def _analyze_trade_from_list(
             trade_index = (trade_index + 1) % len(ordered_trades)
             continue
         print(f"Unknown command: {navigation}")
+
+
+def _show_kelly_breakdown(
+    trades: Sequence[RealizedTrade],
+    *,
+    title: str = "Kelly Criterion Breakdown",
+) -> None:
+    print(render_kelly_breakdown(trades, title=title))
+    input("Press Enter to continue...")
+
+
+def _kelly_metrics(trades: Sequence[RealizedTrade]) -> dict[str, float]:
+    pnl_values = [trade.pnl for trade in trades]
+    wins = [value for value in pnl_values if value > 0]
+    losses = [value for value in pnl_values if value < 0]
+    trades_count = len(pnl_values)
+    wins_count = len(wins)
+    losses_count = len(losses)
+    flats_count = trades_count - wins_count - losses_count
+    win_rate = wins_count / trades_count if trades_count else 0.0
+    avg_win = statistics.mean(wins) if wins else 0.0
+    avg_loss = abs(statistics.mean(losses)) if losses else 0.0
+    if avg_loss > 0:
+        payoff_ratio = avg_win / avg_loss if avg_win > 0 else 0.0
+    elif avg_win > 0:
+        payoff_ratio = math.inf
+    else:
+        payoff_ratio = 0.0
+    expectancy = (win_rate * avg_win) - ((1.0 - win_rate) * avg_loss)
+    kelly: float | None = None
+    if avg_loss > 0 and payoff_ratio > 0:
+        kelly = win_rate - ((1.0 - win_rate) / payoff_ratio)
+    half_kelly = kelly / 2.0 if kelly is not None else None
+    return {
+        "trades": float(trades_count),
+        "wins": float(wins_count),
+        "losses": float(losses_count),
+        "flats": float(flats_count),
+        "win_rate": win_rate,
+        "avg_win": avg_win,
+        "avg_loss": avg_loss,
+        "payoff_ratio": payoff_ratio,
+        "expectancy": expectancy,
+        "kelly": kelly,
+        "half_kelly": half_kelly,
+        "net_pnl": sum(pnl_values),
+    }
+
+
+def _format_rate(value: float | None) -> str:
+    if value is None:
+        return "n/a"
+    return f"{value * 100:.2f}%"
+
+
+def _format_ratio(value: float) -> str:
+    if math.isinf(value):
+        return "inf"
+    return f"{value:.2f}"
+
+
+def _trade_underlying(trade: RealizedTrade) -> str:
+    underlying = getattr(trade, "underlying", "")
+    return underlying or extract_underlying_symbol(trade.symbol)
+
+
+def _trade_option_type(trade: RealizedTrade) -> str:
+    option_type = getattr(trade, "option_type", "")
+    if option_type:
+        return option_type
+    if " Call " in describe_contract(trade.symbol):
+        return "CALL"
+    if " Put " in describe_contract(trade.symbol):
+        return "PUT"
+    return "UNKNOWN"
 
 
 def _sort_trade_list(trades: Sequence[RealizedTrade]) -> list[RealizedTrade]:
@@ -523,7 +678,7 @@ def _build_symbol_context(
 ) -> tuple[dict[str, List[RealizedTrade]], list[str], str | None]:
     trades_by_symbol: dict[str, List[RealizedTrade]] = defaultdict(list)
     for trade in trades:
-        trades_by_symbol[extract_underlying_symbol(trade.symbol)].append(trade)
+        trades_by_symbol[_trade_underlying(trade)].append(trade)
     symbol_order = sorted(trades_by_symbol.keys())
     if not trades:
         return trades_by_symbol, symbol_order, None
@@ -534,5 +689,8 @@ def _build_symbol_context(
         return trades_by_symbol, symbol_order, fallback_chart
     symbol_pnl = analyze_symbols(contract_pnl)
     symbol_rr = compute_symbol_avg_rr(trades)
-    chart_text = render_contract_pnl_chart(symbol_pnl, symbol_rr) if symbol_pnl else fallback_chart
+    try:
+        chart_text = render_contract_pnl_chart(symbol_pnl, symbol_rr) if symbol_pnl else fallback_chart
+    except RuntimeError:
+        chart_text = fallback_chart
     return trades_by_symbol, symbol_order, chart_text
