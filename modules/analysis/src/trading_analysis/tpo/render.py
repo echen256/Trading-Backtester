@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import tempfile
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Sequence
 
@@ -122,80 +123,312 @@ def grade_badge(record: TpoGradeRecord | None) -> str:
     return f"[{quality} {float(score):.0f}]"
 
 
-def build_tpo_plotly_chart(record: TpoGradeRecord) -> Path:
-    """Horizontal Market Profile chart for entry session with entry/exit marks."""
+def _parse_session_date(record: TpoGradeRecord) -> date | None:
+    profiles = record.profiles or {}
+    entry = profiles.get("entry_session") or {}
+    raw = entry.get("date") or record.open_date
+    if not raw:
+        return None
+    if isinstance(raw, date) and not isinstance(raw, datetime):
+        return raw
+    try:
+        return date.fromisoformat(str(raw)[:10])
+    except ValueError:
+        return None
+
+
+def _aggregate_candles(
+    bars: Sequence[dict[str, object]],
+    *,
+    candle_minutes: int = 5,
+) -> list[dict[str, object]]:
+    """Aggregate RTH minute bars into N-minute OHLCV candles (NY session clock)."""
+    from .bars import parse_bar_timestamp
+    from .sessions import to_ny
+
+    if candle_minutes <= 1:
+        candles: list[dict[str, object]] = []
+        for bar in bars:
+            try:
+                ts = parse_bar_timestamp(bar.get("t"))
+                candles.append(
+                    {
+                        "t": to_ny(ts),
+                        "o": float(bar["o"]),
+                        "h": float(bar["h"]),
+                        "l": float(bar["l"]),
+                        "c": float(bar["c"]),
+                    }
+                )
+            except (TypeError, ValueError, KeyError):
+                continue
+        return candles
+
+    buckets: dict[datetime, dict[str, float | datetime]] = {}
+    order: list[datetime] = []
+    for bar in bars:
+        try:
+            ts = to_ny(parse_bar_timestamp(bar.get("t")))
+            o = float(bar["o"])
+            h = float(bar["h"])
+            l = float(bar["l"])
+            c = float(bar["c"])
+        except (TypeError, ValueError, KeyError):
+            continue
+        # Floor to candle_minutes on the NY clock.
+        minute = (ts.minute // candle_minutes) * candle_minutes
+        key = ts.replace(minute=minute, second=0, microsecond=0)
+        if key not in buckets:
+            buckets[key] = {"t": key, "o": o, "h": h, "l": l, "c": c}
+            order.append(key)
+        else:
+            bucket = buckets[key]
+            bucket["h"] = max(float(bucket["h"]), h)
+            bucket["l"] = min(float(bucket["l"]), l)
+            bucket["c"] = c
+    return [buckets[key] for key in order]
+
+
+def _parse_mark_time(raw: str | None, fallback_date: str | None) -> datetime | None:
+    if raw:
+        try:
+            dt = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            return dt
+        except ValueError:
+            pass
+    if fallback_date:
+        try:
+            return datetime.fromisoformat(f"{fallback_date[:10]}T16:00:00+00:00")
+        except ValueError:
+            return None
+    return None
+
+
+def build_tpo_plotly_chart(
+    record: TpoGradeRecord,
+    *,
+    cache_dir: Path | None = None,
+    candle_minutes: int = 5,
+    tpo_width_fraction: float = 0.25,
+) -> Path:
+    """
+    Session chart: candlesticks for the full RTH day (~75% width) with a
+    Market Profile / TPO strip on the right (≤25% width), shared price axis.
+    """
     import plotly.graph_objects as go
+    from plotly.subplots import make_subplots
+
+    from ..market_data import DEFAULT_UNDERLYING_MINUTE_CACHE_DIR, fetch_session_minute_bars
+    from .bars import parse_bar_timestamp
+    from .profile import build_market_profile
+    from .sessions import to_ny
 
     profiles = record.profiles or {}
     entry = profiles.get("entry_session") or {}
-    ascii_block = str(entry.get("tpo_ascii") or "")
-    # Rebuild a simple bar chart from summary levels if ascii present;
-    # prefer structured fields.
-    poc = float(entry.get("poc") or 0)
-    vah = float(entry.get("vah") or 0)
-    val = float(entry.get("val") or 0)
-    session_high = float(entry.get("session_high") or poc)
-    session_low = float(entry.get("session_low") or poc)
-    bracket = float(entry.get("bracket_size") or 0.25)
+    session = _parse_session_date(record)
+    underlying = (record.underlying or "").upper()
+    if session is None or not underlying:
+        raise RuntimeError("Cannot build TPO chart: missing underlying or entry session date.")
 
-    # Approximate histogram from high/low/POC when full brackets unavailable
-    levels: list[float] = []
-    counts: list[int] = []
-    if bracket > 0 and session_high > session_low:
-        level = session_low + bracket / 2
-        while level <= session_high + 1e-9:
-            # Triangular weight peaking at POC as a visual stand-in
-            dist = abs(level - poc) / max(session_high - session_low, 1e-9)
-            count = max(1, int(round((1 - dist) * 10)))
-            levels.append(round(level, 4))
-            counts.append(count)
-            level += bracket
+    resolved_cache = Path(cache_dir) if cache_dir else DEFAULT_UNDERLYING_MINUTE_CACHE_DIR
+    minute_bars = fetch_session_minute_bars(
+        underlying,
+        session,
+        cache_dir=resolved_cache,
+        throttle_seconds=0.0,
+        force_refresh=False,
+    )
+    if not minute_bars:
+        raise RuntimeError(
+            f"No RTH minute bars for {underlying} {session.isoformat()} "
+            f"(cache: {resolved_cache}). Re-run TPO grade / rescan first."
+        )
 
-    figure = go.Figure()
+    profile = build_market_profile(session, minute_bars, period_minutes=30)
+    candles = _aggregate_candles(minute_bars, candle_minutes=candle_minutes)
+    if not candles:
+        raise RuntimeError(f"Could not build candles for {underlying} {session.isoformat()}.")
+
+    tpo_frac = min(max(tpo_width_fraction, 0.15), 0.25)
+    candle_frac = 1.0 - tpo_frac
+
+    figure = make_subplots(
+        rows=1,
+        cols=2,
+        shared_yaxes=True,
+        column_widths=[candle_frac, tpo_frac],
+        horizontal_spacing=0.02,
+        subplot_titles=(
+            f"{underlying} {session.isoformat()}  ({candle_minutes}m)",
+            "TPO",
+        ),
+    )
+
+    figure.add_trace(
+        go.Candlestick(
+            x=[c["t"] for c in candles],
+            open=[c["o"] for c in candles],
+            high=[c["h"] for c in candles],
+            low=[c["l"] for c in candles],
+            close=[c["c"] for c in candles],
+            name=f"{candle_minutes}m",
+            increasing_line_color="#2ca02c",
+            decreasing_line_color="#d62728",
+            showlegend=False,
+        ),
+        row=1,
+        col=1,
+    )
+
+    # Entry / exit marks on the candle pane.
+    entry_dt = _parse_mark_time(record.open_datetime, record.open_date)
+    exit_dt = _parse_mark_time(record.close_datetime, record.close_date)
+    if entry_dt is not None and record.underlying_entry_price is not None:
+        figure.add_trace(
+            go.Scatter(
+                x=[to_ny(entry_dt)],
+                y=[float(record.underlying_entry_price)],
+                mode="markers+text",
+                name="Entry",
+                marker={"symbol": "triangle-up", "size": 12, "color": "#2ca02c"},
+                text=["Entry"],
+                textposition="top center",
+                showlegend=True,
+            ),
+            row=1,
+            col=1,
+        )
+    if (
+        exit_dt is not None
+        and record.underlying_exit_price is not None
+        and (record.open_date != record.close_date or record.underlying_exit_price != record.underlying_entry_price)
+    ):
+        # Only draw exit on this session chart when exit falls on the same session day.
+        if to_ny(exit_dt).date() == session:
+            figure.add_trace(
+                go.Scatter(
+                    x=[to_ny(exit_dt)],
+                    y=[float(record.underlying_exit_price)],
+                    mode="markers+text",
+                    name="Exit",
+                    marker={"symbol": "triangle-down", "size": 12, "color": "#d62728"},
+                    text=["Exit"],
+                    textposition="bottom center",
+                    showlegend=True,
+                ),
+                row=1,
+                col=1,
+            )
+
+    # Real TPO density from rebuilt profile (fallback to summary fields).
+    if profile is not None and profile.tpo_counts:
+        levels = sorted(profile.tpo_counts.keys())
+        counts = [profile.tpo_counts[level] for level in levels]
+        poc = profile.poc
+        vah = profile.vah
+        val = profile.val
+        ib_high = profile.ib_high
+        ib_low = profile.ib_low
+        bracket = profile.bracket_size
+    else:
+        poc = float(entry.get("poc") or 0)
+        vah = float(entry.get("vah") or 0)
+        val = float(entry.get("val") or 0)
+        ib_high = float(entry.get("ib_high") or 0)
+        ib_low = float(entry.get("ib_low") or 0)
+        bracket = float(entry.get("bracket_size") or 0.25)
+        session_high = float(entry.get("session_high") or poc)
+        session_low = float(entry.get("session_low") or poc)
+        levels = []
+        counts = []
+        if bracket > 0 and session_high > session_low:
+            level = session_low + bracket / 2
+            while level <= session_high + 1e-9:
+                dist = abs(level - poc) / max(session_high - session_low, 1e-9)
+                levels.append(round(level, 4))
+                counts.append(max(1, int(round((1 - dist) * 10))))
+                level += bracket
+
+    bar_colors = []
+    for level in levels:
+        if val <= level <= vah:
+            bar_colors.append("#4C78A8")
+        else:
+            bar_colors.append("#9ecae1")
+
     if levels:
         figure.add_trace(
             go.Bar(
                 y=levels,
                 x=counts,
                 orientation="h",
-                name="TPO density (approx)",
-                marker_color="#4C78A8",
-            )
-        )
-    for label, price, color in (
-        ("POC", poc, "#F58518"),
-        ("VAH", vah, "#54A24B"),
-        ("VAL", val, "#54A24B"),
-        ("Entry", record.underlying_entry_price, "#2ca02c"),
-        ("Exit", record.underlying_exit_price, "#d62728"),
-    ):
-        if price is None:
-            continue
-        figure.add_hline(
-            y=float(price),
-            line_dash="dot" if label in {"POC", "VAH", "VAL"} else "solid",
-            line_color=color,
-            annotation_text=label,
-            annotation_position="top right",
+                name="TPO count",
+                marker_color=bar_colors,
+                showlegend=False,
+                hovertemplate="Price %{y:.2f}<br>TPOs %{x}<extra></extra>",
+            ),
+            row=1,
+            col=2,
         )
 
+    # Shared level lines across both panes.
+    level_specs = [
+        ("POC", poc, "#F58518", "dash"),
+        ("VAH", vah, "#54A24B", "dot"),
+        ("VAL", val, "#54A24B", "dot"),
+        ("IB high", ib_high, "#B279A2", "dot"),
+        ("IB low", ib_low, "#B279A2", "dot"),
+    ]
+    for label, price, color, dash in level_specs:
+        if not price:
+            continue
+        for col in (1, 2):
+            figure.add_hline(
+                y=float(price),
+                line_dash=dash,
+                line_color=color,
+                line_width=1.5 if label == "POC" else 1,
+                annotation_text=label if col == 2 else None,
+                annotation_position="top left",
+                row=1,
+                col=col,
+            )
+
+    features = record.features or {}
+    grade = record.grade or {}
+    score = grade.get("overall_score")
+    if score is None:
+        score = features.get("deterministic_score")
+    quality = grade.get("execution_quality") or _quality_from_score(float(score or 0))
+    flags = []
+    if features.get("short_bottom_flag"):
+        flags.append("short@bottom")
+    if features.get("long_top_flag"):
+        flags.append("long@top")
+    if features.get("entry_vs_day_va") == "inside" or "mid_range_entry" in (
+        grade.get("rule_hits") or features.get("rule_hits") or []
+    ):
+        flags.append("mid-range")
+    flag_text = f" · {', '.join(flags)}" if flags else ""
+
     figure.update_layout(
-        title=f"TPO {record.underlying} {entry.get('date', '')} — {record.symbol}",
-        xaxis_title="Relative TPO density",
-        yaxis_title="Price",
+        title=(
+            f"{record.underlying} {session.isoformat()} — {record.symbol}  "
+            f"[{quality} {float(score or 0):.0f}]{flag_text}"
+        ),
         template="plotly_white",
-        height=700,
+        height=720,
+        margin={"l": 60, "r": 30, "t": 70, "b": 50},
+        legend={"orientation": "h", "yanchor": "bottom", "y": 1.02, "x": 0},
+        xaxis_rangeslider_visible=False,
+        bargap=0.05,
     )
-    if ascii_block:
-        figure.add_annotation(
-            text="Full letter TPO available in CLI ASCII view",
-            xref="paper",
-            yref="paper",
-            x=0,
-            y=1.05,
-            showarrow=False,
-            align="left",
-        )
+    figure.update_xaxes(title_text="Session time (NY)", row=1, col=1)
+    figure.update_xaxes(title_text="TPO count", row=1, col=2)
+    figure.update_yaxes(title_text="Price", row=1, col=1)
+    figure.update_yaxes(showticklabels=False, row=1, col=2)
 
     output_dir = Path(tempfile.gettempdir()) / "trading-analysis" / "tpo"
     output_dir.mkdir(parents=True, exist_ok=True)

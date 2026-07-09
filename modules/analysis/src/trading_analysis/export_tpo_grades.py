@@ -68,6 +68,20 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Print execution quality bucket summary after export",
     )
+    parser.add_argument(
+        "--rescan-errors",
+        action="store_true",
+        help=(
+            "Only regrade trades that previously failed (e.g. Polygon 403), "
+            "with a slow throttle. Patches the existing grades JSON in place."
+        ),
+    )
+    parser.add_argument(
+        "--rescan-throttle-seconds",
+        type=float,
+        default=1.5,
+        help="Throttle for --rescan-errors (default: 1.5s)",
+    )
     return parser
 
 
@@ -282,6 +296,34 @@ def main(argv: Sequence[str] | None = None) -> None:
     if start_date and end_date and start_date > end_date:
         raise SystemExit("start-date must be on or before end-date")
 
+    output = args.output or _default_output_path(start_date, end_date)
+
+    if args.rescan_errors:
+        from .rescan_market_data import main as rescan_main
+
+        rescan_argv = [
+            "--target",
+            "tpo",
+            "--tpo-grades",
+            str(output),
+            "--csv",
+            str(args.csv),
+            "--cache-dir",
+            str(args.cache_dir),
+            "--throttle-seconds",
+            str(args.rescan_throttle_seconds),
+        ]
+        if args.start_date:
+            rescan_argv.extend(["--start-date", args.start_date])
+        if args.end_date:
+            rescan_argv.extend(["--end-date", args.end_date])
+        if args.limit is not None:
+            rescan_argv.extend(["--limit", str(args.limit)])
+        rescan_main(rescan_argv)
+        if args.print_summary and output.exists():
+            print(summarize_quality_buckets(load_tpo_grades(output).trades))
+        return
+
     orders = load_orders(args.csv)
     orders = filter_orders(orders, symbol=args.symbol, instrument_type=args.instrument_type)
     # Keep warmup opens through end_date for lot matching
@@ -303,7 +345,6 @@ def main(argv: Sequence[str] | None = None) -> None:
         use_llm=args.grade_llm,
         limit=args.limit,
     )
-    output = args.output or _default_output_path(start_date, end_date)
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(doc.to_dict(), indent=2), encoding="utf-8")
     print(f"Wrote {len(doc.trades)} TPO grades to {output}")

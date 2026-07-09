@@ -23,7 +23,23 @@ After installation these commands are available:
 - `trading-tpo-grade` – build underlying Market Profile (TPO) features for
   realized trades from Polygon minute bars, write
   `order-data/trade-tpo-grades-*.json`, optionally call an LLM grader with
-  `--grade-llm`.
+  `--grade-llm`. Use `--rescan-errors` to slowly retry Polygon 403 trades.
+- `trading-trade-hold-review` – hold-longer counterfactual on long options
+  using the same `analyze_orders` pipeline and shared option daily cache.
+- `trading-rescan-market-data` – throttled rescan of TPO and/or option-cache
+  errors (`--target tpo|hold|both`).
+
+### Shared market-data cache
+
+TPO and trade-hold share `order-data/market-data-cache/`:
+
+| Path | Contents |
+| --- | --- |
+| `underlying/1m/{TICKER}/{YYYY-MM-DD}.json` | RTH minute bars (TPO) |
+| `options/1d/{OCC_SYMBOL}.json` | Option daily bars (hold) |
+
+Existing `order-data/tpo-cache/` files are still read as a fallback for
+underlying minutes so prior TPO runs are not re-fetched.
 
 ### TPO LLM grader (DeepSeek / OpenAI)
 

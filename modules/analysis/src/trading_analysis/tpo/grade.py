@@ -10,11 +10,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from .bars import REPO_ROOT, _load_env_value
+from ..market_data import REPO_ROOT, load_env_value
 from .render import _quality_from_score
 from .schema import TpoFeatures, TpoGrade
 
 DEFAULT_ENV_PATH = REPO_ROOT / ".env"
+_load_env_value = load_env_value
 DEFAULT_SKILL_DIR = REPO_ROOT / ".cursor" / "skills" / "tpo-execution-grade"
 # modules/analysis/skills/tpo-execution-grade (parents[3] == analysis/)
 FALLBACK_SKILL_DIR = Path(__file__).resolve().parents[3] / "skills" / "tpo-execution-grade"

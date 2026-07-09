@@ -7,6 +7,7 @@ src/trading_analysis/display_common.py
 src/trading_analysis/export_tpo_grades.py
 src/trading_analysis/export_trade_hold_review.py
 src/trading_analysis/parse_orders.py
+src/trading_analysis/rescan_market_data.py
 src/trading_analysis/summarize_trade_hold_review.py
 src/trading_analysis/symbol_pnl.py
 src/trading_analysis/trade_review.py
@@ -18,6 +19,12 @@ src/trading_analysis.egg-info/dependency_links.txt
 src/trading_analysis.egg-info/entry_points.txt
 src/trading_analysis.egg-info/requires.txt
 src/trading_analysis.egg-info/top_level.txt
+src/trading_analysis/market_data/__init__.py
+src/trading_analysis/market_data/cache.py
+src/trading_analysis/market_data/env.py
+src/trading_analysis/market_data/option_dailies.py
+src/trading_analysis/market_data/polygon.py
+src/trading_analysis/market_data/underlying_minutes.py
 src/trading_analysis/schwab/__init__.py
 src/trading_analysis/schwab/convert.py
 src/trading_analysis/tpo/__init__.py

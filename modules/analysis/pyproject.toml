@@ -20,6 +20,8 @@ trading-schwab-convert = "trading_analysis.schwab.convert:main"
 trading-bucket-analysis = "trading_analysis.bucket_analysis:main"
 trading-webull-bridge = "trading_analysis.webull_bridge:main"
 trading-tpo-grade = "trading_analysis.export_tpo_grades:main"
+trading-trade-hold-review = "trading_analysis.export_trade_hold_review:main"
+trading-rescan-market-data = "trading_analysis.rescan_market_data:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

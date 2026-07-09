@@ -1,29 +1,35 @@
+"""Export trade hold / hold-longer counterfactual review using shared market data."""
+
 from __future__ import annotations
 
 import argparse
 import json
-import os
-import socket
+import re
 import time
-import urllib.error
-import urllib.parse
-import urllib.request
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import UTC, date, datetime
 from pathlib import Path
-import re
 from typing import Sequence
 
 from .display_common import describe_contract, extract_contract_expiration, extract_underlying_symbol
-from .parse_orders import DEFAULT_ORDERS_CSV, RealizedTrade, compute_realized_trades, filter_orders_by_date, load_orders
-
-POLYGON_API_BASE_URL = "https://api.polygon.io/v2/aggs/ticker"
-REPO_ROOT = Path(__file__).resolve().parents[4]
-DEFAULT_ENV_PATH = REPO_ROOT / ".env"
-DEFAULT_OUTPUT_PATH = (
-    REPO_ROOT / "modules" / "analysis" / "order-data" / "trade-hold-review-2025-01-01-to-2026-05-15.json"
+from .market_data import (
+    DEFAULT_OPTION_DAILY_CACHE_DIR,
+    PolygonHttpError,
+    fetch_option_daily_bars,
+    get_polygon_api_key,
 )
+from .parse_orders import (
+    DEFAULT_WEBULL_ORDERS_CSV,
+    ORDER_DATA_DIR,
+    RealizedTrade,
+    analyze_orders,
+    filter_orders_by_date,
+    filter_trades_by_close_date,
+    load_orders,
+)
+
+DEFAULT_OUTPUT_PATH = ORDER_DATA_DIR / "trade-hold-review-2026-01-01-to-2026-06-30.json"
 
 
 @dataclass
@@ -40,19 +46,56 @@ class LaterOutcome:
     best_case_pnl: float | None
     data_window_end: str | None
     analysis_status: str
+    fetch_error: str | None = None
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Export trade profitability review JSON.")
-    parser.add_argument("--start-date", default="2025-01-01", help="Inclusive trade open/close filter start date (YYYY-MM-DD)")
-    parser.add_argument("--end-date", default="2026-05-15", help="Inclusive trade open/close filter end date (YYYY-MM-DD)")
-    parser.add_argument("--csv", type=Path, default=DEFAULT_ORDERS_CSV, help="Orders CSV path")
+    parser = argparse.ArgumentParser(
+        description=(
+            "Export trade hold-longer review JSON. Uses the same analyze_orders "
+            "pipeline as TPO grading and the shared option daily cache under "
+            "order-data/market-data-cache/options/1d/."
+        )
+    )
+    parser.add_argument("--start-date", default="2026-01-01", help="Inclusive close-date filter start")
+    parser.add_argument("--end-date", default="2026-06-30", help="Inclusive close-date filter end")
+    parser.add_argument("--csv", type=Path, default=DEFAULT_WEBULL_ORDERS_CSV, help="Orders CSV path")
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT_PATH, help="JSON output path")
-    parser.add_argument("--throttle-seconds", type=float, default=0.0, help="Delay between Polygon requests")
+    parser.add_argument(
+        "--cache-dir",
+        type=Path,
+        default=DEFAULT_OPTION_DAILY_CACHE_DIR,
+        help="Option daily bar cache directory",
+    )
+    parser.add_argument(
+        "--throttle-seconds",
+        type=float,
+        default=0.12,
+        help="Delay between Polygon option fetches for cache misses",
+    )
     parser.add_argument(
         "--exclude-same-day-trades",
         action="store_true",
         help="Exclude trades where open_date and close_date are the same day.",
+    )
+    parser.add_argument(
+        "--force-refresh",
+        action="store_true",
+        help="Ignore option daily cache and refetch from Polygon",
+    )
+    parser.add_argument(
+        "--rescan-errors",
+        action="store_true",
+        help=(
+            "Only refetch option symbols whose cache entry has an error "
+            "(slow throttle). Implies force-refresh for those symbols."
+        ),
+    )
+    parser.add_argument(
+        "--rescan-throttle-seconds",
+        type=float,
+        default=1.5,
+        help="Throttle used with --rescan-errors (default: 1.5s)",
     )
     return parser
 
@@ -66,9 +109,12 @@ def main(argv: Sequence[str] | None = None) -> None:
     if start_date > end_date:
         raise ValueError("start-date must be on or before end-date")
 
+    # Same realized-trade pipeline as TPO: keep warmup opens, filter by close date.
     orders = load_orders(args.csv)
-    filtered_orders = filter_orders_by_date(orders, start_date, end_date)
-    all_realized_trades = compute_realized_trades(filtered_orders)
+    orders = filter_orders_by_date(orders, None, end_date)
+    analysis = analyze_orders(orders)
+    all_realized_trades = filter_trades_by_close_date(analysis.realized_trades, start_date, end_date)
+
     excluded_short_trade_count = sum(1 for trade in all_realized_trades if trade.direction == "short")
     candidate_trades = [trade for trade in all_realized_trades if _should_analyze_trade(trade)]
     excluded_same_day_trade_count = sum(1 for trade in candidate_trades if _is_same_day_trade(trade))
@@ -79,23 +125,62 @@ def main(argv: Sequence[str] | None = None) -> None:
     ]
 
     grouped_trades = _group_trades_by_symbol(realized_trades)
-    api_key = _get_polygon_api_key()
-    option_bars_by_symbol: dict[str, list[dict[str, object]] | None] = {}
+    api_key = get_polygon_api_key()
+    if not api_key:
+        raise RuntimeError("POLYGON_API_KEY is not set.")
 
+    option_bars_by_symbol: dict[str, list[dict[str, object]] | None] = {}
+    fetch_errors: dict[str, str] = {}
     symbols = sorted(grouped_trades.keys())
+
+    from .market_data.option_dailies import option_symbols_with_cache_errors
+
+    rescan_set: set[str] = set()
+    if args.rescan_errors:
+        rescan_set = set(option_symbols_with_cache_errors(symbols, cache_dir=args.cache_dir))
+        print(f"Rescanning {len(rescan_set)} option symbols with cache errors...")
+
     for index, symbol in enumerate(symbols, start=1):
-        if not symbol or extract_contract_expiration(symbol) is None:
+        expiration = extract_contract_expiration(symbol)
+        if not symbol or expiration is None:
             option_bars_by_symbol[symbol] = None
             continue
-        option_bars_by_symbol[symbol] = _fetch_option_bars(symbol, grouped_trades[symbol], api_key)
-        if args.throttle_seconds and index < len(symbols):
-            time.sleep(args.throttle_seconds)
+
+        if args.rescan_errors:
+            # Cache-only for healthy symbols; slow force-refresh for errored ones.
+            force = symbol in rescan_set
+            throttle = args.rescan_throttle_seconds if force else 0.0
+        else:
+            force = args.force_refresh
+            throttle = args.throttle_seconds
+
+        start = min(trade.open_date for trade in grouped_trades[symbol])
+        try:
+            option_bars_by_symbol[symbol] = fetch_option_daily_bars(
+                symbol,
+                start_date=start,
+                end_date=expiration,
+                cache_dir=args.cache_dir,
+                api_key=api_key,
+                throttle_seconds=throttle,
+                force_refresh=force,
+            )
+        except PolygonHttpError as exc:
+            option_bars_by_symbol[symbol] = None
+            fetch_errors[symbol] = str(exc)
+            print(f"  fetch error {symbol}: {exc}")
+            if throttle and index < len(symbols):
+                time.sleep(throttle)
 
     profitable_trades: list[dict[str, object]] = []
     unprofitable_trades: list[dict[str, object]] = []
 
     for trade in _sort_trades(realized_trades):
-        outcome = _analyze_later_outcome(trade, option_bars_by_symbol.get(trade.symbol))
+        outcome = _analyze_later_outcome(
+            trade,
+            option_bars_by_symbol.get(trade.symbol),
+            fetch_error=fetch_errors.get(trade.symbol),
+        )
         payload = _serialize_trade(trade, outcome)
         if trade.pnl >= 0:
             profitable_trades.append(payload)
@@ -114,6 +199,11 @@ def main(argv: Sequence[str] | None = None) -> None:
             ),
             "exclude_same_day_trades": args.exclude_same_day_trades,
             "analysis_scope": "Only long option contracts are included. Short option legs are excluded.",
+            "bar_source": "polygon_option_daily",
+            "cache_dir": str(args.cache_dir),
+            "orders_pipeline": "analyze_orders",
+            "fetch_error_symbol_count": len(fetch_errors),
+            "rescan_errors": args.rescan_errors,
         },
         "profitable_trades": profitable_trades,
         "unprofitable_trades": unprofitable_trades,
@@ -123,6 +213,7 @@ def main(argv: Sequence[str] | None = None) -> None:
     print(f"Wrote trade hold review to {args.output}")
     print(f"Profitable trades: {len(profitable_trades)}")
     print(f"Unprofitable trades: {len(unprofitable_trades)}")
+    print(f"Option fetch errors: {len(fetch_errors)}")
 
 
 def _parse_iso_date(value: str) -> date:
@@ -136,59 +227,33 @@ def _group_trades_by_symbol(trades: Sequence[RealizedTrade]) -> dict[str, list[R
     return grouped
 
 
-def _fetch_option_bars(symbol: str, trades: Sequence[RealizedTrade], api_key: str) -> list[dict[str, object]]:
-    expiration = extract_contract_expiration(symbol)
-    if expiration is None:
-        return []
-    start_date = min(trade.open_date for trade in trades)
-    end_date = expiration
-    ticker = f"O:{symbol}"
-    encoded_ticker = urllib.parse.quote(ticker, safe="")
-    query = urllib.parse.urlencode({"apiKey": api_key, "limit": 50000})
-    url = (
-        f"{POLYGON_API_BASE_URL}/{encoded_ticker}/range/1/day/"
-        f"{start_date.isoformat()}/{end_date.isoformat()}?{query}"
-    )
-    request = urllib.request.Request(url, headers={"Accept": "application/json"})
-
-    for attempt in range(3):
-        try:
-            with urllib.request.urlopen(request, timeout=30) as response:
-                payload = json.loads(response.read().decode("utf-8"))
-            results = payload.get("results")
-            if not isinstance(results, list):
-                return []
-            return results
-        except urllib.error.HTTPError as exc:
-            details = exc.read().decode("utf-8", errors="replace")
-            if exc.code == 429 and attempt < 2:
-                time.sleep(2 ** (attempt + 1))
-                continue
-            raise RuntimeError(f"Polygon option request failed for {symbol}: {exc.code} {details}") from exc
-        except urllib.error.URLError as exc:
-            if attempt < 2:
-                time.sleep(2 ** (attempt + 1))
-                continue
-            raise RuntimeError(f"Polygon option request failed for {symbol}: {exc}") from exc
-        except TimeoutError as exc:
-            if attempt < 2:
-                time.sleep(2 ** (attempt + 1))
-                continue
-            raise RuntimeError(f"Polygon option request timed out for {symbol}: {exc}") from exc
-        except socket.timeout as exc:
-            if attempt < 2:
-                time.sleep(2 ** (attempt + 1))
-                continue
-            raise RuntimeError(f"Polygon option request timed out for {symbol}: {exc}") from exc
-    return []
-
-
-def _analyze_later_outcome(trade: RealizedTrade, bars: list[dict[str, object]] | None) -> LaterOutcome:
+def _analyze_later_outcome(
+    trade: RealizedTrade,
+    bars: list[dict[str, object]] | None,
+    *,
+    fetch_error: str | None = None,
+) -> LaterOutcome:
     expiration = extract_contract_expiration(trade.symbol)
     if not trade.symbol:
         return LaterOutcome(False, None, None, None, None, None, None, None, None, None, None, "missing_symbol")
     if expiration is None:
         return LaterOutcome(False, None, None, None, None, None, None, None, None, None, None, "non_option_symbol")
+    if fetch_error:
+        return LaterOutcome(
+            False,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            expiration.isoformat(),
+            "polygon_fetch_error",
+            fetch_error=fetch_error,
+        )
     if trade.trade_date >= expiration:
         pre_exit_peak = _analyze_pre_exit_peak(trade, bars or [])
         return LaterOutcome(
@@ -206,12 +271,15 @@ def _analyze_later_outcome(trade: RealizedTrade, bars: list[dict[str, object]] |
             "exited_on_or_after_expiration",
         )
     if not bars:
-        return LaterOutcome(False, None, None, None, None, None, None, None, None, None, expiration.isoformat(), "no_later_option_data")
+        return LaterOutcome(
+            False, None, None, None, None, None, None, None, None, None, expiration.isoformat(), "no_later_option_data"
+        )
 
     pre_exit_peak = _analyze_pre_exit_peak(trade, bars)
 
     later_bars = [
-        bar for bar in bars
+        bar
+        for bar in bars
         if _parse_bar_date(bar.get("t")) > trade.trade_date and _parse_bar_date(bar.get("t")) <= expiration
     ]
     if not later_bars:
@@ -280,7 +348,7 @@ def _calculate_pnl(trade: RealizedTrade, exit_price: float) -> float:
 
 def _serialize_trade(trade: RealizedTrade, outcome: LaterOutcome) -> dict[str, object]:
     expiration = extract_contract_expiration(trade.symbol)
-    trade_payload = {
+    trade_payload: dict[str, object] = {
         "symbol": trade.symbol,
         "contract_description": describe_contract(trade.symbol),
         "underlying_symbol": extract_underlying_symbol(trade.symbol),
@@ -304,6 +372,8 @@ def _serialize_trade(trade: RealizedTrade, outcome: LaterOutcome) -> dict[str, o
         "hold_longer_analysis_status": outcome.analysis_status,
         "hold_longer_data_window_end": outcome.data_window_end,
     }
+    if outcome.fetch_error:
+        trade_payload["polygon_fetch_error"] = outcome.fetch_error
     return trade_payload
 
 
@@ -330,9 +400,7 @@ def _sort_trades(trades: Sequence[RealizedTrade]) -> list[RealizedTrade]:
 
 def _analyze_pre_exit_peak(trade: RealizedTrade, bars: Sequence[dict[str, object]]) -> dict[str, str | float | None]:
     pre_exit_bars = [
-        bar
-        for bar in bars
-        if trade.open_date <= _parse_bar_date(bar.get("t")) <= trade.trade_date
+        bar for bar in bars if trade.open_date <= _parse_bar_date(bar.get("t")) <= trade.trade_date
     ]
     if not pre_exit_bars:
         return {"date": None, "price": None, "pnl": None}
@@ -353,35 +421,6 @@ def _analyze_pre_exit_peak(trade: RealizedTrade, bars: Sequence[dict[str, object
         "price": peak_price,
         "pnl": peak_pnl,
     }
-
-
-def _get_polygon_api_key() -> str:
-    api_key = os.getenv("POLYGON_API_KEY")
-    if api_key:
-        return api_key
-    loaded = _load_env_value(DEFAULT_ENV_PATH, "POLYGON_API_KEY")
-    if loaded:
-        return loaded
-    raise RuntimeError(
-        f"POLYGON_API_KEY is not set. Expected it in the environment or {DEFAULT_ENV_PATH}."
-    )
-
-
-def _load_env_value(env_path: Path, key: str) -> str | None:
-    if not env_path.exists():
-        return None
-    for raw_line in env_path.read_text(encoding="utf-8").splitlines():
-        line = raw_line.strip()
-        if not line or line.startswith("#") or "=" not in line:
-            continue
-        name, value = line.split("=", 1)
-        if name.strip() != key:
-            continue
-        cleaned = value.strip().strip('"').strip("'")
-        if cleaned:
-            os.environ[key] = cleaned
-            return cleaned
-    return None
 
 
 def _should_analyze_trade(trade: RealizedTrade) -> bool:

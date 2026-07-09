@@ -25,3 +25,5 @@ reports/emerge/
 # Webull OpenAPI local outputs
 webull_trade_sdk.log
 modules/analysis/order-data/webull_orders*.csv
+modules/analysis/order-data/market-data-cache/
+modules/analysis/order-data/tpo-cache/
