@@ -562,7 +562,7 @@ def _grade_trade_from_list(
     if record is None:
         use_llm = False
         if get_grade_api_key():
-            answer = input("LLM API key detected. Run LLM grade? [y/N]: ").strip().lower()
+            answer = input("LLM API key detected (DeepSeek/OpenAI). Run LLM grade? [y/N]: ").strip().lower()
             use_llm = answer in {"y", "yes"}
         print("Building underlying TPO features (Polygon minute bars)...")
         record = grade_realized_trade(trade, use_llm=use_llm)

@@ -21,7 +21,7 @@ from .parse_orders import (
 )
 from .tpo.bars import DEFAULT_CACHE_DIR
 from .tpo.features import extract_features_for_trade
-from .tpo.grade import get_grade_model, grade_trade_record
+from .tpo.grade import get_grade_model, get_grade_provider, grade_trade_record
 from .tpo.render import summarize_quality_buckets
 from .tpo.schema import TpoGradeRecord, TpoGradesDocument
 
@@ -58,7 +58,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--grade-llm",
         action="store_true",
-        help="Call OpenAI-compatible LLM grader (requires API key)",
+        help=(
+            "Call OpenAI-compatible LLM grader (DeepSeek or OpenAI). "
+            "Uses DEEPSEEK_API_KEY / OPENAI_API_KEY / TPO_GRADE_API_KEY"
+        ),
     )
     parser.add_argument(
         "--print-summary",
@@ -241,6 +244,7 @@ def export_tpo_grades(
         "context_sessions_before": context_before,
         "context_sessions_after": context_after,
         "bar_source": "polygon_minute",
+        "grader_provider": get_grade_provider() if use_llm else None,
         "grader_model": get_grade_model() if use_llm else None,
         "rubric_version": "1.0",
         "trade_count": len(records),
@@ -303,6 +307,8 @@ def main(argv: Sequence[str] | None = None) -> None:
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(doc.to_dict(), indent=2), encoding="utf-8")
     print(f"Wrote {len(doc.trades)} TPO grades to {output}")
+    if args.grade_llm:
+        print(f"LLM grader: provider={get_grade_provider()} model={get_grade_model()}")
     if args.print_summary:
         print(summarize_quality_buckets(doc.trades))
 

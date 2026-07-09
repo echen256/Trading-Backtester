@@ -65,28 +65,65 @@ def load_rubric_text(skill_dir: Path | None = None) -> str:
     return "\n\n".join(parts)
 
 
+DEEPSEEK_BASE_URL = "https://api.deepseek.com"
+DEEPSEEK_DEFAULT_MODEL = "deepseek-v4-flash"
+OPENAI_BASE_URL = "https://api.openai.com/v1"
+OPENAI_DEFAULT_MODEL = "gpt-4.1-mini"
+
+
+def _env_value(key: str) -> str | None:
+    return os.getenv(key) or _load_env_value(DEFAULT_ENV_PATH, key)
+
+
+def get_grade_provider() -> str:
+    """
+    Resolve LLM provider for TPO grading.
+
+    Priority:
+      1. TPO_GRADE_PROVIDER=deepseek|openai
+      2. DEEPSEEK_API_KEY present without OpenAI keys → deepseek
+      3. otherwise openai (OpenAI-compatible default)
+    """
+    explicit = (_env_value("TPO_GRADE_PROVIDER") or "").strip().lower()
+    if explicit in {"deepseek", "openai"}:
+        return explicit
+
+    has_deepseek = bool(_env_value("DEEPSEEK_API_KEY"))
+    has_openai = bool(_env_value("TPO_GRADE_API_KEY") or _env_value("OPENAI_API_KEY"))
+    if has_deepseek and not has_openai:
+        return "deepseek"
+    return "openai"
+
+
 def get_grade_api_key() -> str | None:
-    for key in ("TPO_GRADE_API_KEY", "OPENAI_API_KEY"):
-        value = os.getenv(key) or _load_env_value(DEFAULT_ENV_PATH, key)
+    provider = get_grade_provider()
+    if provider == "deepseek":
+        key_names = ("TPO_GRADE_API_KEY", "DEEPSEEK_API_KEY")
+    else:
+        key_names = ("TPO_GRADE_API_KEY", "OPENAI_API_KEY")
+    for key in key_names:
+        value = _env_value(key)
         if value:
             return value
     return None
 
 
 def get_grade_base_url() -> str:
-    return (
-        os.getenv("TPO_GRADE_BASE_URL")
-        or _load_env_value(DEFAULT_ENV_PATH, "TPO_GRADE_BASE_URL")
-        or "https://api.openai.com/v1"
-    ).rstrip("/")
+    explicit = _env_value("TPO_GRADE_BASE_URL")
+    if explicit:
+        return explicit.rstrip("/")
+    if get_grade_provider() == "deepseek":
+        return DEEPSEEK_BASE_URL
+    return OPENAI_BASE_URL
 
 
 def get_grade_model() -> str:
-    return (
-        os.getenv("TPO_GRADE_MODEL")
-        or _load_env_value(DEFAULT_ENV_PATH, "TPO_GRADE_MODEL")
-        or "gpt-4.1-mini"
-    )
+    explicit = _env_value("TPO_GRADE_MODEL")
+    if explicit:
+        return explicit
+    if get_grade_provider() == "deepseek":
+        return DEEPSEEK_DEFAULT_MODEL
+    return OPENAI_DEFAULT_MODEL
 
 
 def features_only_grade(features: TpoFeatures) -> TpoGrade:

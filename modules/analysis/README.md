@@ -24,6 +24,25 @@ After installation these commands are available:
   realized trades from Polygon minute bars, write
   `order-data/trade-tpo-grades-*.json`, optionally call an LLM grader with
   `--grade-llm`.
+
+### TPO LLM grader (DeepSeek / OpenAI)
+
+`--grade-llm` calls an OpenAI-compatible chat completions API. With only
+`DEEPSEEK_API_KEY` in `.env`, it auto-selects DeepSeek:
+
+| Env var | Purpose |
+| --- | --- |
+| `DEEPSEEK_API_KEY` | DeepSeek key (auto provider when no OpenAI key) |
+| `OPENAI_API_KEY` / `TPO_GRADE_API_KEY` | OpenAI or override key |
+| `TPO_GRADE_PROVIDER` | Force `deepseek` or `openai` |
+| `TPO_GRADE_BASE_URL` | Override API base (default DeepSeek or OpenAI) |
+| `TPO_GRADE_MODEL` | Override model (`deepseek-v4-flash` / `gpt-4.1-mini`) |
+
+```bash
+# DeepSeek (uses DEEPSEEK_API_KEY from Trading-Backtester/.env)
+trading-tpo-grade --csv order-data/webull_orders_2026.csv \
+  --start-date 2026-01-01 --end-date 2026-06-30 --grade-llm
+```
 - `trading-schwab-convert` – convert Schwab exports into the normalized
   `orders.csv` schema before analysis.
 - `trading-webull-bridge sync-analysis` – fetch Webull OpenAPI orders into
