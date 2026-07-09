@@ -638,6 +638,11 @@ def parse_args() -> argparse.Namespace:
         help="Print the console summary before any interactive report (default: true)",
     )
     parser.add_argument("--no-open-positions", action="store_true", help="Hide open positions")
+    parser.add_argument(
+        "--tpo-grades",
+        type=Path,
+        help="Path to trade-tpo-grades JSON for interactive [G] badges (auto-discovers if omitted)",
+    )
     return parser.parse_args()
 
 
@@ -673,13 +678,29 @@ def main() -> None:
         print(f"\nWrote realized trades to {args.realized_output}")
     if args.interactive_report:
         from .daily_timeline import summarize_daily_realized_pnl as summarize_timeline_pnl
+        from .export_tpo_grades import discover_tpo_grades_file, load_tpo_grades
         from .trade_timeline import run_interactive_report
 
         day_entries = summarize_timeline_pnl(report_trades)
+        tpo_grades = None
+        grades_path = args.tpo_grades
+        if grades_path is None:
+            grades_path = discover_tpo_grades_file(
+                ORDER_DATA_DIR,
+                start_date=start_date,
+                end_date=end_date,
+            )
+        if grades_path and grades_path.exists():
+            try:
+                tpo_grades = load_tpo_grades(grades_path)
+                print(f"Loaded TPO grades from {grades_path}")
+            except Exception as exc:
+                print(f"Could not load TPO grades from {grades_path}: {exc}")
         run_interactive_report(
             day_entries,
             report_trades,
             symbol_chart=_build_symbol_chart(report_trades),
+            tpo_grades=tpo_grades,
         )
 
 

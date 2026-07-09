@@ -18,6 +18,12 @@ After installation these commands are available:
 - `trading-parse-orders` – analyze a Webull OpenAPI orders CSV such as
   `modules/analysis/order-data/webull_orders_2026.csv`, including realized
   PnL for options and equities. Run with `--help` to see the available filters.
+  Pass `--tpo-grades path.json` (or rely on auto-discovery) to show TPO grade
+  badges and enable interactive `[G] Grade trade`.
+- `trading-tpo-grade` – build underlying Market Profile (TPO) features for
+  realized trades from Polygon minute bars, write
+  `order-data/trade-tpo-grades-*.json`, optionally call an LLM grader with
+  `--grade-llm`.
 - `trading-schwab-convert` – convert Schwab exports into the normalized
   `orders.csv` schema before analysis.
 - `trading-webull-bridge sync-analysis` – fetch Webull OpenAPI orders into

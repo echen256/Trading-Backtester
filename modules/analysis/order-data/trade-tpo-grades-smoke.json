@@ -1,0 +1,404 @@
+{
+  "metadata": {
+    "start_date": "2026-06-12",
+    "end_date": "2026-06-12",
+    "tpo_period_minutes": 30,
+    "context_sessions_before": 10,
+    "context_sessions_after": 10,
+    "bar_source": "polygon_minute",
+    "grader_model": null,
+    "rubric_version": "1.0",
+    "trade_count": 2,
+    "grade_llm": false
+  },
+  "trades": [
+    {
+      "trade_id": "9f08c2ba32a764c0",
+      "symbol": "TSLA260615C00425000",
+      "underlying": "TSLA",
+      "direction": "long",
+      "instrument_type": "OPTION",
+      "option_type": "CALL",
+      "quantity": 2.0,
+      "open_datetime": "2026-06-12T13:37:50.425000",
+      "close_datetime": "2026-06-12T13:42:06.185000",
+      "open_date": "2026-06-12",
+      "close_date": "2026-06-12",
+      "open_price": 2.65,
+      "close_price": 2.13,
+      "realized_pnl": -104.0,
+      "underlying_entry_price": 402.28,
+      "underlying_exit_price": 397.68,
+      "features": {
+        "entry_vs_prior_va": "above_vah",
+        "entry_vs_day_va": "inside_va",
+        "entry_vs_poc_pct": 1.4514,
+        "entry_extreme_score": 0.4937,
+        "short_bottom_flag": false,
+        "long_top_flag": true,
+        "ib_break_context": "inside_ib",
+        "exit_vs_va": "inside_va",
+        "exit_vs_poc_pct": 0.2913,
+        "gave_back_to_value": false,
+        "hold_session_count": 1,
+        "profile_shape_tags": [
+          "D_normal",
+          "trend_day"
+        ],
+        "intraday_round_trip": true,
+        "entry_session_attachment": "rth",
+        "exit_session_attachment": "rth",
+        "entry_price_source": "exact_minute",
+        "exit_price_source": "exact_minute",
+        "deterministic_score": 40.0,
+        "rule_hits": [
+          "long_at_top"
+        ]
+      },
+      "profiles": {
+        "entry_session": {
+          "date": "2026-06-12",
+          "poc": 396.525,
+          "vah": 403.325,
+          "val": 393.975,
+          "ib_high": 404.3,
+          "ib_low": 394.2,
+          "session_high": 407.54,
+          "session_low": 386.76,
+          "bracket_size": 0.85,
+          "tpo_count": 102,
+          "shape_tags": [
+            "D_normal",
+            "trend_day"
+          ],
+          "tpo_ascii": "Session 2026-06-12  POC=396.52  VA=[393.98,403.32]  IB=[394.20,404.30]\n  407.57 | ####                           N\n  406.73 | #########                      MN\n  405.88 | #########                      MN\n  405.02 | #############                  HJM\n  404.18 | #################              AHJM\n  403.32 | ##########################     AHIJLM <VAH\n  402.48 | ############################## AHIJKLM\n  401.62 | ############################## AHIJKLM\n  400.77 | #####################          AHIJK\n  399.93 | ##########################     ADEHIK\n  399.07 | ##########################     ABDEGH\n  398.23 | ##########################     ABCDEG\n  397.38 | ##########################     ABCDEG\n  396.52 | ############################## ABCDEFG <POC\n  395.68 | ############################## ABCDEFG\n  394.82 | ##########################     ABCEFG\n  393.98 | #####################          ABCEF <VAL\n  393.12 | #############                  CEF\n  392.27 | #############                  CEF\n  391.43 | #########                      EF\n  390.57 | #########                      EF\n  389.73 | #########                      EF\n  388.88 | #########                      EF\n  388.02 | ####                           F\n  387.18 | ####                           F",
+          "single_print_high": true,
+          "single_print_low": true
+        },
+        "exit_session": {
+          "date": "2026-06-12",
+          "poc": 396.525,
+          "vah": 403.325,
+          "val": 393.975,
+          "ib_high": 404.3,
+          "ib_low": 394.2,
+          "session_high": 407.54,
+          "session_low": 386.76,
+          "bracket_size": 0.85,
+          "tpo_count": 102,
+          "shape_tags": [
+            "D_normal",
+            "trend_day"
+          ],
+          "tpo_ascii": "Session 2026-06-12  POC=396.52  VA=[393.98,403.32]  IB=[394.20,404.30]\n  407.57 | ####                           N\n  406.73 | #########                      MN\n  405.88 | #########                      MN\n  405.02 | #############                  HJM\n  404.18 | #################              AHJM\n  403.32 | ##########################     AHIJLM <VAH\n  402.48 | ############################## AHIJKLM\n  401.62 | ############################## AHIJKLM\n  400.77 | #####################          AHIJK\n  399.93 | ##########################     ADEHIK\n  399.07 | ##########################     ABDEGH\n  398.23 | ##########################     ABCDEG\n  397.38 | ##########################     ABCDEG\n  396.52 | ############################## ABCDEFG <POC\n  395.68 | ############################## ABCDEFG\n  394.82 | ##########################     ABCEFG\n  393.98 | #####################          ABCEF <VAL\n  393.12 | #############                  CEF\n  392.27 | #############                  CEF\n  391.43 | #########                      EF\n  390.57 | #########                      EF\n  389.73 | #########                      EF\n  388.88 | #########                      EF\n  388.02 | ####                           F\n  387.18 | ####                           F",
+          "single_print_high": true,
+          "single_print_low": true
+        },
+        "context_summary": {
+          "poc_migration": "down",
+          "balance_days": 14,
+          "trend_days": 7,
+          "session_count": 21,
+          "poc_trail": [
+            {
+              "date": "2026-05-29",
+              "poc": 436.975
+            },
+            {
+              "date": "2026-06-01",
+              "poc": 420.9
+            },
+            {
+              "date": "2026-06-02",
+              "poc": 421.425
+            },
+            {
+              "date": "2026-06-03",
+              "poc": 424.125
+            },
+            {
+              "date": "2026-06-04",
+              "poc": 419.8
+            },
+            {
+              "date": "2026-06-05",
+              "poc": 390.75
+            },
+            {
+              "date": "2026-06-08",
+              "poc": 402.375
+            },
+            {
+              "date": "2026-06-09",
+              "poc": 396.75
+            },
+            {
+              "date": "2026-06-10",
+              "poc": 385.35
+            },
+            {
+              "date": "2026-06-11",
+              "poc": 386.8
+            },
+            {
+              "date": "2026-06-12",
+              "poc": 396.525
+            },
+            {
+              "date": "2026-06-15",
+              "poc": 410.725
+            },
+            {
+              "date": "2026-06-16",
+              "poc": 405.25
+            },
+            {
+              "date": "2026-06-17",
+              "poc": 399.75
+            },
+            {
+              "date": "2026-06-18",
+              "poc": 395.625
+            },
+            {
+              "date": "2026-06-22",
+              "poc": 406.725
+            },
+            {
+              "date": "2026-06-23",
+              "poc": 381.9
+            },
+            {
+              "date": "2026-06-24",
+              "poc": 375.75
+            },
+            {
+              "date": "2026-06-25",
+              "poc": 375.025
+            },
+            {
+              "date": "2026-06-26",
+              "poc": 385.2
+            },
+            {
+              "date": "2026-06-29",
+              "poc": 408.75
+            }
+          ]
+        }
+      },
+      "grade": {
+        "status": "features_only",
+        "overall_score": 40.0,
+        "execution_quality": "poor",
+        "rule_hits": [
+          "long_at_top"
+        ],
+        "rule_misses": [],
+        "what_went_wrong": [
+          "long_at_top"
+        ],
+        "what_went_right": [],
+        "corrective_note": "Do not buy extensions at the top of value; wait for a pullback to VAL/extreme.",
+        "confidence": 0.55,
+        "model": null,
+        "graded_at": "2026-07-09T00:30:34.800205+00:00",
+        "error": null
+      }
+    },
+    {
+      "trade_id": "631978ab000d1ae8",
+      "symbol": "TSLA260612C00412500",
+      "underlying": "TSLA",
+      "direction": "long",
+      "instrument_type": "OPTION",
+      "option_type": "CALL",
+      "quantity": 5.0,
+      "open_datetime": "2026-06-12T13:31:04.310000",
+      "close_datetime": "2026-06-12T13:45:01.048000",
+      "open_date": "2026-06-12",
+      "close_date": "2026-06-12",
+      "open_price": 2.06,
+      "close_price": 1.42,
+      "realized_pnl": -320.00000000000006,
+      "underlying_entry_price": 397.5,
+      "underlying_exit_price": 395.14,
+      "features": {
+        "entry_vs_prior_va": "above_vah",
+        "entry_vs_day_va": "inside_va",
+        "entry_vs_poc_pct": 0.2459,
+        "entry_extreme_score": 0.0337,
+        "short_bottom_flag": false,
+        "long_top_flag": false,
+        "ib_break_context": "inside_ib",
+        "exit_vs_va": "inside_va",
+        "exit_vs_poc_pct": -0.3493,
+        "gave_back_to_value": false,
+        "hold_session_count": 1,
+        "profile_shape_tags": [
+          "D_normal",
+          "trend_day"
+        ],
+        "intraday_round_trip": true,
+        "entry_session_attachment": "rth",
+        "exit_session_attachment": "rth",
+        "entry_price_source": "exact_minute",
+        "exit_price_source": "exact_minute",
+        "deterministic_score": 35.0,
+        "rule_hits": [
+          "mid_range_entry"
+        ]
+      },
+      "profiles": {
+        "entry_session": {
+          "date": "2026-06-12",
+          "poc": 396.525,
+          "vah": 403.325,
+          "val": 393.975,
+          "ib_high": 404.3,
+          "ib_low": 394.2,
+          "session_high": 407.54,
+          "session_low": 386.76,
+          "bracket_size": 0.85,
+          "tpo_count": 102,
+          "shape_tags": [
+            "D_normal",
+            "trend_day"
+          ],
+          "tpo_ascii": "Session 2026-06-12  POC=396.52  VA=[393.98,403.32]  IB=[394.20,404.30]\n  407.57 | ####                           N\n  406.73 | #########                      MN\n  405.88 | #########                      MN\n  405.02 | #############                  HJM\n  404.18 | #################              AHJM\n  403.32 | ##########################     AHIJLM <VAH\n  402.48 | ############################## AHIJKLM\n  401.62 | ############################## AHIJKLM\n  400.77 | #####################          AHIJK\n  399.93 | ##########################     ADEHIK\n  399.07 | ##########################     ABDEGH\n  398.23 | ##########################     ABCDEG\n  397.38 | ##########################     ABCDEG\n  396.52 | ############################## ABCDEFG <POC\n  395.68 | ############################## ABCDEFG\n  394.82 | ##########################     ABCEFG\n  393.98 | #####################          ABCEF <VAL\n  393.12 | #############                  CEF\n  392.27 | #############                  CEF\n  391.43 | #########                      EF\n  390.57 | #########                      EF\n  389.73 | #########                      EF\n  388.88 | #########                      EF\n  388.02 | ####                           F\n  387.18 | ####                           F",
+          "single_print_high": true,
+          "single_print_low": true
+        },
+        "exit_session": {
+          "date": "2026-06-12",
+          "poc": 396.525,
+          "vah": 403.325,
+          "val": 393.975,
+          "ib_high": 404.3,
+          "ib_low": 394.2,
+          "session_high": 407.54,
+          "session_low": 386.76,
+          "bracket_size": 0.85,
+          "tpo_count": 102,
+          "shape_tags": [
+            "D_normal",
+            "trend_day"
+          ],
+          "tpo_ascii": "Session 2026-06-12  POC=396.52  VA=[393.98,403.32]  IB=[394.20,404.30]\n  407.57 | ####                           N\n  406.73 | #########                      MN\n  405.88 | #########                      MN\n  405.02 | #############                  HJM\n  404.18 | #################              AHJM\n  403.32 | ##########################     AHIJLM <VAH\n  402.48 | ############################## AHIJKLM\n  401.62 | ############################## AHIJKLM\n  400.77 | #####################          AHIJK\n  399.93 | ##########################     ADEHIK\n  399.07 | ##########################     ABDEGH\n  398.23 | ##########################     ABCDEG\n  397.38 | ##########################     ABCDEG\n  396.52 | ############################## ABCDEFG <POC\n  395.68 | ############################## ABCDEFG\n  394.82 | ##########################     ABCEFG\n  393.98 | #####################          ABCEF <VAL\n  393.12 | #############                  CEF\n  392.27 | #############                  CEF\n  391.43 | #########                      EF\n  390.57 | #########                      EF\n  389.73 | #########                      EF\n  388.88 | #########                      EF\n  388.02 | ####                           F\n  387.18 | ####                           F",
+          "single_print_high": true,
+          "single_print_low": true
+        },
+        "context_summary": {
+          "poc_migration": "down",
+          "balance_days": 14,
+          "trend_days": 7,
+          "session_count": 21,
+          "poc_trail": [
+            {
+              "date": "2026-05-29",
+              "poc": 436.975
+            },
+            {
+              "date": "2026-06-01",
+              "poc": 420.9
+            },
+            {
+              "date": "2026-06-02",
+              "poc": 421.425
+            },
+            {
+              "date": "2026-06-03",
+              "poc": 424.125
+            },
+            {
+              "date": "2026-06-04",
+              "poc": 419.8
+            },
+            {
+              "date": "2026-06-05",
+              "poc": 390.75
+            },
+            {
+              "date": "2026-06-08",
+              "poc": 402.375
+            },
+            {
+              "date": "2026-06-09",
+              "poc": 396.75
+            },
+            {
+              "date": "2026-06-10",
+              "poc": 385.35
+            },
+            {
+              "date": "2026-06-11",
+              "poc": 386.8
+            },
+            {
+              "date": "2026-06-12",
+              "poc": 396.525
+            },
+            {
+              "date": "2026-06-15",
+              "poc": 410.725
+            },
+            {
+              "date": "2026-06-16",
+              "poc": 405.25
+            },
+            {
+              "date": "2026-06-17",
+              "poc": 399.75
+            },
+            {
+              "date": "2026-06-18",
+              "poc": 395.625
+            },
+            {
+              "date": "2026-06-22",
+              "poc": 406.725
+            },
+            {
+              "date": "2026-06-23",
+              "poc": 381.9
+            },
+            {
+              "date": "2026-06-24",
+              "poc": 375.75
+            },
+            {
+              "date": "2026-06-25",
+              "poc": 375.025
+            },
+            {
+              "date": "2026-06-26",
+              "poc": 385.2
+            },
+            {
+              "date": "2026-06-29",
+              "poc": 408.75
+            }
+          ]
+        }
+      },
+      "grade": {
+        "status": "features_only",
+        "overall_score": 35.0,
+        "execution_quality": "poor",
+        "rule_hits": [
+          "mid_range_entry"
+        ],
+        "rule_misses": [],
+        "what_went_wrong": [
+          "mid_range_entry"
+        ],
+        "what_went_right": [],
+        "corrective_note": "Skip mid-range entries; only take trades at local range extremes.",
+        "confidence": 0.55,
+        "model": null,
+        "graded_at": "2026-07-09T00:30:34.823696+00:00",
+        "error": null
+      }
+    }
+  ]
+}

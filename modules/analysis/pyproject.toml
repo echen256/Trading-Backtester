@@ -19,6 +19,10 @@ trading-parse-orders = "trading_analysis.parse_orders:main"
 trading-schwab-convert = "trading_analysis.schwab.convert:main"
 trading-bucket-analysis = "trading_analysis.bucket_analysis:main"
 trading-webull-bridge = "trading_analysis.webull_bridge:main"
+trading-tpo-grade = "trading_analysis.export_tpo_grades:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/trading_analysis"]
