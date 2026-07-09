@@ -321,19 +321,147 @@ def _close_lots(
     return remaining
 
 
+def _option_strike(symbol: str) -> float | None:
+    match = OPTION_CONTRACT_RE.fullmatch(symbol)
+    if not match:
+        return None
+    return int(match.group(4)) / 1000.0
+
+
+def _option_right(symbol: str) -> str | None:
+    match = OPTION_CONTRACT_RE.fullmatch(symbol)
+    if not match:
+        return None
+    return match.group(3)
+
+
+def _fill_group_key(order: Order) -> str:
+    return order.filled_time or order.placed_time or ""
+
+
+def _with_trade_price(order: Order, price: float) -> Order:
+    return replace(order, avg_price=price, price=price)
+
+
+def _vertical_primary_leg(option_legs: Sequence[Order]) -> Order | None:
+    """Contract that should carry the net package premium for a 2-leg vertical."""
+    if len(option_legs) != 2:
+        return None
+    rights = {_option_right(leg.symbol) for leg in option_legs}
+    if rights not in [{"C"}, {"P"}]:
+        return None
+    strikes = [_option_strike(leg.symbol) for leg in option_legs]
+    if any(strike is None for strike in strikes):
+        return None
+    if rights == {"C"}:
+        return min(option_legs, key=lambda leg: _option_strike(leg.symbol) or 0.0)
+    return max(option_legs, key=lambda leg: _option_strike(leg.symbol) or 0.0)
+
+
+def _allocate_package_prices(orders: Sequence[Order]) -> list[Order]:
+    """
+    Fix Webull multi-leg exports that stamp the *net package* (or stock) price on every leg.
+
+    - Verticals: same fill time/qty/avg on both legs → put net premium on the primary
+      strike only; other leg gets 0 so package PnL is not double-canceled.
+    - Stock+option combos: option avg equals stock price → reprice option to intrinsic.
+    """
+    grouped: dict[str, list[Order]] = defaultdict(list)
+    for order in orders:
+        grouped[_fill_group_key(order)].append(order)
+
+    rewritten: dict[int, Order] = {}
+    for legs in grouped.values():
+        if len(legs) < 2:
+            continue
+
+        option_legs = [leg for leg in legs if leg.instrument_type == "OPTION"]
+        equity_legs = [leg for leg in legs if leg.instrument_type != "OPTION"]
+
+        # Stock + option combo priced at the stock print.
+        if equity_legs and option_legs:
+            equity = equity_legs[0]
+            equity_px = equity.trade_price
+            if equity_px is None:
+                continue
+            for opt in option_legs:
+                opt_px = opt.trade_price
+                if opt_px is None or abs(opt_px - equity_px) > 0.02:
+                    continue
+                strike = _option_strike(opt.symbol)
+                right = _option_right(opt.symbol)
+                if strike is None or right is None:
+                    continue
+                if right == "C":
+                    intrinsic = max(0.0, equity_px - strike)
+                else:
+                    intrinsic = max(0.0, strike - equity_px)
+                rewritten[id(opt)] = _with_trade_price(opt, intrinsic)
+            continue
+
+        # Net-priced vertical (identical avg on both legs).
+        if len(option_legs) == 2:
+            px0 = option_legs[0].trade_price
+            px1 = option_legs[1].trade_price
+            q0 = option_legs[0].quantity
+            q1 = option_legs[1].quantity
+            sides = {leg.side for leg in option_legs}
+            if (
+                px0 is None
+                or px1 is None
+                or abs(px0 - px1) > 1e-9
+                or abs(q0 - q1) > 1e-9
+                or sides != {"BUY", "SELL"}
+                or option_legs[0].underlying != option_legs[1].underlying
+            ):
+                continue
+            primary = _vertical_primary_leg(option_legs)
+            if primary is None:
+                continue
+            for opt in option_legs:
+                if opt.symbol == primary.symbol:
+                    rewritten[id(opt)] = _with_trade_price(opt, px0)
+                else:
+                    rewritten[id(opt)] = _with_trade_price(opt, 0.0)
+
+        # 4-leg / multi packages with a single shared net price: put net on BUY legs'
+        # primary only when balanced and identical — allocate to first BUY, zero others.
+        elif len(option_legs) >= 3:
+            prices = {leg.trade_price for leg in option_legs}
+            qtys = {leg.quantity for leg in option_legs}
+            underlyings = {leg.underlying for leg in option_legs}
+            sides = {leg.side for leg in option_legs}
+            if (
+                len(prices) == 1
+                and None not in prices
+                and len(qtys) == 1
+                and len(underlyings) == 1
+                and sides == {"BUY", "SELL"}
+            ):
+                net = next(iter(prices))
+                assert net is not None
+                buys = [leg for leg in option_legs if leg.side == "BUY"]
+                priced_id = id(buys[0]) if buys else id(option_legs[0])
+                for opt in option_legs:
+                    if id(opt) == priced_id:
+                        rewritten[id(opt)] = _with_trade_price(opt, net)
+                    else:
+                        rewritten[id(opt)] = _with_trade_price(opt, 0.0)
+
+    return [rewritten.get(id(order), order) for order in orders]
+
+
 def _reconcile_order_action(order: Order) -> Order:
     """
     Prefer Side as cash-flow truth when it conflicts with Action/PositionIntent.
 
-    Webull sometimes emits BUY + SELL_TO_CLOSE (STC) or SELL + BUY_TO_OPEN (BTO).
-    Trusting Action alone mis-routes shorts (e.g. BUY+STC never covers a short lot)
-    and can overstate realized PnL by tens of thousands.
+    Webull multi-leg rows often label both legs BTO/STC while Side correctly shows
+    BUY vs SELL. Trust Side + OPEN/CLOSE so shorts open/cover on the right book.
     """
     side = order.side
     intent = order.position_intent
     action = order.action
 
-    # Equity short labels: Side may be SHORT rather than SELL.
     if action == "SHORT" or side == "SHORT":
         return replace(order, side="SELL", action="SHORT") if side == "SHORT" else order
     if action in {"COVER", "BTC"} and order.instrument_type == "EQUITY":
@@ -368,7 +496,6 @@ def _reconcile_order_action(order: Order) -> Order:
             )
         return order
 
-    # Explicit option actions without intent: if Side contradicts, prefer Side flip path.
     if action in {"BTO", "BTC"} and side == "SELL":
         return replace(order, action=side, position_intent="")
     if action in {"STO", "STC"} and side == "BUY":
@@ -408,9 +535,10 @@ def _apply_equity_order(
     unmatched: list[UnmatchedClose],
 ) -> None:
     qty = order.quantity
-    if order.action == "SHORT":
+    # Combo exports sometimes label the stock leg STC/BTO; Side is authoritative.
+    if order.action == "SHORT" or order.side == "SHORT":
         _open_lot(order, positions, "short", qty)
-    elif order.action in {"COVER", "BTC"}:
+    elif order.action in {"COVER", "BTC"} and order.side == "BUY":
         _close_lots(order, positions, realized, unmatched, "short", qty)
     elif order.side == "BUY":
         remaining = _close_lots(order, positions, realized, unmatched, "short", qty)
@@ -426,10 +554,96 @@ def compute_realized_trades(orders: Sequence[Order]) -> list[RealizedTrade]:
     return analyze_orders(orders).realized_trades
 
 
-def analyze_orders(orders: Sequence[Order]) -> AnalysisResult:
+def _normalize_instrument_type(order: Order) -> Order:
+    """Webull combo exports often tag the stock leg as OPTION with a non-OCC symbol."""
+    if order.instrument_type == "OPTION" and not OPTION_CONTRACT_RE.fullmatch(order.symbol):
+        order = replace(order, instrument_type="EQUITY")
+    elif order.instrument_type in {"", "UNKNOWN"}:
+        inferred = "OPTION" if OPTION_CONTRACT_RE.fullmatch(order.symbol) else "EQUITY"
+        order = replace(order, instrument_type=inferred)
+    return _normalize_combo_equity_quantity(order)
+
+
+def _normalize_combo_equity_quantity(order: Order) -> Order:
+    """
+    Stock+option combo rows often set Filled to the *contract* count while
+    Total Qty holds the share count (e.g. Filled=3, Total Qty=300).
+
+    Prefer share quantity for equity legs when Total Qty == Filled * 100.
+    """
+    if order.instrument_type != "EQUITY":
+        return order
+    if order.filled <= 0 or order.total_qty <= 0:
+        return order
+    if abs(order.total_qty - order.filled * OPTION_MULTIPLIER) > 1e-6:
+        return order
+    return replace(order, filled=order.total_qty)
+
+
+def _settle_expired_option_lots(
+    positions: dict[str, dict[str, Deque[PositionLot]]],
+    realized: list[RealizedTrade],
+    *,
+    as_of: date | None = None,
+) -> None:
+    """
+    Realize worthless expiration for option lots still open after their expiry date.
+
+    Webull order history often omits explicit expire/assignment fills. Settling
+    remaining long lots to 0 (and short lots to 0 credit keep) matches broker
+    realized P&L much more closely for 0DTE / held-to-expiry trades.
+    """
+    from .display_common import extract_contract_expiration
+
+    cutoff = as_of or date.max
+    for symbol, sides in list(positions.items()):
+        expiration = extract_contract_expiration(symbol)
+        if expiration is None or expiration > cutoff:
+            continue
+        match = OPTION_CONTRACT_RE.fullmatch(symbol)
+        underlying = match.group(1) if match else symbol
+        for side_name in ("long", "short"):
+            lots = sides.get(side_name)
+            if not lots:
+                continue
+            while lots:
+                lot = lots.popleft()
+                if lot.quantity <= 1e-9:
+                    continue
+                if side_name == "long":
+                    pnl = (0.0 - lot.price) * lot.quantity * OPTION_MULTIPLIER
+                    direction = "long"
+                    close_action = "EXPIRE"
+                else:
+                    pnl = (lot.price - 0.0) * lot.quantity * OPTION_MULTIPLIER
+                    direction = "short"
+                    close_action = "EXPIRE"
+                realized.append(
+                    RealizedTrade(
+                        trade_date=expiration,
+                        symbol=symbol,
+                        quantity=lot.quantity,
+                        price=0.0,
+                        pnl=pnl,
+                        open_date=lot.opened,
+                        open_price=lot.price,
+                        direction=direction,
+                        trade_datetime=datetime.combine(expiration, datetime.min.time()),
+                        open_datetime=lot.opened_at,
+                        underlying=underlying,
+                        instrument_type="OPTION",
+                        option_type=_option_type_label(symbol),
+                        open_action=lot.action,
+                        close_action=close_action,
+                    )
+                )
+
+
+def analyze_orders(orders: Sequence[Order], *, settle_expirations: bool = True) -> AnalysisResult:
     eligible_orders: list[Order] = []
     skipped_orders: list[Order] = []
     for order in orders:
+        order = _normalize_instrument_type(order)
         has_valid_contract = (
             order.instrument_type != "OPTION" or OPTION_CONTRACT_RE.fullmatch(order.symbol)
         )
@@ -444,6 +658,8 @@ def analyze_orders(orders: Sequence[Order]) -> AnalysisResult:
             eligible_orders.append(_reconcile_order_action(order))
         else:
             skipped_orders.append(order)
+
+    eligible_orders = _allocate_package_prices(eligible_orders)
     eligible_orders.sort(key=lambda order: order.traded_at or datetime.min)
 
     positions: dict[str, dict[str, Deque[PositionLot]]] = defaultdict(
@@ -457,6 +673,13 @@ def analyze_orders(orders: Sequence[Order]) -> AnalysisResult:
             _apply_option_order(order, positions, realized, unmatched)
         else:
             _apply_equity_order(order, positions, realized, unmatched)
+
+    if settle_expirations:
+        last_fill = max(
+            (order.trade_date for order in eligible_orders if order.trade_date is not None),
+            default=None,
+        )
+        _settle_expired_option_lots(positions, realized, as_of=last_fill)
 
     return AnalysisResult(
         orders=list(orders),

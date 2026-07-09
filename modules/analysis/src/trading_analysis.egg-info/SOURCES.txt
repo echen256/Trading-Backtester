@@ -4,6 +4,7 @@ src/trading_analysis/__init__.py
 src/trading_analysis/bucket_analysis.py
 src/trading_analysis/daily_timeline.py
 src/trading_analysis/display_common.py
+src/trading_analysis/export_tpo_grades.py
 src/trading_analysis/export_trade_hold_review.py
 src/trading_analysis/parse_orders.py
 src/trading_analysis/summarize_trade_hold_review.py
@@ -19,3 +20,11 @@ src/trading_analysis.egg-info/requires.txt
 src/trading_analysis.egg-info/top_level.txt
 src/trading_analysis/schwab/__init__.py
 src/trading_analysis/schwab/convert.py
+src/trading_analysis/tpo/__init__.py
+src/trading_analysis/tpo/bars.py
+src/trading_analysis/tpo/features.py
+src/trading_analysis/tpo/grade.py
+src/trading_analysis/tpo/profile.py
+src/trading_analysis/tpo/render.py
+src/trading_analysis/tpo/schema.py
+src/trading_analysis/tpo/sessions.py
