@@ -321,6 +321,61 @@ def _close_lots(
     return remaining
 
 
+def _reconcile_order_action(order: Order) -> Order:
+    """
+    Prefer Side as cash-flow truth when it conflicts with Action/PositionIntent.
+
+    Webull sometimes emits BUY + SELL_TO_CLOSE (STC) or SELL + BUY_TO_OPEN (BTO).
+    Trusting Action alone mis-routes shorts (e.g. BUY+STC never covers a short lot)
+    and can overstate realized PnL by tens of thousands.
+    """
+    side = order.side
+    intent = order.position_intent
+    action = order.action
+
+    # Equity short labels: Side may be SHORT rather than SELL.
+    if action == "SHORT" or side == "SHORT":
+        return replace(order, side="SELL", action="SHORT") if side == "SHORT" else order
+    if action in {"COVER", "BTC"} and order.instrument_type == "EQUITY":
+        return order
+
+    open_close = ""
+    if intent:
+        if "OPEN" in intent:
+            open_close = "OPEN"
+        elif "CLOSE" in intent:
+            open_close = "CLOSE"
+    elif action in {"BTO", "STO"}:
+        open_close = "OPEN"
+    elif action in {"BTC", "STC"}:
+        open_close = "CLOSE"
+
+    if side in {"BUY", "SELL"} and open_close:
+        if side == "BUY" and open_close == "OPEN":
+            reconciled_action, reconciled_intent = "BTO", "BUY_TO_OPEN"
+        elif side == "BUY" and open_close == "CLOSE":
+            reconciled_action, reconciled_intent = "BTC", "BUY_TO_CLOSE"
+        elif side == "SELL" and open_close == "OPEN":
+            reconciled_action, reconciled_intent = "STO", "SELL_TO_OPEN"
+        else:
+            reconciled_action, reconciled_intent = "STC", "SELL_TO_CLOSE"
+
+        if action != reconciled_action or (intent and intent != reconciled_intent):
+            return replace(
+                order,
+                action=reconciled_action,
+                position_intent=reconciled_intent,
+            )
+        return order
+
+    # Explicit option actions without intent: if Side contradicts, prefer Side flip path.
+    if action in {"BTO", "BTC"} and side == "SELL":
+        return replace(order, action=side, position_intent="")
+    if action in {"STO", "STC"} and side == "BUY":
+        return replace(order, action=side, position_intent="")
+    return order
+
+
 def _apply_option_order(
     order: Order,
     positions: dict[str, dict[str, Deque[PositionLot]]],
@@ -386,7 +441,7 @@ def analyze_orders(orders: Sequence[Order]) -> AnalysisResult:
             and bool(has_valid_contract)
         )
         if is_eligible:
-            eligible_orders.append(order)
+            eligible_orders.append(_reconcile_order_action(order))
         else:
             skipped_orders.append(order)
     eligible_orders.sort(key=lambda order: order.traded_at or datetime.min)
