@@ -580,6 +580,28 @@ def _normalize_combo_equity_quantity(order: Order) -> Order:
     return replace(order, filled=order.total_qty)
 
 
+def _expiration_close_datetime(expiration: date, *, opened_at: datetime | None = None) -> datetime:
+    """Return RTH close (16:00 America/New_York) on the expiration date.
+
+    If the lot was opened after that close on the same day (rare), bump to
+    opened_at so exit is never earlier than entry.
+    """
+    try:
+        from zoneinfo import ZoneInfo
+
+        ny = ZoneInfo("America/New_York")
+        close_ny = datetime(expiration.year, expiration.month, expiration.day, 16, 0, tzinfo=ny)
+        expire_dt = close_ny.astimezone(ZoneInfo("UTC")).replace(tzinfo=None)
+    except Exception:
+        expire_dt = datetime.combine(expiration, datetime.min.time()).replace(hour=20, minute=0)
+
+    if opened_at is not None:
+        opened = opened_at.replace(tzinfo=None) if opened_at.tzinfo else opened_at
+        if opened > expire_dt:
+            return opened
+    return expire_dt
+
+
 def _settle_expired_option_lots(
     positions: dict[str, dict[str, Deque[PositionLot]]],
     realized: list[RealizedTrade],
@@ -618,6 +640,9 @@ def _settle_expired_option_lots(
                     pnl = (lot.price - 0.0) * lot.quantity * OPTION_MULTIPLIER
                     direction = "short"
                     close_action = "EXPIRE"
+                # Stamp expiry at RTH close (16:00 America/New_York), not midnight.
+                # Midnight made same-day 0DTE entries appear after their "exit".
+                expire_dt = _expiration_close_datetime(expiration, opened_at=lot.opened_at)
                 realized.append(
                     RealizedTrade(
                         trade_date=expiration,
@@ -628,7 +653,7 @@ def _settle_expired_option_lots(
                         open_date=lot.opened,
                         open_price=lot.price,
                         direction=direction,
-                        trade_datetime=datetime.combine(expiration, datetime.min.time()),
+                        trade_datetime=expire_dt,
                         open_datetime=lot.opened_at,
                         underlying=underlying,
                         instrument_type="OPTION",

@@ -279,13 +279,16 @@ def discover_tpo_grades_file(
     end_date: date | None = None,
 ) -> Path | None:
     candidates = sorted(order_data_dir.glob("trade-tpo-grades-*.json"), reverse=True)
+    candidates = [path for path in candidates if "smoke" not in path.name.lower()]
     if not candidates:
         return None
     if start_date and end_date:
         exact = order_data_dir / f"trade-tpo-grades-{start_date.isoformat()}_to_{end_date.isoformat()}.json"
         if exact.exists():
             return exact
-    return candidates[0]
+    # Prefer dated exports over ad-hoc filenames.
+    dated = [path for path in candidates if any(ch.isdigit() for ch in path.name)]
+    return (dated or candidates)[0]
 
 
 def main(argv: Sequence[str] | None = None) -> None:

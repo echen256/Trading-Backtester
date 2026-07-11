@@ -1,0 +1,21 @@
+Subject: [Compliance OK] VaR/holds check — 2 pos — 2026-07-10 23:03 ET
+
+**Subject: Compliance Check – VaR/Hold Status & DeepSeek Credits**
+
+You are **not** violating any hold or VaR directives.  
+
+- **Options VaR**: Premium at risk is $1,415 / NLV $20,513.47 = **6.9%** – well under the soft 10% and hard 20% limits.  
+- **Concurrent underlyings**: You have 2 (BE, QQQ) – within the max of 3.  
+- **Hold period**: No positions were opened today, so the minimum ~2 session hold is not triggered.  
+- **Revenge sizing**: No alert needed – day P&L is negative, but no new positions were added.
+
+**DeepSeek API credits**: $99.37 remaining – no risk of running out (warn threshold is $2.00).
+
+Keep managing risk as you are. No action required.
+
+---
+DeepSeek credits: available=True balance=99.37 USD
+Monitor time (ET): 2026-07-10T23:03:14.178717-04:00
+Positions: 2 | Premium@risk: $1,415.00
+Note: X/Grok push not configured (needs user OAuth for DMs; will not publicly tweet positions).
+

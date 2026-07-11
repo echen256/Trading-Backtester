@@ -661,10 +661,36 @@ class WebullBridge:
         """Fetch current open positions."""
         self._ensure_clients()
         account_id = self.resolve_account_id()
-        res = self._trade_client.account_v2.get_account_positions(account_id)
+        # SDK method is singular: get_account_position
+        res = self._trade_client.account_v2.get_account_position(account_id)
         if res.status_code != 200:
             raise RuntimeError(f"Positions request failed: {res.status_code} {res.text}")
-        return res.json()
+        payload = res.json()
+        if isinstance(payload, list):
+            return payload
+        if isinstance(payload, dict):
+            for key in ("positions", "holdings", "data", "account_positions"):
+                value = payload.get(key)
+                if isinstance(value, list):
+                    return value
+        return []
+
+    def get_open_orders(self, *, page_size: int = 50) -> list[dict[str, Any]]:
+        """Fetch working/pending orders."""
+        self._ensure_clients()
+        account_id = self.resolve_account_id()
+        res = self._trade_client.order_v2.get_order_open(account_id, page_size=page_size)
+        if res.status_code != 200:
+            raise RuntimeError(f"Open orders request failed: {res.status_code} {res.text}")
+        payload = res.json()
+        if isinstance(payload, list):
+            return payload
+        if isinstance(payload, dict):
+            for key in ("orders", "data", "open_orders"):
+                value = payload.get(key)
+                if isinstance(value, list):
+                    return value
+        return []
 
     def get_account_balance(self) -> dict[str, Any]:
         """Fetch account balance/cash info."""

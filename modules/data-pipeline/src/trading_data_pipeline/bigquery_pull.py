@@ -123,45 +123,76 @@ def _parse_full_table_id(table_id: str) -> tuple[str, str, str]:
     return parts[0], parts[1], parts[2]
 
 
-def _resolve_table_target(args: argparse.Namespace, client: bigquery.Client) -> tuple[str, str, str]:
-    if args.table_id:
-        return _parse_full_table_id(args.table_id)
+def _resolve_table_parts(
+    *,
+    client: bigquery.Client,
+    table_id: str | None = None,
+    project: str | None = None,
+    dataset: str | None = None,
+    table: str | None = None,
+) -> tuple[str, str, str]:
+    if table_id:
+        return _parse_full_table_id(table_id)
 
-    if not args.dataset:
+    if not dataset:
         raise SystemExit("--dataset is required (or set $BQ_DATASET)")
-    if not args.table:
+    if not table:
         raise SystemExit("--table is required (or set $BQ_TABLE)")
 
-    dataset = str(args.dataset).strip()
-    table = str(args.table).strip()
-    project = args.project or client.project
-    if not project:
+    resolved_dataset = str(dataset).strip()
+    resolved_table = str(table).strip()
+    resolved_project = project or client.project
+    if not resolved_project:
         raise SystemExit("--project is required (or configure ADC default project)")
 
     # Support accidental split like --dataset "project:dataset" --table "table"
-    if ":" in dataset:
-        parsed_project, parsed_dataset = dataset.split(":", 1)
-        project = parsed_project
-        dataset = parsed_dataset
+    if ":" in resolved_dataset:
+        parsed_project, parsed_dataset = resolved_dataset.split(":", 1)
+        resolved_project = parsed_project
+        resolved_dataset = parsed_dataset
     # Support accidental split like --dataset "project.dataset" --table "table"
-    elif dataset.count(".") == 1:
-        parsed_project, parsed_dataset = dataset.split(".", 1)
-        project = parsed_project
-        dataset = parsed_dataset
+    elif resolved_dataset.count(".") == 1:
+        parsed_project, parsed_dataset = resolved_dataset.split(".", 1)
+        resolved_project = parsed_project
+        resolved_dataset = parsed_dataset
 
-    return project, dataset, table
+    return resolved_project, resolved_dataset, resolved_table
 
 
-def main(argv: list[str] | None = None) -> None:
-    parser = build_parser()
-    args = parser.parse_args(argv)
+def _resolve_table_target(args: argparse.Namespace, client: bigquery.Client) -> tuple[str, str, str]:
+    return _resolve_table_parts(
+        client=client,
+        table_id=args.table_id,
+        project=args.project,
+        dataset=args.dataset,
+        table=args.table,
+    )
 
-    start_ts = _parse_date(args.start_date)
-    end_date = _parse_date(args.end_date)
-    end_exclusive_ts = end_date + timedelta(days=1) if end_date else None
 
-    client = bigquery.Client(project=args.project) if args.project else bigquery.Client()
-    target_project, target_dataset, target_table = _resolve_table_target(args, client)
+def pull_ticker_dataframe(
+    ticker: str,
+    *,
+    table_id: str | None = None,
+    project: str | None = None,
+    dataset: str | None = None,
+    table: str | None = None,
+    location: str | None = None,
+    start_date: str | None = None,
+    end_date: str | None = None,
+) -> pd.DataFrame:
+    """Pull OHLCV rows for a ticker from BigQuery into a DataFrame."""
+    start_ts = _parse_date(start_date)
+    end_day = _parse_date(end_date)
+    end_exclusive_ts = end_day + timedelta(days=1) if end_day else None
+
+    client = bigquery.Client(project=project) if project else bigquery.Client()
+    target_project, target_dataset, target_table = _resolve_table_parts(
+        client=client,
+        table_id=table_id,
+        project=project,
+        dataset=dataset,
+        table=table,
+    )
     query = _build_query(
         target_project,
         target_dataset,
@@ -171,22 +202,25 @@ def main(argv: list[str] | None = None) -> None:
     )
 
     query_params: list[bigquery.ScalarQueryParameter] = [
-        bigquery.ScalarQueryParameter("ticker", "STRING", args.ticker),
+        bigquery.ScalarQueryParameter("ticker", "STRING", ticker),
     ]
     if start_ts is not None:
         query_params.append(bigquery.ScalarQueryParameter("start_ts", "TIMESTAMP", start_ts))
     if end_exclusive_ts is not None:
-        query_params.append(bigquery.ScalarQueryParameter("end_exclusive_ts", "TIMESTAMP", end_exclusive_ts))
+        query_params.append(
+            bigquery.ScalarQueryParameter("end_exclusive_ts", "TIMESTAMP", end_exclusive_ts)
+        )
 
     query_job = client.query(
         query,
         job_config=bigquery.QueryJobConfig(query_parameters=query_params),
-        location=args.location,
+        location=location,
     )
     df = query_job.to_dataframe()
-
     if df.empty:
-        raise SystemExit(f"No rows found for ticker {args.ticker} in {target_project}.{target_dataset}.{target_table}")
+        raise LookupError(
+            f"No rows found for ticker {ticker} in {target_project}.{target_dataset}.{target_table}"
+        )
 
     if "timestamp" in df.columns:
         df["timestamp"] = pd.to_datetime(df["timestamp"], utc=True)
@@ -197,12 +231,37 @@ def main(argv: list[str] | None = None) -> None:
         df["transactions"] = pd.to_numeric(df["transactions"], errors="coerce").astype("Int64")
 
     present_columns = [column for column in COLUMN_ORDER if column in df.columns]
-    output_df = df[present_columns].sort_values("timestamp").drop_duplicates(subset=["timestamp"], keep="last")
+    return (
+        df[present_columns]
+        .sort_values("timestamp")
+        .drop_duplicates(subset=["timestamp"], keep="last")
+        .reset_index(drop=True)
+    )
 
+
+def main(argv: list[str] | None = None) -> None:
+    parser = build_parser()
+    args = parser.parse_args(argv)
+
+    try:
+        output_df = pull_ticker_dataframe(
+            args.ticker,
+            table_id=args.table_id,
+            project=args.project,
+            dataset=args.dataset,
+            table=args.table,
+            location=args.location,
+            start_date=args.start_date,
+            end_date=args.end_date,
+        )
+    except LookupError as exc:
+        raise SystemExit(str(exc)) from exc
+
+    target_label = args.table_id or f"{args.project}.{args.dataset}.{args.table}"
     if args.dry_run:
         print(
             f"[dry-run] {args.ticker} -> {len(output_df)} rows from "
-            f"{target_project}.{target_dataset}.{target_table} (timeframe={args.timeframe})"
+            f"{target_label} (timeframe={args.timeframe})"
         )
         return
 
