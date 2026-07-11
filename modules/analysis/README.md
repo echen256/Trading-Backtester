@@ -28,6 +28,38 @@ After installation these commands are available:
   using the same `analyze_orders` pipeline and shared option daily cache.
 - `trading-rescan-market-data` – throttled rescan of TPO and/or option-cache
   errors (`--target tpo|hold|both`).
+- `trading-compliance-monitor` – polls Webull positions/balance, checks VaR /
+  concentration / same-day hold rules, and emails a DeepSeek brief tagged
+  `[TRADING-COMPLIANCE]`.
+
+### Compliance monitor cron
+
+Weekday digests fire at market-relative times (America/New_York RTH):
+
+| Event | ET |
+| --- | --- |
+| 1 hour after open | 10:30 |
+| Mid-session | 12:45 |
+| 1 hour before close | 15:00 |
+
+The installer reads the machine timezone (`/etc/localtime`, or `COMPLIANCE_CRON_TZ` / `TZ`) and writes local wall-clock cron entries. Re-run after changing system timezone (e.g. travel).
+
+```bash
+# Install / refresh (idempotent; replaces the marked crontab block)
+python3 modules/analysis/scripts/install_compliance_cron.py
+
+# Preview only
+python3 modules/analysis/scripts/install_compliance_cron.py --dry-run
+
+# Remove
+python3 modules/analysis/scripts/install_compliance_cron.py --remove
+
+# Manual one-shot
+trading-compliance-monitor --once --force-email
+```
+
+Runner: `modules/analysis/scripts/run_compliance_monitor.sh`  
+Logs: `modules/analysis/order-data/compliance-monitor.cron.log`
 
 ### Shared market-data cache
 

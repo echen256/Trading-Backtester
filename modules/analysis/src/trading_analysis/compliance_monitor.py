@@ -30,6 +30,9 @@ DEFAULT_ENV_PATH = REPO_ROOT / ".env"
 ORDER_DATA_DIR = PACKAGE_ROOT / "order-data"
 DEFAULT_STATE_PATH = ORDER_DATA_DIR / "compliance-monitor-state.json"
 DEFAULT_ALERT_TO = "ericthechen@gmail.com"
+# Stable token for Gmail filters (Subject contains / Has the words).
+EMAIL_FILTER_TAG = "[TRADING-COMPLIANCE]"
+EMAIL_FILTER_HEADER = "X-Trading-Compliance-Monitor"
 
 NY = ZoneInfo("America/New_York")
 CHI = ZoneInfo("America/Chicago")
@@ -514,6 +517,8 @@ def send_email_smtp(to_addr: str, subject: str, body: str) -> bool:
     msg["From"] = user
     msg["To"] = to_addr
     msg["Subject"] = subject
+    msg[EMAIL_FILTER_HEADER] = "v1"
+    msg["X-Entity-Ref-ID"] = "trading-compliance-monitor"  # reduces some threading quirks
     msg.set_content(body)
     context = ssl.create_default_context()
     with smtplib.SMTP_SSL(host, port, context=context) as smtp:
@@ -670,18 +675,23 @@ def run_once(config: MonitorConfig, *, force_email: bool = False) -> int:
         credit_line = "AT RISK OF RUNNING OUT OF DEEPSEEK API CREDITS — " + credit_line
 
     body = (
+        f"{EMAIL_FILTER_TAG}\n"
         f"{brief}\n\n"
         f"---\n"
         f"{credit_line}\n"
         f"Monitor time (ET): {_now_et().isoformat()}\n"
         f"Positions: {len(snapshot.positions)} | Premium@risk: ${snapshot.premium_at_risk:,.2f}\n"
+        f"Filter tag: {EMAIL_FILTER_TAG}\n"
         f"Note: X/Grok push not configured (needs user OAuth for DMs; "
         f"will not publicly tweet positions).\n"
     )
 
     severities = {f.severity for f in all_flags}
     prefix = "CRITICAL" if "critical" in severities else "WARN" if "warning" in severities else "OK"
-    subject = f"[Compliance {prefix}] VaR/holds check — {len(snapshot.positions)} pos — {_now_et().strftime('%Y-%m-%d %H:%M ET')}"
+    subject = (
+        f"{EMAIL_FILTER_TAG} [{prefix}] VaR/holds — {len(snapshot.positions)} pos — "
+        f"{_now_et().strftime('%Y-%m-%d %H:%M ET')}"
+    )
 
     state_path = Path(os.getenv("COMPLIANCE_STATE_PATH", str(DEFAULT_STATE_PATH)))
     state = load_state(state_path)
