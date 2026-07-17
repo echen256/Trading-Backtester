@@ -31,6 +31,38 @@ After installation these commands are available:
 - `trading-compliance-monitor` – polls Webull positions/balance, checks VaR /
   concentration / same-day hold rules, and emails a DeepSeek brief tagged
   `[TRADING-COMPLIANCE]`.
+- `trading-options-premium` – agent/CLI API for liquid **15–60 DTE** option
+  premiums vs underlying (Polygon). Subcommands: `list`, `fetch`, `chart`.
+  Watchlist: `order-data/watchlist.txt` (or `--symbol`).
+- `trading-options-premium-ui` – Streamlit dashboard (thin wrapper over the
+  same `build_premium_payload` API).
+
+### Options premium vs underlying
+
+```bash
+# List liquid contracts (JSON)
+# Volume scan defaults to strikes within ±50% of spot (`--moneyness-band 0.5`).
+trading-options-premium list --symbol MU --dte-min 15 --dte-max 60
+
+# Fetch underlying OHLC + premium series for agents
+trading-options-premium fetch --symbol MU --start-date 2026-05-22 --end-date 2026-07-16 -o /tmp/mu-premiums.json
+
+# Plotly HTML
+trading-options-premium chart --symbol MU --select MU260717C01250000 -o order-data/options-premium-chart.html
+
+# Interactive UI
+trading-options-premium-ui
+```
+
+Python API (same functions the UI calls):
+
+```python
+from datetime import date
+from trading_analysis.options_premium import build_premium_payload, build_premium_figure
+
+payload = build_premium_payload("MU", start_date=date(2026, 5, 22), end_date=date(2026, 7, 16))
+fig = build_premium_figure(payload, show_close=True, show_high=True)
+```
 
 ### Compliance monitor cron
 
@@ -68,7 +100,9 @@ TPO and trade-hold share `order-data/market-data-cache/`:
 | Path | Contents |
 | --- | --- |
 | `underlying/1m/{TICKER}/{YYYY-MM-DD}.json` | RTH minute bars (TPO) |
-| `options/1d/{OCC_SYMBOL}.json` | Option daily bars (hold) |
+| `underlying/1d/{TICKER}.json` | Underlying daily bars (options premium) |
+| `options/1d/{OCC_SYMBOL}.json` | Option daily bars (hold / premiums) |
+| `options/contracts/{...}.json` | Cached option contract lists |
 
 Existing `order-data/tpo-cache/` files are still read as a fallback for
 underlying minutes so prior TPO runs are not re-fetched.

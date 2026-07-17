@@ -2,6 +2,8 @@
 trading-bucket-analysis = trading_analysis.bucket_analysis:main
 trading-compliance-monitor = trading_analysis.compliance_monitor:main
 trading-fisher-trade-overlay = trading_analysis.fisher_trade_overlay:main
+trading-options-premium = trading_analysis.options_premium.cli:main
+trading-options-premium-ui = trading_analysis.options_premium.ui:main
 trading-parse-orders = trading_analysis.parse_orders:main
 trading-rescan-market-data = trading_analysis.rescan_market_data:main
 trading-schwab-convert = trading_analysis.schwab.convert:main

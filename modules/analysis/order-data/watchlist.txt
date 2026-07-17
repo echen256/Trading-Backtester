@@ -1,0 +1,6 @@
+# Options-premium dashboard watchlist (one ticker per line)
+MU
+INTC
+QQQ
+NVDA
+TSLA

@@ -29,7 +29,17 @@ src/trading_analysis/market_data/cache.py
 src/trading_analysis/market_data/env.py
 src/trading_analysis/market_data/option_dailies.py
 src/trading_analysis/market_data/polygon.py
+src/trading_analysis/market_data/underlying_dailies.py
 src/trading_analysis/market_data/underlying_minutes.py
+src/trading_analysis/options_premium/__init__.py
+src/trading_analysis/options_premium/api.py
+src/trading_analysis/options_premium/app.py
+src/trading_analysis/options_premium/chart.py
+src/trading_analysis/options_premium/cli.py
+src/trading_analysis/options_premium/contracts.py
+src/trading_analysis/options_premium/series.py
+src/trading_analysis/options_premium/ui.py
+src/trading_analysis/options_premium/watchlist.py
 src/trading_analysis/schwab/__init__.py
 src/trading_analysis/schwab/convert.py
 src/trading_analysis/tpo/__init__.py
