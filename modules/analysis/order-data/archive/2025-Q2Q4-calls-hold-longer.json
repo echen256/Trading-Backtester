@@ -1,0 +1,64 @@
+{
+  "calls_by_quarter": {
+    "Q2": {
+      "n": 336,
+      "n_with_later_data": 280,
+      "actual_pnl": -5064.0,
+      "if_best_later_exit": 469771.0,
+      "upside_full": 474835.0,
+      "if_half_ideal_capture": 232353.5,
+      "upside_half": 237417.5,
+      "pct_would_improve": 76.4,
+      "median_missed_when_positive": 1093.0,
+      "sum_missed_on_losers": 265765.0,
+      "sum_missed_on_winners": 220737.0,
+      "same_day_n": 152,
+      "same_day_missed": 214429.0,
+      "multi_day_missed": 274773.0,
+      "avg_hold": 1.08
+    },
+    "Q3": {
+      "n": 343,
+      "n_with_later_data": 322,
+      "actual_pnl": 16180.0,
+      "if_best_later_exit": 953107.0,
+      "upside_full": 936927.0,
+      "if_half_ideal_capture": 484643.5,
+      "upside_half": 468463.5,
+      "pct_would_improve": 92.2,
+      "median_missed_when_positive": 1480.0,
+      "sum_missed_on_losers": 515839.0,
+      "sum_missed_on_winners": 420126.0,
+      "same_day_n": 92,
+      "same_day_missed": 182148.0,
+      "multi_day_missed": 757765.0,
+      "avg_hold": 2.11
+    },
+    "Q4": {
+      "n": 356,
+      "n_with_later_data": 289,
+      "actual_pnl": 13147.0,
+      "if_best_later_exit": 672160.0,
+      "upside_full": 659013.0,
+      "if_half_ideal_capture": 342653.5,
+      "upside_half": 329506.5,
+      "pct_would_improve": 86.2,
+      "median_missed_when_positive": 1119.0,
+      "sum_missed_on_losers": 278458.0,
+      "sum_missed_on_winners": 372635.0,
+      "same_day_n": 94,
+      "same_day_missed": 180705.0,
+      "multi_day_missed": 485672.0,
+      "avg_hold": 1.86
+    }
+  },
+  "all_calls": {
+    "actual": 24263.0,
+    "full_ideal": 2095038.0,
+    "half_ideal": 1059650.5,
+    "upside_full": 2070775.0,
+    "upside_half": 1035387.5,
+    "n": 1035,
+    "n_ok": 891
+  }
+}

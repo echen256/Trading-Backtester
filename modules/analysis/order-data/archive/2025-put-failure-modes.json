@@ -1,0 +1,813 @@
+{
+  "Q2": {
+    "n": 292,
+    "pnl": 10416.0,
+    "win_rate": 33.2,
+    "loser_n": 194,
+    "loser_pnl": -51852.0,
+    "winner_pnl": 62268.0,
+    "avg_hold_losers": 2.3,
+    "avg_hold_winners": 1.22,
+    "same_day_pct_losers": 51.0,
+    "primary_failure_modes": {
+      "quick_cut_after_entry": {
+        "n": 32,
+        "pnl": -5860.0
+      },
+      "same_day_scratch": {
+        "n": 99,
+        "pnl": -18910.0
+      },
+      "short_dated_decay": {
+        "n": 16,
+        "pnl": -6383.0
+      },
+      "multi_day_wrong_way": {
+        "n": 27,
+        "pnl": -10935.0
+      },
+      "held_loser_into_rally": {
+        "n": 20,
+        "pnl": -9764.0
+      }
+    },
+    "tag_frequency_on_losers": {
+      "same_day_scratch": {
+        "n": 99,
+        "pnl": -18910.0
+      },
+      "0_2_dte": {
+        "n": 66,
+        "pnl": -16748.0
+      },
+      "premium_down_25_50": {
+        "n": 53,
+        "pnl": -16547.0
+      },
+      "premium_crushed_>50%": {
+        "n": 46,
+        "pnl": -22748.0
+      },
+      "one_day_cut": {
+        "n": 44,
+        "pnl": -10784.0
+      },
+      "large_size_10+": {
+        "n": 34,
+        "pnl": -13647.0
+      },
+      "multi_day_bleed": {
+        "n": 31,
+        "pnl": -12394.0
+      },
+      "short_dte_3_7": {
+        "n": 30,
+        "pnl": -8030.0
+      },
+      "held_loser_too_long": {
+        "n": 20,
+        "pnl": -9764.0
+      }
+    },
+    "hold_buckets": {
+      "0d": {
+        "n": 138,
+        "pnl": -3041.0
+      },
+      "1d": {
+        "n": 74,
+        "pnl": 14094.0
+      },
+      "2-5d": {
+        "n": 64,
+        "pnl": 5851.0
+      },
+      ">5d": {
+        "n": 16,
+        "pnl": -6488.0
+      }
+    },
+    "dte_winners": {
+      "med": 7,
+      "mean": 16.6,
+      "pct_le7": 56.7
+    },
+    "dte_losers": {
+      "med": 8.0,
+      "mean": 24.0,
+      "pct_le7": 49.5
+    },
+    "worst_names": [
+      [
+        "TSLA",
+        -13104.0,
+        39
+      ],
+      [
+        "QCOM",
+        -6594.0,
+        15
+      ],
+      [
+        "QQQ",
+        -6034.0,
+        27
+      ],
+      [
+        "MU",
+        -4466.0,
+        13
+      ],
+      [
+        "AAPL",
+        -3611.0,
+        18
+      ],
+      [
+        "MSTR",
+        -3348.0,
+        15
+      ]
+    ],
+    "monthly": {
+      "2025-04": {
+        "pnl": 23863.0,
+        "n": 146,
+        "win": 61,
+        "win_rate": 41.8
+      },
+      "2025-05": {
+        "pnl": -10691.0,
+        "n": 76,
+        "win": 15,
+        "win_rate": 19.7
+      },
+      "2025-06": {
+        "pnl": -2756.0,
+        "n": 70,
+        "win": 21,
+        "win_rate": 30.0
+      }
+    },
+    "worst_trades": [
+      {
+        "sym": "QQQ",
+        "open": "2025-04-07",
+        "close": "2025-04-08",
+        "hold": 1,
+        "dte": 1,
+        "qty": 2.0,
+        "ret": -98.3,
+        "pnl": -1754.0,
+        "modes": [
+          "one_day_cut",
+          "premium_crushed_>50%",
+          "0_2_dte"
+        ]
+      },
+      {
+        "sym": "TSLA",
+        "open": "2025-05-05",
+        "close": "2025-05-13",
+        "hold": 8,
+        "dte": 11,
+        "qty": 3.0,
+        "ret": -99.0,
+        "pnl": -1707.0,
+        "modes": [
+          "held_loser_too_long",
+          "premium_crushed_>50%"
+        ]
+      },
+      {
+        "sym": "QCOM",
+        "open": "2025-04-07",
+        "close": "2025-04-09",
+        "hold": 2,
+        "dte": 4,
+        "qty": 10.0,
+        "ret": -43.1,
+        "pnl": -1480.0,
+        "modes": [
+          "multi_day_bleed",
+          "premium_down_25_50",
+          "short_dte_3_7",
+          "large_size_10+"
+        ]
+      },
+      {
+        "sym": "TSLA",
+        "open": "2025-04-11",
+        "close": "2025-04-23",
+        "hold": 12,
+        "dte": 35,
+        "qty": 2.0,
+        "ret": -64.4,
+        "pnl": -1410.0,
+        "modes": [
+          "held_loser_too_long",
+          "premium_crushed_>50%"
+        ]
+      },
+      {
+        "sym": "QQQ",
+        "open": "2025-04-04",
+        "close": "2025-04-04",
+        "hold": 0,
+        "dte": 0,
+        "qty": 8.0,
+        "ret": -88.0,
+        "pnl": -1344.0,
+        "modes": [
+          "same_day_scratch",
+          "premium_crushed_>50%",
+          "0_2_dte"
+        ]
+      },
+      {
+        "sym": "MU",
+        "open": "2025-05-23",
+        "close": "2025-05-27",
+        "hold": 4,
+        "dte": 7,
+        "qty": 12.0,
+        "ret": -77.3,
+        "pnl": -1308.0,
+        "modes": [
+          "multi_day_bleed",
+          "premium_crushed_>50%",
+          "short_dte_3_7",
+          "large_size_10+"
+        ]
+      },
+      {
+        "sym": "QCOM",
+        "open": "2025-04-09",
+        "close": "2025-04-09",
+        "hold": 0,
+        "dte": 2,
+        "qty": 8.0,
+        "ret": -52.7,
+        "pnl": -1176.0,
+        "modes": [
+          "same_day_scratch",
+          "premium_crushed_>50%",
+          "0_2_dte"
+        ]
+      },
+      {
+        "sym": "WMT",
+        "open": "2025-02-18",
+        "close": "2025-06-20",
+        "hold": 122,
+        "dte": 122,
+        "qty": 75.0,
+        "ret": -100.0,
+        "pnl": -975.0,
+        "modes": [
+          "held_loser_too_long",
+          "premium_crushed_>50%",
+          "large_size_10+"
+        ]
+      }
+    ],
+    "avg_loser_qty": 6.35,
+    "avg_winner_qty": 4.93
+  },
+  "Q3": {
+    "n": 130,
+    "pnl": -12207.0,
+    "win_rate": 23.1,
+    "loser_n": 99,
+    "loser_pnl": -17505.0,
+    "winner_pnl": 5298.0,
+    "avg_hold_losers": 2.76,
+    "avg_hold_winners": 1.13,
+    "same_day_pct_losers": 32.3,
+    "primary_failure_modes": {
+      "quick_cut_after_entry": {
+        "n": 25,
+        "pnl": -3426.0
+      },
+      "same_day_scratch": {
+        "n": 32,
+        "pnl": -3105.0
+      },
+      "held_loser_into_rally": {
+        "n": 14,
+        "pnl": -6067.0
+      },
+      "multi_day_wrong_way": {
+        "n": 23,
+        "pnl": -3931.0
+      },
+      "short_dated_decay": {
+        "n": 5,
+        "pnl": -976.0
+      }
+    },
+    "tag_frequency_on_losers": {
+      "same_day_scratch": {
+        "n": 32,
+        "pnl": -3105.0
+      },
+      "one_day_cut": {
+        "n": 28,
+        "pnl": -3948.0
+      },
+      "multi_day_bleed": {
+        "n": 25,
+        "pnl": -4385.0
+      },
+      "premium_down_25_50": {
+        "n": 19,
+        "pnl": -4500.0
+      },
+      "premium_crushed_>50%": {
+        "n": 18,
+        "pnl": -7445.0
+      },
+      "held_loser_too_long": {
+        "n": 14,
+        "pnl": -6067.0
+      },
+      "0_2_dte": {
+        "n": 11,
+        "pnl": -1826.0
+      },
+      "short_dte_3_7": {
+        "n": 5,
+        "pnl": -694.0
+      },
+      "large_size_10+": {
+        "n": 4,
+        "pnl": -830.0
+      }
+    },
+    "hold_buckets": {
+      "0d": {
+        "n": 46,
+        "pnl": -1196.0
+      },
+      "1d": {
+        "n": 40,
+        "pnl": -1435.0
+      },
+      "2-5d": {
+        "n": 34,
+        "pnl": -4944.0
+      },
+      ">5d": {
+        "n": 10,
+        "pnl": -4632.0
+      }
+    },
+    "dte_winners": {
+      "med": 47.5,
+      "mean": 33.4,
+      "pct_le7": 46.7
+    },
+    "dte_losers": {
+      "med": 57,
+      "mean": 48.7,
+      "pct_le7": 16.2
+    },
+    "worst_names": [
+      [
+        "TSLA",
+        -6229.0,
+        18
+      ],
+      [
+        "COIN",
+        -3710.0,
+        19
+      ],
+      [
+        "MSTR",
+        -1215.0,
+        9
+      ],
+      [
+        "NVDA",
+        -901.0,
+        9
+      ],
+      [
+        "MU",
+        -604.0,
+        6
+      ],
+      [
+        "PLTR",
+        -474.0,
+        2
+      ]
+    ],
+    "monthly": {
+      "2025-07": {
+        "pnl": -1816.0,
+        "n": 20,
+        "win": 2,
+        "win_rate": 10.0
+      },
+      "2025-08": {
+        "pnl": -4427.0,
+        "n": 37,
+        "win": 12,
+        "win_rate": 32.4
+      },
+      "2025-09": {
+        "pnl": -5964.0,
+        "n": 73,
+        "win": 16,
+        "win_rate": 21.9
+      }
+    },
+    "worst_trades": [
+      {
+        "sym": "TSLA",
+        "open": "2025-07-07",
+        "close": "2025-08-15",
+        "hold": 39,
+        "dte": 39,
+        "qty": 2.0,
+        "ret": -100.0,
+        "pnl": -1146.0,
+        "modes": [
+          "held_loser_too_long",
+          "premium_crushed_>50%"
+        ]
+      },
+      {
+        "sym": "TSLA",
+        "open": "2025-08-01",
+        "close": "2025-08-11",
+        "hold": 10,
+        "dte": 49,
+        "qty": 2.0,
+        "ret": -73.6,
+        "pnl": -1090.0,
+        "modes": [
+          "held_loser_too_long",
+          "premium_crushed_>50%"
+        ]
+      },
+      {
+        "sym": "COIN",
+        "open": "2025-09-05",
+        "close": "2025-09-10",
+        "hold": 5,
+        "dte": 42,
+        "qty": 2.0,
+        "ret": -67.9,
+        "pnl": -862.0,
+        "modes": [
+          "held_loser_too_long",
+          "premium_crushed_>50%"
+        ]
+      },
+      {
+        "sym": "TSLA",
+        "open": "2025-07-31",
+        "close": "2025-08-11",
+        "hold": 11,
+        "dte": 50,
+        "qty": 2.0,
+        "ret": -65.8,
+        "pnl": -750.0,
+        "modes": [
+          "held_loser_too_long",
+          "premium_crushed_>50%"
+        ]
+      },
+      {
+        "sym": "TSLA",
+        "open": "2025-07-15",
+        "close": "2025-07-28",
+        "hold": 13,
+        "dte": 66,
+        "qty": 1.0,
+        "ret": -52.0,
+        "pnl": -575.0,
+        "modes": [
+          "held_loser_too_long",
+          "premium_crushed_>50%"
+        ]
+      },
+      {
+        "sym": "TSLA",
+        "open": "2025-08-01",
+        "close": "2025-08-11",
+        "hold": 10,
+        "dte": 49,
+        "qty": 1.0,
+        "ret": -70.0,
+        "pnl": -455.0,
+        "modes": [
+          "held_loser_too_long",
+          "premium_crushed_>50%"
+        ]
+      },
+      {
+        "sym": "QQQ",
+        "open": "2025-09-25",
+        "close": "2025-09-30",
+        "hold": 5,
+        "dte": 5,
+        "qty": 3.0,
+        "ret": -97.9,
+        "pnl": -426.0,
+        "modes": [
+          "held_loser_too_long",
+          "premium_crushed_>50%",
+          "short_dte_3_7"
+        ]
+      },
+      {
+        "sym": "OKLO",
+        "open": "2025-09-26",
+        "close": "2025-09-29",
+        "hold": 3,
+        "dte": 56,
+        "qty": 2.0,
+        "ret": -36.4,
+        "pnl": -390.0,
+        "modes": [
+          "multi_day_bleed",
+          "premium_down_25_50"
+        ]
+      }
+    ],
+    "avg_loser_qty": 2.44,
+    "avg_winner_qty": 3.17
+  },
+  "Q4": {
+    "n": 452,
+    "pnl": -15939.0,
+    "win_rate": 37.8,
+    "loser_n": 274,
+    "loser_pnl": -59686.0,
+    "winner_pnl": 43747.0,
+    "avg_hold_losers": 1.43,
+    "avg_hold_winners": 1.61,
+    "same_day_pct_losers": 49.3,
+    "primary_failure_modes": {
+      "same_day_scratch": {
+        "n": 135,
+        "pnl": -13959.0
+      },
+      "quick_cut_after_entry": {
+        "n": 49,
+        "pnl": -14765.0
+      },
+      "multi_day_wrong_way": {
+        "n": 42,
+        "pnl": -14197.0
+      },
+      "held_loser_into_rally": {
+        "n": 27,
+        "pnl": -12628.0
+      },
+      "short_dated_decay": {
+        "n": 21,
+        "pnl": -4137.0
+      }
+    },
+    "tag_frequency_on_losers": {
+      "same_day_scratch": {
+        "n": 135,
+        "pnl": -13959.0
+      },
+      "0_2_dte": {
+        "n": 84,
+        "pnl": -10653.0
+      },
+      "premium_crushed_>50%": {
+        "n": 75,
+        "pnl": -29668.0
+      },
+      "premium_down_25_50": {
+        "n": 67,
+        "pnl": -16952.0
+      },
+      "one_day_cut": {
+        "n": 66,
+        "pnl": -18309.0
+      },
+      "multi_day_bleed": {
+        "n": 46,
+        "pnl": -14790.0
+      },
+      "held_loser_too_long": {
+        "n": 27,
+        "pnl": -12628.0
+      },
+      "large_size_10+": {
+        "n": 27,
+        "pnl": -5717.0
+      },
+      "short_dte_3_7": {
+        "n": 16,
+        "pnl": -4450.0
+      }
+    },
+    "hold_buckets": {
+      "0d": {
+        "n": 212,
+        "pnl": -2902.0
+      },
+      "1d": {
+        "n": 122,
+        "pnl": -2205.0
+      },
+      "2-5d": {
+        "n": 85,
+        "pnl": -7307.0
+      },
+      ">5d": {
+        "n": 33,
+        "pnl": -3525.0
+      }
+    },
+    "dte_winners": {
+      "med": 18,
+      "mean": 26.4,
+      "pct_le7": 33.3
+    },
+    "dte_losers": {
+      "med": 17.0,
+      "mean": 22.6,
+      "pct_le7": 36.5
+    },
+    "worst_names": [
+      [
+        "QQQ",
+        -9940.0,
+        70
+      ],
+      [
+        "AMD",
+        -8568.0,
+        15
+      ],
+      [
+        "ASML",
+        -7152.0,
+        7
+      ],
+      [
+        "MU",
+        -4683.0,
+        15
+      ],
+      [
+        "KRE",
+        -2917.0,
+        13
+      ],
+      [
+        "TSLA",
+        -2616.0,
+        16
+      ]
+    ],
+    "monthly": {
+      "2025-10": {
+        "pnl": -8693.0,
+        "n": 136,
+        "win": 45,
+        "win_rate": 33.1
+      },
+      "2025-11": {
+        "pnl": 901.0,
+        "n": 169,
+        "win": 77,
+        "win_rate": 45.6
+      },
+      "2025-12": {
+        "pnl": -8147.0,
+        "n": 147,
+        "win": 49,
+        "win_rate": 33.3
+      }
+    },
+    "worst_trades": [
+      {
+        "sym": "AMD",
+        "open": "2025-10-09",
+        "close": "2025-10-13",
+        "hold": 4,
+        "dte": 43,
+        "qty": 2.0,
+        "ret": -100.0,
+        "pnl": -2030.0,
+        "modes": [
+          "multi_day_bleed",
+          "premium_crushed_>50%"
+        ]
+      },
+      {
+        "sym": "AMD",
+        "open": "2025-11-25",
+        "close": "2025-12-02",
+        "hold": 7,
+        "dte": 24,
+        "qty": 3.0,
+        "ret": -77.5,
+        "pnl": -1674.0,
+        "modes": [
+          "held_loser_too_long",
+          "premium_crushed_>50%"
+        ]
+      },
+      {
+        "sym": "ASTS",
+        "open": "2025-11-06",
+        "close": "2025-11-12",
+        "hold": 6,
+        "dte": 15,
+        "qty": 10.0,
+        "ret": -77.9,
+        "pnl": -1480.0,
+        "modes": [
+          "held_loser_too_long",
+          "premium_crushed_>50%",
+          "large_size_10+"
+        ]
+      },
+      {
+        "sym": "AMD",
+        "open": "2025-11-07",
+        "close": "2025-11-13",
+        "hold": 6,
+        "dte": 70,
+        "qty": 2.0,
+        "ret": -56.2,
+        "pnl": -1440.0,
+        "modes": [
+          "held_loser_too_long",
+          "premium_crushed_>50%"
+        ]
+      },
+      {
+        "sym": "AMD",
+        "open": "2025-11-07",
+        "close": "2025-11-13",
+        "hold": 6,
+        "dte": 70,
+        "qty": 2.0,
+        "ret": -55.9,
+        "pnl": -1430.0,
+        "modes": [
+          "held_loser_too_long",
+          "premium_crushed_>50%"
+        ]
+      },
+      {
+        "sym": "ASML",
+        "open": "2025-10-13",
+        "close": "2025-10-15",
+        "hold": 2,
+        "dte": 39,
+        "qty": 1.0,
+        "ret": -61.7,
+        "pnl": -1240.0,
+        "modes": [
+          "multi_day_bleed",
+          "premium_crushed_>50%"
+        ]
+      },
+      {
+        "sym": "ASML",
+        "open": "2025-10-14",
+        "close": "2025-10-15",
+        "hold": 1,
+        "dte": 66,
+        "qty": 1.0,
+        "ret": -45.6,
+        "pnl": -1240.0,
+        "modes": [
+          "one_day_cut",
+          "premium_down_25_50"
+        ]
+      },
+      {
+        "sym": "MU",
+        "open": "2025-11-04",
+        "close": "2025-11-05",
+        "hold": 1,
+        "dte": 17,
+        "qty": 4.0,
+        "ret": -50.2,
+        "pnl": -1164.0,
+        "modes": [
+          "one_day_cut",
+          "premium_crushed_>50%"
+        ]
+      }
+    ],
+    "avg_loser_qty": 3.39,
+    "avg_winner_qty": 2.27
+  }
+}

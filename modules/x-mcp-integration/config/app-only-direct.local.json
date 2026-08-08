@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "xapi-app-only": {
+      "url": "https://api.x.com/mcp",
+      "headers": {
+        "Authorization": "Bearer AAAAAAAAAAAAAAAAAAAAADWl%2BQEAAAAAS8RylUbQcu4QawP%2BYsiACZFskBA%3D85gSFBbm02VtrZndfBwnfDVWPyk48LinF7MEJHUZ0MBh2b3UnO"
+      }
+    },
+    "x-docs": {
+      "url": "https://docs.x.com/mcp"
+    }
+  }
+}

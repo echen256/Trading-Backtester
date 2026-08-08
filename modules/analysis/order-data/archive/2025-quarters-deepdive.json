@@ -1,0 +1,1010 @@
+{
+  "Q1": {
+    "label": "2025-Q1",
+    "n": 144,
+    "pnl": 17849.0,
+    "win_rate": 54.9,
+    "avg_hold": 3.24,
+    "median_hold": 2.0,
+    "same_day_pct": 9.0,
+    "one_day_pct": 31.2,
+    "swing_2_5_pct": 40.3,
+    "longer_pct": 19.4,
+    "avg_qty": 4.17,
+    "median_qty": 2.0,
+    "avg_notional": 942.0,
+    "trades_per_week": 11.1,
+    "gross_wins": 33252.0,
+    "gross_losses": -15403.0,
+    "avg_winner": 420.91,
+    "avg_loser": -236.97,
+    "profit_factor": 2.16,
+    "by_type": {
+      "CALL": {
+        "n": 90,
+        "pnl": 1072.0
+      },
+      "PUT": {
+        "n": 54,
+        "pnl": 16777.0
+      }
+    },
+    "hold_buckets": {
+      "0d": {
+        "n": 13,
+        "pnl": -753.0
+      },
+      "1d": {
+        "n": 45,
+        "pnl": 3601.0
+      },
+      "2-5d": {
+        "n": 58,
+        "pnl": 6192.0
+      },
+      ">5d": {
+        "n": 28,
+        "pnl": 8809.0
+      }
+    },
+    "top_underlyings": [
+      [
+        "GLD",
+        4316.0,
+        13
+      ],
+      [
+        "MSTR",
+        4304.0,
+        21
+      ],
+      [
+        "WMT",
+        3466.0,
+        13
+      ],
+      [
+        "COIN",
+        2810.0,
+        3
+      ],
+      [
+        "TSLA",
+        2619.0,
+        22
+      ],
+      [
+        "MU",
+        2428.0,
+        6
+      ]
+    ],
+    "worst_underlyings": [
+      [
+        "JD",
+        -2436.0,
+        12
+      ],
+      [
+        "BILI",
+        -1785.0,
+        3
+      ],
+      [
+        "BABA",
+        -648.0,
+        10
+      ],
+      [
+        "ACHR",
+        -450.0,
+        1
+      ],
+      [
+        "TMUS",
+        -330.0,
+        1
+      ],
+      [
+        "BA",
+        -320.0,
+        1
+      ]
+    ],
+    "monthly": {
+      "2025-01": {
+        "n": 2,
+        "pnl": 148.0,
+        "win_rate": 50.0,
+        "same_day_pct": 0.0,
+        "avg_hold": 14,
+        "trades_per_week": 0.5
+      },
+      "2025-02": {
+        "n": 28,
+        "pnl": 3586.0,
+        "win_rate": 42.9,
+        "same_day_pct": 10.7,
+        "avg_hold": 3.32,
+        "trades_per_week": 6.5
+      },
+      "2025-03": {
+        "n": 114,
+        "pnl": 14115.0,
+        "win_rate": 57.9,
+        "same_day_pct": 8.8,
+        "avg_hold": 3.03,
+        "trades_per_week": 26.5
+      }
+    },
+    "median_dte": 54.0,
+    "avg_dte": 47.8,
+    "best": [
+      {
+        "sym": "MU",
+        "type": "PUT",
+        "open": "2025-03-25",
+        "close": "2025-03-31",
+        "hold": 6,
+        "qty": 8.0,
+        "pnl": 1584.0,
+        "ret": 157.1
+      },
+      {
+        "sym": "MSTR",
+        "type": "PUT",
+        "open": "2025-02-24",
+        "close": "2025-02-25",
+        "hold": 1,
+        "qty": 1.0,
+        "pnl": 1570.0,
+        "ret": 112.9
+      },
+      {
+        "sym": "MSTR",
+        "type": "PUT",
+        "open": "2025-02-24",
+        "close": "2025-02-28",
+        "hold": 4,
+        "qty": 1.0,
+        "pnl": 1545.0,
+        "ret": 112.4
+      },
+      {
+        "sym": "WMT",
+        "type": "PUT",
+        "open": "2025-03-03",
+        "close": "2025-03-07",
+        "hold": 4,
+        "qty": 10.0,
+        "pnl": 1510.0,
+        "ret": 136.0
+      },
+      {
+        "sym": "GLD",
+        "type": "CALL",
+        "open": "2025-03-21",
+        "close": "2025-03-31",
+        "hold": 10,
+        "qty": 3.0,
+        "pnl": 1305.0,
+        "ret": 77.7
+      }
+    ],
+    "worst": [
+      {
+        "sym": "MSTR",
+        "type": "CALL",
+        "open": "2025-03-07",
+        "close": "2025-03-10",
+        "hold": 3,
+        "qty": 1.0,
+        "pnl": -795.0
+      },
+      {
+        "sym": "JD",
+        "type": "CALL",
+        "open": "2025-01-31",
+        "close": "2025-02-12",
+        "hold": 12,
+        "qty": 11.0,
+        "pnl": -715.0
+      },
+      {
+        "sym": "BILI",
+        "type": "CALL",
+        "open": "2025-02-20",
+        "close": "2025-02-24",
+        "hold": 4,
+        "qty": 5.0,
+        "pnl": -600.0
+      },
+      {
+        "sym": "BILI",
+        "type": "CALL",
+        "open": "2025-02-21",
+        "close": "2025-02-24",
+        "hold": 3,
+        "qty": 5.0,
+        "pnl": -595.0
+      },
+      {
+        "sym": "BILI",
+        "type": "CALL",
+        "open": "2025-02-21",
+        "close": "2025-02-24",
+        "hold": 3,
+        "qty": 5.0,
+        "pnl": -590.0
+      }
+    ],
+    "winners_traits": {
+      "n": 79,
+      "avg_hold": 3.58,
+      "same_day_pct": 6.3,
+      "call_pct": 58.2
+    },
+    "losers_traits": {
+      "n": 65,
+      "avg_hold": 2.82,
+      "same_day_pct": 12.3,
+      "avg_qty": 4.71
+    }
+  },
+  "Q2": {
+    "label": "2025-Q2",
+    "n": 628,
+    "pnl": 5352.0,
+    "win_rate": 38.7,
+    "avg_hold": 1.48,
+    "median_hold": 0.0,
+    "same_day_pct": 51.9,
+    "one_day_pct": 23.7,
+    "swing_2_5_pct": 20.2,
+    "longer_pct": 4.1,
+    "avg_qty": 5.01,
+    "median_qty": 2.0,
+    "avg_notional": 800.0,
+    "trades_per_week": 48.3,
+    "gross_wins": 98745.0,
+    "gross_losses": -93393.0,
+    "avg_winner": 406.36,
+    "avg_loser": -242.58,
+    "profit_factor": 1.06,
+    "by_type": {
+      "CALL": {
+        "n": 336,
+        "pnl": -5064.0
+      },
+      "PUT": {
+        "n": 292,
+        "pnl": 10416.0
+      }
+    },
+    "hold_buckets": {
+      "0d": {
+        "n": 326,
+        "pnl": -4931.0
+      },
+      "1d": {
+        "n": 149,
+        "pnl": 4658.0
+      },
+      "2-5d": {
+        "n": 127,
+        "pnl": 7399.0
+      },
+      ">5d": {
+        "n": 26,
+        "pnl": -1774.0
+      }
+    },
+    "top_underlyings": [
+      [
+        "MU",
+        9471.0,
+        22
+      ],
+      [
+        "AAPL",
+        6826.0,
+        35
+      ],
+      [
+        "GLD",
+        6030.0,
+        51
+      ],
+      [
+        "NVDA",
+        5963.0,
+        20
+      ],
+      [
+        "APP",
+        4566.0,
+        6
+      ],
+      [
+        "QQQ",
+        3861.0,
+        75
+      ]
+    ],
+    "worst_underlyings": [
+      [
+        "MSTR",
+        -6516.0,
+        34
+      ],
+      [
+        "QCOM",
+        -5446.0,
+        18
+      ],
+      [
+        "TSLA",
+        -4652.0,
+        80
+      ],
+      [
+        "USO",
+        -2842.0,
+        10
+      ],
+      [
+        "WMT",
+        -2257.0,
+        5
+      ],
+      [
+        "U",
+        -1691.0,
+        20
+      ]
+    ],
+    "monthly": {
+      "2025-04": {
+        "n": 246,
+        "pnl": 24586.0,
+        "win_rate": 43.1,
+        "same_day_pct": 47.2,
+        "avg_hold": 1.37,
+        "trades_per_week": 57.2
+      },
+      "2025-05": {
+        "n": 174,
+        "pnl": -13837.0,
+        "win_rate": 33.3,
+        "same_day_pct": 51.7,
+        "avg_hold": 1.26,
+        "trades_per_week": 40.5
+      },
+      "2025-06": {
+        "n": 208,
+        "pnl": -5397.0,
+        "win_rate": 38.0,
+        "same_day_pct": 57.7,
+        "avg_hold": 1.79,
+        "trades_per_week": 48.4
+      }
+    },
+    "median_dte": 7.0,
+    "avg_dte": 24.6,
+    "best": [
+      {
+        "sym": "MU",
+        "type": "PUT",
+        "open": "2025-04-03",
+        "close": "2025-04-04",
+        "hold": 1,
+        "qty": 4.0,
+        "pnl": 3804.0,
+        "ret": 321.3
+      },
+      {
+        "sym": "MU",
+        "type": "PUT",
+        "open": "2025-04-03",
+        "close": "2025-04-04",
+        "hold": 1,
+        "qty": 5.0,
+        "pnl": 3570.0,
+        "ret": 241.2
+      },
+      {
+        "sym": "MU",
+        "type": "PUT",
+        "open": "2025-04-03",
+        "close": "2025-04-03",
+        "hold": 0,
+        "qty": 10.0,
+        "pnl": 3010.0,
+        "ret": 104.2
+      },
+      {
+        "sym": "AAPL",
+        "type": "PUT",
+        "open": "2025-04-04",
+        "close": "2025-04-07",
+        "hold": 3,
+        "qty": 10.0,
+        "pnl": 2870.0,
+        "ret": 214.2
+      },
+      {
+        "sym": "NVDA",
+        "type": "PUT",
+        "open": "2025-04-03",
+        "close": "2025-04-04",
+        "hold": 1,
+        "qty": 15.0,
+        "pnl": 2490.0,
+        "ret": 276.7
+      }
+    ],
+    "worst": [
+      {
+        "sym": "USO",
+        "type": "CALL",
+        "open": "2025-04-07",
+        "close": "2025-04-09",
+        "hold": 2,
+        "qty": 15.0,
+        "pnl": -2055.0
+      },
+      {
+        "sym": "QQQ",
+        "type": "PUT",
+        "open": "2025-04-07",
+        "close": "2025-04-08",
+        "hold": 1,
+        "qty": 2.0,
+        "pnl": -1754.0
+      },
+      {
+        "sym": "TSLA",
+        "type": "PUT",
+        "open": "2025-05-05",
+        "close": "2025-05-13",
+        "hold": 8,
+        "qty": 3.0,
+        "pnl": -1707.0
+      },
+      {
+        "sym": "UVXY",
+        "type": "CALL",
+        "open": "2025-04-10",
+        "close": "2025-04-11",
+        "hold": 1,
+        "qty": 100.0,
+        "pnl": -1500.0
+      },
+      {
+        "sym": "QCOM",
+        "type": "PUT",
+        "open": "2025-04-07",
+        "close": "2025-04-09",
+        "hold": 2,
+        "qty": 10.0,
+        "pnl": -1480.0
+      }
+    ],
+    "winners_traits": {
+      "n": 243,
+      "avg_hold": 1.25,
+      "same_day_pct": 49.4,
+      "call_pct": 60.1
+    },
+    "losers_traits": {
+      "n": 385,
+      "avg_hold": 1.62,
+      "same_day_pct": 53.5,
+      "avg_qty": 5.67
+    }
+  },
+  "Q3": {
+    "label": "2025-Q3",
+    "n": 473,
+    "pnl": 3973.0,
+    "win_rate": 34.5,
+    "avg_hold": 2.18,
+    "median_hold": 1,
+    "same_day_pct": 31.3,
+    "one_day_pct": 29.4,
+    "swing_2_5_pct": 31.9,
+    "longer_pct": 7.4,
+    "avg_qty": 4.36,
+    "median_qty": 2.0,
+    "avg_notional": 680.0,
+    "trades_per_week": 36.4,
+    "gross_wins": 50427.0,
+    "gross_losses": -46454.0,
+    "avg_winner": 309.37,
+    "avg_loser": -149.85,
+    "profit_factor": 1.09,
+    "by_type": {
+      "CALL": {
+        "n": 343,
+        "pnl": 16180.0
+      },
+      "PUT": {
+        "n": 130,
+        "pnl": -12207.0
+      }
+    },
+    "hold_buckets": {
+      "0d": {
+        "n": 148,
+        "pnl": -8376.0
+      },
+      "1d": {
+        "n": 139,
+        "pnl": -213.0
+      },
+      "2-5d": {
+        "n": 151,
+        "pnl": 8959.0
+      },
+      ">5d": {
+        "n": 35,
+        "pnl": 3603.0
+      }
+    },
+    "top_underlyings": [
+      [
+        "INTC",
+        9598.0,
+        45
+      ],
+      [
+        "GLD",
+        7056.0,
+        37
+      ],
+      [
+        "NIO",
+        2301.0,
+        19
+      ],
+      [
+        "ALAB",
+        1860.0,
+        8
+      ],
+      [
+        "PDD",
+        1034.0,
+        9
+      ],
+      [
+        "GDX",
+        976.0,
+        6
+      ]
+    ],
+    "worst_underlyings": [
+      [
+        "COIN",
+        -4950.0,
+        32
+      ],
+      [
+        "TSLA",
+        -3441.0,
+        29
+      ],
+      [
+        "CRWV",
+        -1287.0,
+        11
+      ],
+      [
+        "NVDA",
+        -1248.0,
+        13
+      ],
+      [
+        "QCOM",
+        -1185.0,
+        6
+      ],
+      [
+        "KC",
+        -1130.0,
+        8
+      ]
+    ],
+    "monthly": {
+      "2025-07": {
+        "n": 91,
+        "pnl": -3426.0,
+        "win_rate": 30.8,
+        "same_day_pct": 29.7,
+        "avg_hold": 2.24,
+        "trades_per_week": 21.2
+      },
+      "2025-08": {
+        "n": 106,
+        "pnl": -2561.0,
+        "win_rate": 40.6,
+        "same_day_pct": 18.9,
+        "avg_hold": 2.81,
+        "trades_per_week": 24.7
+      },
+      "2025-09": {
+        "n": 276,
+        "pnl": 9960.0,
+        "win_rate": 33.3,
+        "same_day_pct": 36.6,
+        "avg_hold": 1.92,
+        "trades_per_week": 64.2
+      }
+    },
+    "median_dte": 57,
+    "avg_dte": 49.4,
+    "best": [
+      {
+        "sym": "INTC",
+        "type": "CALL",
+        "open": "2025-09-17",
+        "close": "2025-09-18",
+        "hold": 1,
+        "qty": 10.0,
+        "pnl": 3360.0,
+        "ret": 763.6
+      },
+      {
+        "sym": "TSLA",
+        "type": "CALL",
+        "open": "2025-09-11",
+        "close": "2025-09-15",
+        "hold": 4,
+        "qty": 1.0,
+        "pnl": 2384.0,
+        "ret": 156.8
+      },
+      {
+        "sym": "INTC",
+        "type": "CALL",
+        "open": "2025-09-17",
+        "close": "2025-09-19",
+        "hold": 2,
+        "qty": 10.0,
+        "pnl": 2270.0,
+        "ret": 515.9
+      },
+      {
+        "sym": "INTC",
+        "type": "CALL",
+        "open": "2025-09-17",
+        "close": "2025-09-18",
+        "hold": 1,
+        "qty": 5.0,
+        "pnl": 1805.0,
+        "ret": 820.5
+      },
+      {
+        "sym": "NIO",
+        "type": "CALL",
+        "open": "2025-09-11",
+        "close": "2025-09-17",
+        "hold": 6,
+        "qty": 40.0,
+        "pnl": 1320.0,
+        "ret": 97.1
+      }
+    ],
+    "worst": [
+      {
+        "sym": "TSLA",
+        "type": "PUT",
+        "open": "2025-07-07",
+        "close": "2025-08-15",
+        "hold": 39,
+        "qty": 2.0,
+        "pnl": -1146.0
+      },
+      {
+        "sym": "TSLA",
+        "type": "PUT",
+        "open": "2025-08-01",
+        "close": "2025-08-11",
+        "hold": 10,
+        "qty": 2.0,
+        "pnl": -1090.0
+      },
+      {
+        "sym": "GLD",
+        "type": "CALL",
+        "open": "2025-07-22",
+        "close": "2025-07-28",
+        "hold": 6,
+        "qty": 2.0,
+        "pnl": -912.0
+      },
+      {
+        "sym": "COIN",
+        "type": "PUT",
+        "open": "2025-09-05",
+        "close": "2025-09-10",
+        "hold": 5,
+        "qty": 2.0,
+        "pnl": -862.0
+      },
+      {
+        "sym": "TSLA",
+        "type": "PUT",
+        "open": "2025-07-31",
+        "close": "2025-08-11",
+        "hold": 11,
+        "qty": 2.0,
+        "pnl": -750.0
+      }
+    ],
+    "winners_traits": {
+      "n": 163,
+      "avg_hold": 2.81,
+      "same_day_pct": 20.2,
+      "call_pct": 81.6
+    },
+    "losers_traits": {
+      "n": 310,
+      "avg_hold": 1.85,
+      "same_day_pct": 37.1,
+      "avg_qty": 4.39
+    }
+  },
+  "Q4": {
+    "label": "2025-Q4",
+    "n": 808,
+    "pnl": -2792.0,
+    "win_rate": 41.3,
+    "avg_hold": 1.65,
+    "median_hold": 1.0,
+    "same_day_pct": 41.3,
+    "one_day_pct": 28.7,
+    "swing_2_5_pct": 22.0,
+    "longer_pct": 7.9,
+    "avg_qty": 3.85,
+    "median_qty": 2.0,
+    "avg_notional": 799.0,
+    "trades_per_week": 62.2,
+    "gross_wins": 100976.0,
+    "gross_losses": -103768.0,
+    "avg_winner": 302.32,
+    "avg_loser": -218.92,
+    "profit_factor": 0.97,
+    "by_type": {
+      "CALL": {
+        "n": 356,
+        "pnl": 13147.0
+      },
+      "PUT": {
+        "n": 452,
+        "pnl": -15939.0
+      }
+    },
+    "hold_buckets": {
+      "0d": {
+        "n": 334,
+        "pnl": -1297.0
+      },
+      "1d": {
+        "n": 232,
+        "pnl": -5081.0
+      },
+      "2-5d": {
+        "n": 178,
+        "pnl": -5705.0
+      },
+      ">5d": {
+        "n": 64,
+        "pnl": 9291.0
+      }
+    },
+    "top_underlyings": [
+      [
+        "SLV",
+        12234.0,
+        46
+      ],
+      [
+        "MSFT",
+        2674.0,
+        7
+      ],
+      [
+        "MU",
+        2365.0,
+        32
+      ],
+      [
+        "UUUU",
+        2119.0,
+        16
+      ],
+      [
+        "QQQ",
+        1919.0,
+        167
+      ],
+      [
+        "RBLX",
+        1786.0,
+        3
+      ]
+    ],
+    "worst_underlyings": [
+      [
+        "ASML",
+        -6866.0,
+        8
+      ],
+      [
+        "AMD",
+        -5380.0,
+        26
+      ],
+      [
+        "GTLB",
+        -4968.0,
+        12
+      ],
+      [
+        "BABA",
+        -2840.0,
+        14
+      ],
+      [
+        "STLA",
+        -2390.0,
+        5
+      ],
+      [
+        "ASTS",
+        -2040.0,
+        4
+      ]
+    ],
+    "monthly": {
+      "2025-10": {
+        "n": 313,
+        "pnl": -759.0,
+        "win_rate": 41.5,
+        "same_day_pct": 38.3,
+        "avg_hold": 1.48,
+        "trades_per_week": 72.8
+      },
+      "2025-11": {
+        "n": 251,
+        "pnl": -6587.0,
+        "win_rate": 43.4,
+        "same_day_pct": 45.8,
+        "avg_hold": 1.37,
+        "trades_per_week": 58.4
+      },
+      "2025-12": {
+        "n": 244,
+        "pnl": 4554.0,
+        "win_rate": 38.9,
+        "same_day_pct": 40.6,
+        "avg_hold": 2.15,
+        "trades_per_week": 56.7
+      }
+    },
+    "median_dte": 24.0,
+    "avg_dte": 29.6,
+    "best": [
+      {
+        "sym": "GLD",
+        "type": "CALL",
+        "open": "2025-11-20",
+        "close": "2025-12-29",
+        "hold": 39,
+        "qty": 2.0,
+        "pnl": 4802.0,
+        "ret": 635.2
+      },
+      {
+        "sym": "TLT",
+        "type": "CALL",
+        "open": "2025-10-13",
+        "close": "2025-10-13",
+        "hold": 0,
+        "qty": 15.0,
+        "pnl": 2385.0,
+        "ret": 324.5
+      },
+      {
+        "sym": "SLV",
+        "type": "CALL",
+        "open": "2025-10-13",
+        "close": "2025-10-17",
+        "hold": 4,
+        "qty": 5.0,
+        "pnl": 1825.0,
+        "ret": null
+      },
+      {
+        "sym": "STX",
+        "type": "CALL",
+        "open": "2025-10-28",
+        "close": "2025-10-29",
+        "hold": 1,
+        "qty": 1.0,
+        "pnl": 1810.0,
+        "ret": 226.3
+      },
+      {
+        "sym": "SLV",
+        "type": "CALL",
+        "open": "2025-11-24",
+        "close": "2025-12-01",
+        "hold": 7,
+        "qty": 6.0,
+        "pnl": 1650.0,
+        "ret": 500.0
+      }
+    ],
+    "worst": [
+      {
+        "sym": "TLT",
+        "type": "CALL",
+        "open": "2025-10-10",
+        "close": "2025-10-13",
+        "hold": 3,
+        "qty": 15.0,
+        "pnl": -2580.0
+      },
+      {
+        "sym": "AMD",
+        "type": "PUT",
+        "open": "2025-10-09",
+        "close": "2025-10-13",
+        "hold": 4,
+        "qty": 2.0,
+        "pnl": -2030.0
+      },
+      {
+        "sym": "GTLB",
+        "type": "CALL",
+        "open": "2025-11-03",
+        "close": "2025-11-06",
+        "hold": 3,
+        "qty": 10.0,
+        "pnl": -1890.0
+      },
+      {
+        "sym": "AMD",
+        "type": "PUT",
+        "open": "2025-11-25",
+        "close": "2025-12-02",
+        "hold": 7,
+        "qty": 3.0,
+        "pnl": -1674.0
+      },
+      {
+        "sym": "ASTS",
+        "type": "PUT",
+        "open": "2025-11-06",
+        "close": "2025-11-12",
+        "hold": 6,
+        "qty": 10.0,
+        "pnl": -1480.0
+      }
+    ],
+    "winners_traits": {
+      "n": 334,
+      "avg_hold": 1.95,
+      "same_day_pct": 37.4,
+      "call_pct": 48.8
+    },
+    "losers_traits": {
+      "n": 474,
+      "avg_hold": 1.44,
+      "same_day_pct": 44.1,
+      "avg_qty": 4.34
+    }
+  }
+}

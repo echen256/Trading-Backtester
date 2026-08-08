@@ -18,6 +18,113 @@ After installation these commands are available:
 - `trading-parse-orders` – analyze a Webull OpenAPI orders CSV such as
   `modules/analysis/order-data/webull_orders_2026.csv`, including realized
   PnL for options and equities. Run with `--help` to see the available filters.
+  Pass `--tpo-grades path.json` (or rely on auto-discovery) to show TPO grade
+  badges and enable interactive `[G] Grade trade`.
+- `trading-tpo-grade` – build underlying Market Profile (TPO) features for
+  realized trades from Polygon minute bars, write
+  `order-data/trade-tpo-grades-*.json`, optionally call an LLM grader with
+  `--grade-llm`. Use `--rescan-errors` to slowly retry Polygon 403 trades.
+- `trading-trade-hold-review` – hold-longer counterfactual on long options
+  using the same `analyze_orders` pipeline and shared option daily cache.
+- `trading-rescan-market-data` – throttled rescan of TPO and/or option-cache
+  errors (`--target tpo|hold|both`).
+- `trading-compliance-monitor` – polls Webull positions/balance, checks VaR /
+  concentration / same-day hold rules, and emails a DeepSeek brief tagged
+  `[TRADING-COMPLIANCE]`.
+- `trading-options-premium` – agent/CLI API for liquid **15–60 DTE** option
+  premiums vs underlying (Polygon). Subcommands: `list`, `fetch`, `chart`.
+  Watchlist: `order-data/watchlist.txt` (or `--symbol`).
+- `trading-options-premium-ui` – Streamlit dashboard (thin wrapper over the
+  same `build_premium_payload` API).
+
+### Options premium vs underlying
+
+```bash
+# List liquid contracts (JSON)
+# Volume scan defaults to strikes within ±50% of spot (`--moneyness-band 0.5`).
+trading-options-premium list --symbol MU --dte-min 15 --dte-max 60
+
+# Fetch underlying OHLC + premium series for agents
+trading-options-premium fetch --symbol MU --start-date 2026-05-22 --end-date 2026-07-16 -o /tmp/mu-premiums.json
+
+# Plotly HTML
+trading-options-premium chart --symbol MU --select MU260717C01250000 -o order-data/options-premium-chart.html
+
+# Interactive UI
+trading-options-premium-ui
+```
+
+Python API (same functions the UI calls):
+
+```python
+from datetime import date
+from trading_analysis.options_premium import build_premium_payload, build_premium_figure
+
+payload = build_premium_payload("MU", start_date=date(2026, 5, 22), end_date=date(2026, 7, 16))
+fig = build_premium_figure(payload, show_close=True, show_high=True)
+```
+
+### Compliance monitor cron
+
+Weekday digests fire at market-relative times (America/New_York RTH):
+
+| Event | ET |
+| --- | --- |
+| 1 hour after open | 10:30 |
+| Mid-session | 12:45 |
+| 1 hour before close | 15:00 |
+
+The installer reads the machine timezone (`/etc/localtime`, or `COMPLIANCE_CRON_TZ` / `TZ`) and writes local wall-clock cron entries. Re-run after changing system timezone (e.g. travel).
+
+```bash
+# Install / refresh (idempotent; replaces the marked crontab block)
+python3 modules/analysis/scripts/install_compliance_cron.py
+
+# Preview only
+python3 modules/analysis/scripts/install_compliance_cron.py --dry-run
+
+# Remove
+python3 modules/analysis/scripts/install_compliance_cron.py --remove
+
+# Manual one-shot
+trading-compliance-monitor --once --force-email
+```
+
+Runner: `modules/analysis/scripts/run_compliance_monitor.sh`  
+Logs: `modules/analysis/order-data/compliance-monitor.cron.log`
+
+### Shared market-data cache
+
+TPO and trade-hold share `order-data/market-data-cache/`:
+
+| Path | Contents |
+| --- | --- |
+| `underlying/1m/{TICKER}/{YYYY-MM-DD}.json` | RTH minute bars (TPO) |
+| `underlying/1d/{TICKER}.json` | Underlying daily bars (options premium) |
+| `options/1d/{OCC_SYMBOL}.json` | Option daily bars (hold / premiums) |
+| `options/contracts/{...}.json` | Cached option contract lists |
+
+Existing `order-data/tpo-cache/` files are still read as a fallback for
+underlying minutes so prior TPO runs are not re-fetched.
+
+### TPO LLM grader (DeepSeek / OpenAI)
+
+`--grade-llm` calls an OpenAI-compatible chat completions API. With only
+`DEEPSEEK_API_KEY` in `.env`, it auto-selects DeepSeek:
+
+| Env var | Purpose |
+| --- | --- |
+| `DEEPSEEK_API_KEY` | DeepSeek key (auto provider when no OpenAI key) |
+| `OPENAI_API_KEY` / `TPO_GRADE_API_KEY` | OpenAI or override key |
+| `TPO_GRADE_PROVIDER` | Force `deepseek` or `openai` |
+| `TPO_GRADE_BASE_URL` | Override API base (default DeepSeek or OpenAI) |
+| `TPO_GRADE_MODEL` | Override model (`deepseek-v4-flash` / `gpt-4.1-mini`) |
+
+```bash
+# DeepSeek (uses DEEPSEEK_API_KEY from Trading-Backtester/.env)
+trading-tpo-grade --csv order-data/webull_orders_2026.csv \
+  --start-date 2026-01-01 --end-date 2026-06-30 --grade-llm
+```
 - `trading-schwab-convert` – convert Schwab exports into the normalized
   `orders.csv` schema before analysis.
 - `trading-webull-bridge sync-analysis` – fetch Webull OpenAPI orders into

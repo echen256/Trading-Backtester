@@ -1,0 +1,1912 @@
+{
+  "metadata": {
+    "definition": "Value at risk = open long-option premium at cost (quantity \u00d7 entry premium \u00d7 100). EOD excludes same-day round-trips; intraday_peak includes opens before same-day closes.",
+    "scope": "Long option positions from analyze_orders(orders.csv); shorts excluded.",
+    "start_date": "2026-01-01",
+    "end_date": "2026-07-08",
+    "orders_path": "modules/analysis/order-data/orders.csv",
+    "realized_long_trades": 1291,
+    "currency": "USD",
+    "summary": {
+      "max_eod_premium_at_risk": 27108.0,
+      "max_eod_date": "2026-03-24",
+      "max_intraday_peak_premium_at_risk": 42017.0,
+      "max_intraday_peak_date": "2026-03-25",
+      "avg_weekday_eod_premium_at_risk": 11188.01,
+      "median_weekday_eod_premium_at_risk": 10073.0,
+      "final_eod_premium_at_risk": 3384.0
+    }
+  },
+  "daily": [
+    {
+      "date": "2026-01-01",
+      "premium_at_risk_eod": 0.0,
+      "premium_at_risk_intraday_peak": 0.0,
+      "contracts_open_eod": 0.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Thursday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-01-02",
+      "premium_at_risk_eod": 4904.0,
+      "premium_at_risk_intraday_peak": 5579.0,
+      "contracts_open_eod": 21.0,
+      "premium_opened": 5579.0,
+      "premium_closed": 675.0,
+      "weekday": "Friday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-01-03",
+      "premium_at_risk_eod": 4904.0,
+      "premium_at_risk_intraday_peak": 4904.0,
+      "contracts_open_eod": 21.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Saturday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-01-04",
+      "premium_at_risk_eod": 4904.0,
+      "premium_at_risk_intraday_peak": 4904.0,
+      "contracts_open_eod": 21.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Sunday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-01-05",
+      "premium_at_risk_eod": 5374.0,
+      "premium_at_risk_intraday_peak": 7224.0,
+      "contracts_open_eod": 31.0,
+      "premium_opened": 2320.0,
+      "premium_closed": 1850.0,
+      "weekday": "Monday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-01-06",
+      "premium_at_risk_eod": 10564.0,
+      "premium_at_risk_intraday_peak": 11733.0,
+      "contracts_open_eod": 59.0,
+      "premium_opened": 6359.0,
+      "premium_closed": 1169.0,
+      "weekday": "Tuesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-01-07",
+      "premium_at_risk_eod": 5856.0,
+      "premium_at_risk_intraday_peak": 13245.0,
+      "contracts_open_eod": 39.0,
+      "premium_opened": 2681.0,
+      "premium_closed": 7389.0,
+      "weekday": "Wednesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-01-08",
+      "premium_at_risk_eod": 7313.0,
+      "premium_at_risk_intraday_peak": 11059.0,
+      "contracts_open_eod": 26.0,
+      "premium_opened": 5203.0,
+      "premium_closed": 3746.0,
+      "weekday": "Thursday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-01-09",
+      "premium_at_risk_eod": 7178.0,
+      "premium_at_risk_intraday_peak": 13988.0,
+      "contracts_open_eod": 16.0,
+      "premium_opened": 6675.0,
+      "premium_closed": 6810.0,
+      "weekday": "Friday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-01-10",
+      "premium_at_risk_eod": 7178.0,
+      "premium_at_risk_intraday_peak": 7178.0,
+      "contracts_open_eod": 16.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Saturday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-01-11",
+      "premium_at_risk_eod": 7178.0,
+      "premium_at_risk_intraday_peak": 7178.0,
+      "contracts_open_eod": 16.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Sunday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-01-12",
+      "premium_at_risk_eod": 6312.0,
+      "premium_at_risk_intraday_peak": 9606.0,
+      "contracts_open_eod": 42.0,
+      "premium_opened": 2428.0,
+      "premium_closed": 3294.0,
+      "weekday": "Monday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-01-13",
+      "premium_at_risk_eod": 5483.0,
+      "premium_at_risk_intraday_peak": 9043.0,
+      "contracts_open_eod": 34.0,
+      "premium_opened": 2731.0,
+      "premium_closed": 3560.0,
+      "weekday": "Tuesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-01-14",
+      "premium_at_risk_eod": 12081.0,
+      "premium_at_risk_intraday_peak": 17203.0,
+      "contracts_open_eod": 36.0,
+      "premium_opened": 11720.0,
+      "premium_closed": 5122.0,
+      "weekday": "Wednesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-01-15",
+      "premium_at_risk_eod": 10045.0,
+      "premium_at_risk_intraday_peak": 15544.0,
+      "contracts_open_eod": 44.0,
+      "premium_opened": 3463.0,
+      "premium_closed": 5499.0,
+      "weekday": "Thursday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-01-16",
+      "premium_at_risk_eod": 9684.0,
+      "premium_at_risk_intraday_peak": 11653.0,
+      "contracts_open_eod": 29.0,
+      "premium_opened": 1608.0,
+      "premium_closed": 1969.0,
+      "weekday": "Friday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-01-17",
+      "premium_at_risk_eod": 9684.0,
+      "premium_at_risk_intraday_peak": 9684.0,
+      "contracts_open_eod": 29.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Saturday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-01-18",
+      "premium_at_risk_eod": 9684.0,
+      "premium_at_risk_intraday_peak": 9684.0,
+      "contracts_open_eod": 29.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Sunday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-01-19",
+      "premium_at_risk_eod": 9684.0,
+      "premium_at_risk_intraday_peak": 9684.0,
+      "contracts_open_eod": 29.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Monday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-01-20",
+      "premium_at_risk_eod": 14047.0,
+      "premium_at_risk_intraday_peak": 20773.0,
+      "contracts_open_eod": 30.0,
+      "premium_opened": 11089.0,
+      "premium_closed": 6726.0,
+      "weekday": "Tuesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-01-21",
+      "premium_at_risk_eod": 16846.0,
+      "premium_at_risk_intraday_peak": 17070.0,
+      "contracts_open_eod": 35.0,
+      "premium_opened": 3023.0,
+      "premium_closed": 224.0,
+      "weekday": "Wednesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-01-22",
+      "premium_at_risk_eod": 24098.0,
+      "premium_at_risk_intraday_peak": 26040.0,
+      "contracts_open_eod": 42.0,
+      "premium_opened": 9194.0,
+      "premium_closed": 1942.0,
+      "weekday": "Thursday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-01-23",
+      "premium_at_risk_eod": 18000.0,
+      "premium_at_risk_intraday_peak": 26193.0,
+      "contracts_open_eod": 33.0,
+      "premium_opened": 2095.0,
+      "premium_closed": 8193.0,
+      "weekday": "Friday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-01-24",
+      "premium_at_risk_eod": 18000.0,
+      "premium_at_risk_intraday_peak": 18000.0,
+      "contracts_open_eod": 33.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Saturday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-01-25",
+      "premium_at_risk_eod": 18000.0,
+      "premium_at_risk_intraday_peak": 18000.0,
+      "contracts_open_eod": 33.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Sunday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-01-26",
+      "premium_at_risk_eod": 12438.0,
+      "premium_at_risk_intraday_peak": 23274.0,
+      "contracts_open_eod": 38.0,
+      "premium_opened": 5274.0,
+      "premium_closed": 10836.0,
+      "weekday": "Monday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-01-27",
+      "premium_at_risk_eod": 15963.0,
+      "premium_at_risk_intraday_peak": 22413.0,
+      "contracts_open_eod": 53.0,
+      "premium_opened": 9975.0,
+      "premium_closed": 6450.0,
+      "weekday": "Tuesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-01-28",
+      "premium_at_risk_eod": 14133.0,
+      "premium_at_risk_intraday_peak": 23921.0,
+      "contracts_open_eod": 40.0,
+      "premium_opened": 7958.0,
+      "premium_closed": 9788.0,
+      "weekday": "Wednesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-01-29",
+      "premium_at_risk_eod": 15948.0,
+      "premium_at_risk_intraday_peak": 25051.0,
+      "contracts_open_eod": 53.0,
+      "premium_opened": 10918.0,
+      "premium_closed": 9103.0,
+      "weekday": "Thursday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-01-30",
+      "premium_at_risk_eod": 10477.0,
+      "premium_at_risk_intraday_peak": 16479.0,
+      "contracts_open_eod": 42.0,
+      "premium_opened": 531.0,
+      "premium_closed": 6002.0,
+      "weekday": "Friday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-01-31",
+      "premium_at_risk_eod": 10477.0,
+      "premium_at_risk_intraday_peak": 10477.0,
+      "contracts_open_eod": 42.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Saturday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-02-01",
+      "premium_at_risk_eod": 10477.0,
+      "premium_at_risk_intraday_peak": 10477.0,
+      "contracts_open_eod": 42.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Sunday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-02-02",
+      "premium_at_risk_eod": 10031.0,
+      "premium_at_risk_intraday_peak": 15327.0,
+      "contracts_open_eod": 38.0,
+      "premium_opened": 4850.0,
+      "premium_closed": 5296.0,
+      "weekday": "Monday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-02-03",
+      "premium_at_risk_eod": 13289.0,
+      "premium_at_risk_intraday_peak": 17184.0,
+      "contracts_open_eod": 54.0,
+      "premium_opened": 7153.0,
+      "premium_closed": 3895.0,
+      "weekday": "Tuesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-02-04",
+      "premium_at_risk_eod": 9161.0,
+      "premium_at_risk_intraday_peak": 16417.0,
+      "contracts_open_eod": 33.0,
+      "premium_opened": 3128.0,
+      "premium_closed": 7256.0,
+      "weekday": "Wednesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-02-05",
+      "premium_at_risk_eod": 11555.0,
+      "premium_at_risk_intraday_peak": 17711.0,
+      "contracts_open_eod": 73.0,
+      "premium_opened": 8550.0,
+      "premium_closed": 6156.0,
+      "weekday": "Thursday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-02-06",
+      "premium_at_risk_eod": 13325.0,
+      "premium_at_risk_intraday_peak": 16209.0,
+      "contracts_open_eod": 59.0,
+      "premium_opened": 4654.0,
+      "premium_closed": 2884.0,
+      "weekday": "Friday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-02-07",
+      "premium_at_risk_eod": 13325.0,
+      "premium_at_risk_intraday_peak": 13325.0,
+      "contracts_open_eod": 59.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Saturday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-02-08",
+      "premium_at_risk_eod": 13325.0,
+      "premium_at_risk_intraday_peak": 13325.0,
+      "contracts_open_eod": 59.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Sunday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-02-09",
+      "premium_at_risk_eod": 17168.0,
+      "premium_at_risk_intraday_peak": 18488.0,
+      "contracts_open_eod": 118.0,
+      "premium_opened": 5163.0,
+      "premium_closed": 1320.0,
+      "weekday": "Monday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-02-10",
+      "premium_at_risk_eod": 15764.0,
+      "premium_at_risk_intraday_peak": 17432.0,
+      "contracts_open_eod": 97.0,
+      "premium_opened": 264.0,
+      "premium_closed": 1668.0,
+      "weekday": "Tuesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-02-11",
+      "premium_at_risk_eod": 13176.0,
+      "premium_at_risk_intraday_peak": 18311.0,
+      "contracts_open_eod": 82.0,
+      "premium_opened": 2547.0,
+      "premium_closed": 5135.0,
+      "weekday": "Wednesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-02-12",
+      "premium_at_risk_eod": 14106.0,
+      "premium_at_risk_intraday_peak": 18881.0,
+      "contracts_open_eod": 104.0,
+      "premium_opened": 5705.0,
+      "premium_closed": 4775.0,
+      "weekday": "Thursday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-02-13",
+      "premium_at_risk_eod": 10730.0,
+      "premium_at_risk_intraday_peak": 21518.0,
+      "contracts_open_eod": 66.0,
+      "premium_opened": 7412.0,
+      "premium_closed": 10788.0,
+      "weekday": "Friday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-02-14",
+      "premium_at_risk_eod": 10730.0,
+      "premium_at_risk_intraday_peak": 10730.0,
+      "contracts_open_eod": 66.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Saturday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-02-15",
+      "premium_at_risk_eod": 10730.0,
+      "premium_at_risk_intraday_peak": 10730.0,
+      "contracts_open_eod": 66.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Sunday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-02-16",
+      "premium_at_risk_eod": 10730.0,
+      "premium_at_risk_intraday_peak": 10730.0,
+      "contracts_open_eod": 66.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Monday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-02-17",
+      "premium_at_risk_eod": 11500.0,
+      "premium_at_risk_intraday_peak": 12586.0,
+      "contracts_open_eod": 60.0,
+      "premium_opened": 1856.0,
+      "premium_closed": 1086.0,
+      "weekday": "Tuesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-02-18",
+      "premium_at_risk_eod": 7544.0,
+      "premium_at_risk_intraday_peak": 14082.0,
+      "contracts_open_eod": 72.0,
+      "premium_opened": 2582.0,
+      "premium_closed": 6538.0,
+      "weekday": "Wednesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-02-19",
+      "premium_at_risk_eod": 16579.0,
+      "premium_at_risk_intraday_peak": 18430.0,
+      "contracts_open_eod": 79.0,
+      "premium_opened": 10886.0,
+      "premium_closed": 1851.0,
+      "weekday": "Thursday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-02-20",
+      "premium_at_risk_eod": 18463.0,
+      "premium_at_risk_intraday_peak": 25528.0,
+      "contracts_open_eod": 100.0,
+      "premium_opened": 8949.0,
+      "premium_closed": 7065.0,
+      "weekday": "Friday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-02-21",
+      "premium_at_risk_eod": 18463.0,
+      "premium_at_risk_intraday_peak": 18463.0,
+      "contracts_open_eod": 100.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Saturday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-02-22",
+      "premium_at_risk_eod": 18463.0,
+      "premium_at_risk_intraday_peak": 18463.0,
+      "contracts_open_eod": 100.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Sunday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-02-23",
+      "premium_at_risk_eod": 19988.0,
+      "premium_at_risk_intraday_peak": 24667.0,
+      "contracts_open_eod": 104.0,
+      "premium_opened": 6204.0,
+      "premium_closed": 4679.0,
+      "weekday": "Monday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-02-24",
+      "premium_at_risk_eod": 17198.0,
+      "premium_at_risk_intraday_peak": 29192.0,
+      "contracts_open_eod": 84.0,
+      "premium_opened": 9204.0,
+      "premium_closed": 11994.0,
+      "weekday": "Tuesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-02-25",
+      "premium_at_risk_eod": 15860.0,
+      "premium_at_risk_intraday_peak": 18128.0,
+      "contracts_open_eod": 69.0,
+      "premium_opened": 930.0,
+      "premium_closed": 2268.0,
+      "weekday": "Wednesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-02-26",
+      "premium_at_risk_eod": 15803.0,
+      "premium_at_risk_intraday_peak": 18899.0,
+      "contracts_open_eod": 66.0,
+      "premium_opened": 3039.0,
+      "premium_closed": 3096.0,
+      "weekday": "Thursday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-02-27",
+      "premium_at_risk_eod": 18613.0,
+      "premium_at_risk_intraday_peak": 23823.0,
+      "contracts_open_eod": 145.0,
+      "premium_opened": 8020.0,
+      "premium_closed": 5210.0,
+      "weekday": "Friday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-02-28",
+      "premium_at_risk_eod": 18613.0,
+      "premium_at_risk_intraday_peak": 18613.0,
+      "contracts_open_eod": 145.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Saturday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-03-01",
+      "premium_at_risk_eod": 18613.0,
+      "premium_at_risk_intraday_peak": 18613.0,
+      "contracts_open_eod": 145.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Sunday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-03-02",
+      "premium_at_risk_eod": 17423.0,
+      "premium_at_risk_intraday_peak": 20188.0,
+      "contracts_open_eod": 149.0,
+      "premium_opened": 1575.0,
+      "premium_closed": 2765.0,
+      "weekday": "Monday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-03-03",
+      "premium_at_risk_eod": 13917.0,
+      "premium_at_risk_intraday_peak": 25718.0,
+      "contracts_open_eod": 155.0,
+      "premium_opened": 8295.0,
+      "premium_closed": 11801.0,
+      "weekday": "Tuesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-03-04",
+      "premium_at_risk_eod": 8456.0,
+      "premium_at_risk_intraday_peak": 14585.0,
+      "contracts_open_eod": 140.0,
+      "premium_opened": 668.0,
+      "premium_closed": 6129.0,
+      "weekday": "Wednesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-03-05",
+      "premium_at_risk_eod": 16809.0,
+      "premium_at_risk_intraday_peak": 25110.0,
+      "contracts_open_eod": 161.0,
+      "premium_opened": 16654.0,
+      "premium_closed": 8301.0,
+      "weekday": "Thursday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-03-06",
+      "premium_at_risk_eod": 22316.0,
+      "premium_at_risk_intraday_peak": 28339.0,
+      "contracts_open_eod": 235.0,
+      "premium_opened": 11530.0,
+      "premium_closed": 6023.0,
+      "weekday": "Friday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-03-07",
+      "premium_at_risk_eod": 22316.0,
+      "premium_at_risk_intraday_peak": 22316.0,
+      "contracts_open_eod": 235.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Saturday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-03-08",
+      "premium_at_risk_eod": 22316.0,
+      "premium_at_risk_intraday_peak": 22316.0,
+      "contracts_open_eod": 235.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Sunday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-03-09",
+      "premium_at_risk_eod": 16125.0,
+      "premium_at_risk_intraday_peak": 31798.0,
+      "contracts_open_eod": 189.0,
+      "premium_opened": 9482.0,
+      "premium_closed": 15673.0,
+      "weekday": "Monday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-03-10",
+      "premium_at_risk_eod": 18023.0,
+      "premium_at_risk_intraday_peak": 22193.0,
+      "contracts_open_eod": 221.0,
+      "premium_opened": 6068.0,
+      "premium_closed": 4170.0,
+      "weekday": "Tuesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-03-11",
+      "premium_at_risk_eod": 15399.0,
+      "premium_at_risk_intraday_peak": 21112.0,
+      "contracts_open_eod": 260.0,
+      "premium_opened": 3089.0,
+      "premium_closed": 5713.0,
+      "weekday": "Wednesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-03-12",
+      "premium_at_risk_eod": 14990.0,
+      "premium_at_risk_intraday_peak": 22584.0,
+      "contracts_open_eod": 261.0,
+      "premium_opened": 7185.0,
+      "premium_closed": 7594.0,
+      "weekday": "Thursday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-03-13",
+      "premium_at_risk_eod": 17136.0,
+      "premium_at_risk_intraday_peak": 27599.0,
+      "contracts_open_eod": 168.0,
+      "premium_opened": 12609.0,
+      "premium_closed": 10463.0,
+      "weekday": "Friday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-03-14",
+      "premium_at_risk_eod": 17136.0,
+      "premium_at_risk_intraday_peak": 17136.0,
+      "contracts_open_eod": 168.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Saturday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-03-15",
+      "premium_at_risk_eod": 17136.0,
+      "premium_at_risk_intraday_peak": 17136.0,
+      "contracts_open_eod": 168.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Sunday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-03-16",
+      "premium_at_risk_eod": 14504.0,
+      "premium_at_risk_intraday_peak": 23905.0,
+      "contracts_open_eod": 120.0,
+      "premium_opened": 6769.0,
+      "premium_closed": 9401.0,
+      "weekday": "Monday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-03-17",
+      "premium_at_risk_eod": 15554.0,
+      "premium_at_risk_intraday_peak": 16604.0,
+      "contracts_open_eod": 127.0,
+      "premium_opened": 2100.0,
+      "premium_closed": 1050.0,
+      "weekday": "Tuesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-03-18",
+      "premium_at_risk_eod": 23634.0,
+      "premium_at_risk_intraday_peak": 25096.0,
+      "contracts_open_eod": 168.0,
+      "premium_opened": 9542.0,
+      "premium_closed": 1462.0,
+      "weekday": "Wednesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-03-19",
+      "premium_at_risk_eod": 23339.0,
+      "premium_at_risk_intraday_peak": 26265.0,
+      "contracts_open_eod": 163.0,
+      "premium_opened": 2631.0,
+      "premium_closed": 2926.0,
+      "weekday": "Thursday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-03-20",
+      "premium_at_risk_eod": 24928.0,
+      "premium_at_risk_intraday_peak": 35424.0,
+      "contracts_open_eod": 251.0,
+      "premium_opened": 12085.0,
+      "premium_closed": 10496.0,
+      "weekday": "Friday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-03-21",
+      "premium_at_risk_eod": 24928.0,
+      "premium_at_risk_intraday_peak": 24928.0,
+      "contracts_open_eod": 251.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Saturday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-03-22",
+      "premium_at_risk_eod": 24928.0,
+      "premium_at_risk_intraday_peak": 24928.0,
+      "contracts_open_eod": 251.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Sunday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-03-23",
+      "premium_at_risk_eod": 23583.0,
+      "premium_at_risk_intraday_peak": 24928.0,
+      "contracts_open_eod": 236.0,
+      "premium_opened": 0.0,
+      "premium_closed": 1345.0,
+      "weekday": "Monday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-03-24",
+      "premium_at_risk_eod": 27108.0,
+      "premium_at_risk_intraday_peak": 27876.0,
+      "contracts_open_eod": 291.0,
+      "premium_opened": 4293.0,
+      "premium_closed": 768.0,
+      "weekday": "Tuesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-03-25",
+      "premium_at_risk_eod": 19695.0,
+      "premium_at_risk_intraday_peak": 42017.0,
+      "contracts_open_eod": 244.0,
+      "premium_opened": 14909.0,
+      "premium_closed": 22322.0,
+      "weekday": "Wednesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-03-26",
+      "premium_at_risk_eod": 22956.0,
+      "premium_at_risk_intraday_peak": 27857.0,
+      "contracts_open_eod": 303.0,
+      "premium_opened": 8162.0,
+      "premium_closed": 4901.0,
+      "weekday": "Thursday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-03-27",
+      "premium_at_risk_eod": 26645.0,
+      "premium_at_risk_intraday_peak": 31516.0,
+      "contracts_open_eod": 185.0,
+      "premium_opened": 8560.0,
+      "premium_closed": 4871.0,
+      "weekday": "Friday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-03-28",
+      "premium_at_risk_eod": 26645.0,
+      "premium_at_risk_intraday_peak": 26645.0,
+      "contracts_open_eod": 185.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Saturday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-03-29",
+      "premium_at_risk_eod": 26645.0,
+      "premium_at_risk_intraday_peak": 26645.0,
+      "contracts_open_eod": 185.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Sunday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-03-30",
+      "premium_at_risk_eod": 22849.0,
+      "premium_at_risk_intraday_peak": 29355.0,
+      "contracts_open_eod": 110.0,
+      "premium_opened": 2710.0,
+      "premium_closed": 6506.0,
+      "weekday": "Monday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-03-31",
+      "premium_at_risk_eod": 11629.0,
+      "premium_at_risk_intraday_peak": 28340.0,
+      "contracts_open_eod": 90.0,
+      "premium_opened": 5491.0,
+      "premium_closed": 16711.0,
+      "weekday": "Tuesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-04-01",
+      "premium_at_risk_eod": 12131.0,
+      "premium_at_risk_intraday_peak": 16066.0,
+      "contracts_open_eod": 115.0,
+      "premium_opened": 4437.0,
+      "premium_closed": 3935.0,
+      "weekday": "Wednesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-04-02",
+      "premium_at_risk_eod": 16234.0,
+      "premium_at_risk_intraday_peak": 17923.0,
+      "contracts_open_eod": 127.0,
+      "premium_opened": 5792.0,
+      "premium_closed": 1689.0,
+      "weekday": "Thursday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-04-03",
+      "premium_at_risk_eod": 16234.0,
+      "premium_at_risk_intraday_peak": 16234.0,
+      "contracts_open_eod": 127.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Friday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-04-04",
+      "premium_at_risk_eod": 16234.0,
+      "premium_at_risk_intraday_peak": 16234.0,
+      "contracts_open_eod": 127.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Saturday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-04-05",
+      "premium_at_risk_eod": 16234.0,
+      "premium_at_risk_intraday_peak": 16234.0,
+      "contracts_open_eod": 127.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Sunday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-04-06",
+      "premium_at_risk_eod": 16843.0,
+      "premium_at_risk_intraday_peak": 23288.0,
+      "contracts_open_eod": 117.0,
+      "premium_opened": 7054.0,
+      "premium_closed": 6445.0,
+      "weekday": "Monday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-04-07",
+      "premium_at_risk_eod": 20894.0,
+      "premium_at_risk_intraday_peak": 26341.0,
+      "contracts_open_eod": 135.0,
+      "premium_opened": 9498.0,
+      "premium_closed": 5447.0,
+      "weekday": "Tuesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-04-08",
+      "premium_at_risk_eod": 8867.0,
+      "premium_at_risk_intraday_peak": 23247.0,
+      "contracts_open_eod": 117.0,
+      "premium_opened": 2353.0,
+      "premium_closed": 14380.0,
+      "weekday": "Wednesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-04-09",
+      "premium_at_risk_eod": 7980.0,
+      "premium_at_risk_intraday_peak": 13912.0,
+      "contracts_open_eod": 104.0,
+      "premium_opened": 5045.0,
+      "premium_closed": 5932.0,
+      "weekday": "Thursday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-04-10",
+      "premium_at_risk_eod": 9763.0,
+      "premium_at_risk_intraday_peak": 12228.0,
+      "contracts_open_eod": 121.0,
+      "premium_opened": 4248.0,
+      "premium_closed": 2465.0,
+      "weekday": "Friday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-04-11",
+      "premium_at_risk_eod": 9763.0,
+      "premium_at_risk_intraday_peak": 9763.0,
+      "contracts_open_eod": 121.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Saturday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-04-12",
+      "premium_at_risk_eod": 9763.0,
+      "premium_at_risk_intraday_peak": 9763.0,
+      "contracts_open_eod": 121.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Sunday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-04-13",
+      "premium_at_risk_eod": 10550.0,
+      "premium_at_risk_intraday_peak": 27118.0,
+      "contracts_open_eod": 87.0,
+      "premium_opened": 17355.0,
+      "premium_closed": 16568.0,
+      "weekday": "Monday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-04-14",
+      "premium_at_risk_eod": 9076.0,
+      "premium_at_risk_intraday_peak": 15019.0,
+      "contracts_open_eod": 91.0,
+      "premium_opened": 4469.0,
+      "premium_closed": 5943.0,
+      "weekday": "Tuesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-04-15",
+      "premium_at_risk_eod": 9192.0,
+      "premium_at_risk_intraday_peak": 11747.0,
+      "contracts_open_eod": 72.0,
+      "premium_opened": 2671.0,
+      "premium_closed": 2555.0,
+      "weekday": "Wednesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-04-16",
+      "premium_at_risk_eod": 9710.0,
+      "premium_at_risk_intraday_peak": 17168.0,
+      "contracts_open_eod": 108.0,
+      "premium_opened": 7976.0,
+      "premium_closed": 7458.0,
+      "weekday": "Thursday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-04-17",
+      "premium_at_risk_eod": 13226.0,
+      "premium_at_risk_intraday_peak": 19892.0,
+      "contracts_open_eod": 78.0,
+      "premium_opened": 10182.0,
+      "premium_closed": 6666.0,
+      "weekday": "Friday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-04-18",
+      "premium_at_risk_eod": 13226.0,
+      "premium_at_risk_intraday_peak": 13226.0,
+      "contracts_open_eod": 78.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Saturday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-04-19",
+      "premium_at_risk_eod": 13226.0,
+      "premium_at_risk_intraday_peak": 13226.0,
+      "contracts_open_eod": 78.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Sunday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-04-20",
+      "premium_at_risk_eod": 10253.0,
+      "premium_at_risk_intraday_peak": 15876.0,
+      "contracts_open_eod": 65.0,
+      "premium_opened": 2650.0,
+      "premium_closed": 5623.0,
+      "weekday": "Monday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-04-21",
+      "premium_at_risk_eod": 8079.0,
+      "premium_at_risk_intraday_peak": 13735.0,
+      "contracts_open_eod": 51.0,
+      "premium_opened": 3482.0,
+      "premium_closed": 5656.0,
+      "weekday": "Tuesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-04-22",
+      "premium_at_risk_eod": 6065.0,
+      "premium_at_risk_intraday_peak": 16767.0,
+      "contracts_open_eod": 86.0,
+      "premium_opened": 8688.0,
+      "premium_closed": 10702.0,
+      "weekday": "Wednesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-04-23",
+      "premium_at_risk_eod": 5219.0,
+      "premium_at_risk_intraday_peak": 10304.0,
+      "contracts_open_eod": 102.0,
+      "premium_opened": 4239.0,
+      "premium_closed": 5085.0,
+      "weekday": "Thursday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-04-24",
+      "premium_at_risk_eod": 8001.0,
+      "premium_at_risk_intraday_peak": 13703.0,
+      "contracts_open_eod": 178.0,
+      "premium_opened": 8484.0,
+      "premium_closed": 5702.0,
+      "weekday": "Friday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-04-25",
+      "premium_at_risk_eod": 8001.0,
+      "premium_at_risk_intraday_peak": 8001.0,
+      "contracts_open_eod": 178.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Saturday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-04-26",
+      "premium_at_risk_eod": 8001.0,
+      "premium_at_risk_intraday_peak": 8001.0,
+      "contracts_open_eod": 178.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Sunday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-04-27",
+      "premium_at_risk_eod": 4150.0,
+      "premium_at_risk_intraday_peak": 13349.0,
+      "contracts_open_eod": 116.0,
+      "premium_opened": 5348.0,
+      "premium_closed": 9199.0,
+      "weekday": "Monday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-04-28",
+      "premium_at_risk_eod": 6202.0,
+      "premium_at_risk_intraday_peak": 16801.0,
+      "contracts_open_eod": 105.0,
+      "premium_opened": 12651.0,
+      "premium_closed": 10599.0,
+      "weekday": "Tuesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-04-29",
+      "premium_at_risk_eod": 7537.0,
+      "premium_at_risk_intraday_peak": 10661.0,
+      "contracts_open_eod": 102.0,
+      "premium_opened": 4459.0,
+      "premium_closed": 3124.0,
+      "weekday": "Wednesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-04-30",
+      "premium_at_risk_eod": 6544.0,
+      "premium_at_risk_intraday_peak": 9629.0,
+      "contracts_open_eod": 101.0,
+      "premium_opened": 2092.0,
+      "premium_closed": 3085.0,
+      "weekday": "Thursday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-05-01",
+      "premium_at_risk_eod": 13030.0,
+      "premium_at_risk_intraday_peak": 15410.0,
+      "contracts_open_eod": 141.0,
+      "premium_opened": 8866.0,
+      "premium_closed": 2380.0,
+      "weekday": "Friday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-05-02",
+      "premium_at_risk_eod": 13030.0,
+      "premium_at_risk_intraday_peak": 13030.0,
+      "contracts_open_eod": 141.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Saturday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-05-03",
+      "premium_at_risk_eod": 13030.0,
+      "premium_at_risk_intraday_peak": 13030.0,
+      "contracts_open_eod": 141.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Sunday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-05-04",
+      "premium_at_risk_eod": 13609.0,
+      "premium_at_risk_intraday_peak": 20624.0,
+      "contracts_open_eod": 143.0,
+      "premium_opened": 7594.0,
+      "premium_closed": 7015.0,
+      "weekday": "Monday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-05-05",
+      "premium_at_risk_eod": 11369.0,
+      "premium_at_risk_intraday_peak": 18854.0,
+      "contracts_open_eod": 140.0,
+      "premium_opened": 5245.0,
+      "premium_closed": 7485.0,
+      "weekday": "Tuesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-05-06",
+      "premium_at_risk_eod": 11117.0,
+      "premium_at_risk_intraday_peak": 19971.0,
+      "contracts_open_eod": 152.0,
+      "premium_opened": 8602.0,
+      "premium_closed": 8854.0,
+      "weekday": "Wednesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-05-07",
+      "premium_at_risk_eod": 9847.0,
+      "premium_at_risk_intraday_peak": 22712.0,
+      "contracts_open_eod": 138.0,
+      "premium_opened": 11595.0,
+      "premium_closed": 12865.0,
+      "weekday": "Thursday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-05-08",
+      "premium_at_risk_eod": 3918.0,
+      "premium_at_risk_intraday_peak": 18680.0,
+      "contracts_open_eod": 115.0,
+      "premium_opened": 8833.0,
+      "premium_closed": 14762.0,
+      "weekday": "Friday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-05-09",
+      "premium_at_risk_eod": 3918.0,
+      "premium_at_risk_intraday_peak": 3918.0,
+      "contracts_open_eod": 115.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Saturday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-05-10",
+      "premium_at_risk_eod": 3918.0,
+      "premium_at_risk_intraday_peak": 3918.0,
+      "contracts_open_eod": 115.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Sunday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-05-11",
+      "premium_at_risk_eod": 11310.0,
+      "premium_at_risk_intraday_peak": 16860.0,
+      "contracts_open_eod": 293.0,
+      "premium_opened": 12942.0,
+      "premium_closed": 5550.0,
+      "weekday": "Monday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-05-12",
+      "premium_at_risk_eod": 11444.0,
+      "premium_at_risk_intraday_peak": 18835.0,
+      "contracts_open_eod": 297.0,
+      "premium_opened": 7525.0,
+      "premium_closed": 7391.0,
+      "weekday": "Tuesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-05-13",
+      "premium_at_risk_eod": 11912.0,
+      "premium_at_risk_intraday_peak": 23764.0,
+      "contracts_open_eod": 324.0,
+      "premium_opened": 12320.0,
+      "premium_closed": 11852.0,
+      "weekday": "Wednesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-05-14",
+      "premium_at_risk_eod": 13294.0,
+      "premium_at_risk_intraday_peak": 20882.0,
+      "contracts_open_eod": 284.0,
+      "premium_opened": 8970.0,
+      "premium_closed": 7588.0,
+      "weekday": "Thursday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-05-15",
+      "premium_at_risk_eod": 9145.0,
+      "premium_at_risk_intraday_peak": 18931.0,
+      "contracts_open_eod": 76.0,
+      "premium_opened": 5637.0,
+      "premium_closed": 9786.0,
+      "weekday": "Friday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-05-16",
+      "premium_at_risk_eod": 9145.0,
+      "premium_at_risk_intraday_peak": 9145.0,
+      "contracts_open_eod": 76.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Saturday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-05-17",
+      "premium_at_risk_eod": 9145.0,
+      "premium_at_risk_intraday_peak": 9145.0,
+      "contracts_open_eod": 76.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Sunday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-05-18",
+      "premium_at_risk_eod": 7476.0,
+      "premium_at_risk_intraday_peak": 16520.0,
+      "contracts_open_eod": 15.0,
+      "premium_opened": 7375.0,
+      "premium_closed": 9044.0,
+      "weekday": "Monday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-05-19",
+      "premium_at_risk_eod": 10461.0,
+      "premium_at_risk_intraday_peak": 22697.0,
+      "contracts_open_eod": 17.0,
+      "premium_opened": 15221.0,
+      "premium_closed": 12236.0,
+      "weekday": "Tuesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-05-20",
+      "premium_at_risk_eod": 10073.0,
+      "premium_at_risk_intraday_peak": 19713.0,
+      "contracts_open_eod": 11.0,
+      "premium_opened": 9252.0,
+      "premium_closed": 9640.0,
+      "weekday": "Wednesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-05-21",
+      "premium_at_risk_eod": 7555.0,
+      "premium_at_risk_intraday_peak": 18874.0,
+      "contracts_open_eod": 16.0,
+      "premium_opened": 8801.0,
+      "premium_closed": 11319.0,
+      "weekday": "Thursday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-05-22",
+      "premium_at_risk_eod": 6712.0,
+      "premium_at_risk_intraday_peak": 12432.0,
+      "contracts_open_eod": 68.0,
+      "premium_opened": 4877.0,
+      "premium_closed": 5720.0,
+      "weekday": "Friday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-05-23",
+      "premium_at_risk_eod": 6712.0,
+      "premium_at_risk_intraday_peak": 6712.0,
+      "contracts_open_eod": 68.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Saturday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-05-24",
+      "premium_at_risk_eod": 6712.0,
+      "premium_at_risk_intraday_peak": 6712.0,
+      "contracts_open_eod": 68.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Sunday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-05-25",
+      "premium_at_risk_eod": 6712.0,
+      "premium_at_risk_intraday_peak": 6712.0,
+      "contracts_open_eod": 68.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Monday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-05-26",
+      "premium_at_risk_eod": 8493.0,
+      "premium_at_risk_intraday_peak": 15308.0,
+      "contracts_open_eod": 100.0,
+      "premium_opened": 8596.0,
+      "premium_closed": 6815.0,
+      "weekday": "Tuesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-05-27",
+      "premium_at_risk_eod": 7640.0,
+      "premium_at_risk_intraday_peak": 36540.0,
+      "contracts_open_eod": 112.0,
+      "premium_opened": 28047.0,
+      "premium_closed": 28900.0,
+      "weekday": "Wednesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-05-28",
+      "premium_at_risk_eod": 10797.0,
+      "premium_at_risk_intraday_peak": 23455.0,
+      "contracts_open_eod": 111.0,
+      "premium_opened": 15815.0,
+      "premium_closed": 12658.0,
+      "weekday": "Thursday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-05-29",
+      "premium_at_risk_eod": 5165.0,
+      "premium_at_risk_intraday_peak": 31193.0,
+      "contracts_open_eod": 24.0,
+      "premium_opened": 20396.0,
+      "premium_closed": 26028.0,
+      "weekday": "Friday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-05-30",
+      "premium_at_risk_eod": 5165.0,
+      "premium_at_risk_intraday_peak": 5165.0,
+      "contracts_open_eod": 24.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Saturday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-05-31",
+      "premium_at_risk_eod": 5165.0,
+      "premium_at_risk_intraday_peak": 5165.0,
+      "contracts_open_eod": 24.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Sunday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-06-01",
+      "premium_at_risk_eod": 7379.0,
+      "premium_at_risk_intraday_peak": 18914.0,
+      "contracts_open_eod": 33.0,
+      "premium_opened": 13749.0,
+      "premium_closed": 11535.0,
+      "weekday": "Monday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-06-02",
+      "premium_at_risk_eod": 7366.0,
+      "premium_at_risk_intraday_peak": 15987.0,
+      "contracts_open_eod": 34.0,
+      "premium_opened": 8608.0,
+      "premium_closed": 8621.0,
+      "weekday": "Tuesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-06-03",
+      "premium_at_risk_eod": 7421.0,
+      "premium_at_risk_intraday_peak": 23120.0,
+      "contracts_open_eod": 58.0,
+      "premium_opened": 15754.0,
+      "premium_closed": 15699.0,
+      "weekday": "Wednesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-06-04",
+      "premium_at_risk_eod": 8336.0,
+      "premium_at_risk_intraday_peak": 16392.0,
+      "contracts_open_eod": 45.0,
+      "premium_opened": 8971.0,
+      "premium_closed": 8056.0,
+      "weekday": "Thursday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-06-05",
+      "premium_at_risk_eod": 7183.0,
+      "premium_at_risk_intraday_peak": 20517.0,
+      "contracts_open_eod": 79.0,
+      "premium_opened": 12181.0,
+      "premium_closed": 13334.0,
+      "weekday": "Friday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-06-06",
+      "premium_at_risk_eod": 7183.0,
+      "premium_at_risk_intraday_peak": 7183.0,
+      "contracts_open_eod": 79.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Saturday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-06-07",
+      "premium_at_risk_eod": 7183.0,
+      "premium_at_risk_intraday_peak": 7183.0,
+      "contracts_open_eod": 79.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Sunday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-06-08",
+      "premium_at_risk_eod": 7616.0,
+      "premium_at_risk_intraday_peak": 14410.0,
+      "contracts_open_eod": 78.0,
+      "premium_opened": 7227.0,
+      "premium_closed": 6794.0,
+      "weekday": "Monday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-06-09",
+      "premium_at_risk_eod": 5430.0,
+      "premium_at_risk_intraday_peak": 18211.0,
+      "contracts_open_eod": 90.0,
+      "premium_opened": 10595.0,
+      "premium_closed": 12781.0,
+      "weekday": "Tuesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-06-10",
+      "premium_at_risk_eod": 5773.0,
+      "premium_at_risk_intraday_peak": 13041.0,
+      "contracts_open_eod": 89.0,
+      "premium_opened": 7611.0,
+      "premium_closed": 7268.0,
+      "weekday": "Wednesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-06-11",
+      "premium_at_risk_eod": 6159.0,
+      "premium_at_risk_intraday_peak": 22113.0,
+      "contracts_open_eod": 69.0,
+      "premium_opened": 16340.0,
+      "premium_closed": 15954.0,
+      "weekday": "Thursday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-06-12",
+      "premium_at_risk_eod": 6290.0,
+      "premium_at_risk_intraday_peak": 16872.0,
+      "contracts_open_eod": 91.0,
+      "premium_opened": 10713.0,
+      "premium_closed": 10582.0,
+      "weekday": "Friday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-06-13",
+      "premium_at_risk_eod": 6290.0,
+      "premium_at_risk_intraday_peak": 6290.0,
+      "contracts_open_eod": 91.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Saturday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-06-14",
+      "premium_at_risk_eod": 6290.0,
+      "premium_at_risk_intraday_peak": 6290.0,
+      "contracts_open_eod": 91.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Sunday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-06-15",
+      "premium_at_risk_eod": 7300.0,
+      "premium_at_risk_intraday_peak": 11610.0,
+      "contracts_open_eod": 90.0,
+      "premium_opened": 5320.0,
+      "premium_closed": 4310.0,
+      "weekday": "Monday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-06-16",
+      "premium_at_risk_eod": 6239.0,
+      "premium_at_risk_intraday_peak": 17255.0,
+      "contracts_open_eod": 10.0,
+      "premium_opened": 9955.0,
+      "premium_closed": 11016.0,
+      "weekday": "Tuesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-06-17",
+      "premium_at_risk_eod": 1518.0,
+      "premium_at_risk_intraday_peak": 13682.0,
+      "contracts_open_eod": 7.0,
+      "premium_opened": 7443.0,
+      "premium_closed": 12164.0,
+      "weekday": "Wednesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-06-18",
+      "premium_at_risk_eod": 2738.0,
+      "premium_at_risk_intraday_peak": 21828.0,
+      "contracts_open_eod": 11.0,
+      "premium_opened": 20310.0,
+      "premium_closed": 19090.0,
+      "weekday": "Thursday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-06-19",
+      "premium_at_risk_eod": 2738.0,
+      "premium_at_risk_intraday_peak": 2738.0,
+      "contracts_open_eod": 11.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Friday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-06-20",
+      "premium_at_risk_eod": 2738.0,
+      "premium_at_risk_intraday_peak": 2738.0,
+      "contracts_open_eod": 11.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Saturday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-06-21",
+      "premium_at_risk_eod": 2738.0,
+      "premium_at_risk_intraday_peak": 2738.0,
+      "contracts_open_eod": 11.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Sunday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-06-22",
+      "premium_at_risk_eod": 4207.0,
+      "premium_at_risk_intraday_peak": 11010.0,
+      "contracts_open_eod": 33.0,
+      "premium_opened": 8272.0,
+      "premium_closed": 6803.0,
+      "weekday": "Monday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-06-23",
+      "premium_at_risk_eod": 5588.0,
+      "premium_at_risk_intraday_peak": 9039.0,
+      "contracts_open_eod": 47.0,
+      "premium_opened": 4832.0,
+      "premium_closed": 3451.0,
+      "weekday": "Tuesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-06-24",
+      "premium_at_risk_eod": 3274.0,
+      "premium_at_risk_intraday_peak": 11460.0,
+      "contracts_open_eod": 68.0,
+      "premium_opened": 5872.0,
+      "premium_closed": 8186.0,
+      "weekday": "Wednesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-06-25",
+      "premium_at_risk_eod": 5674.0,
+      "premium_at_risk_intraday_peak": 15581.0,
+      "contracts_open_eod": 77.0,
+      "premium_opened": 12307.0,
+      "premium_closed": 9907.0,
+      "weekday": "Thursday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-06-26",
+      "premium_at_risk_eod": 6883.0,
+      "premium_at_risk_intraday_peak": 18792.0,
+      "contracts_open_eod": 46.0,
+      "premium_opened": 13118.0,
+      "premium_closed": 11909.0,
+      "weekday": "Friday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-06-27",
+      "premium_at_risk_eod": 6883.0,
+      "premium_at_risk_intraday_peak": 6883.0,
+      "contracts_open_eod": 46.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Saturday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-06-28",
+      "premium_at_risk_eod": 6883.0,
+      "premium_at_risk_intraday_peak": 6883.0,
+      "contracts_open_eod": 46.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Sunday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-06-29",
+      "premium_at_risk_eod": 3280.0,
+      "premium_at_risk_intraday_peak": 15721.0,
+      "contracts_open_eod": 7.0,
+      "premium_opened": 8838.0,
+      "premium_closed": 12441.0,
+      "weekday": "Monday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-06-30",
+      "premium_at_risk_eod": 7472.0,
+      "premium_at_risk_intraday_peak": 8504.0,
+      "contracts_open_eod": 90.0,
+      "premium_opened": 5224.0,
+      "premium_closed": 1032.0,
+      "weekday": "Tuesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-07-01",
+      "premium_at_risk_eod": 3625.0,
+      "premium_at_risk_intraday_peak": 22999.0,
+      "contracts_open_eod": 5.0,
+      "premium_opened": 15527.0,
+      "premium_closed": 19374.0,
+      "weekday": "Wednesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-07-02",
+      "premium_at_risk_eod": 4542.0,
+      "premium_at_risk_intraday_peak": 13127.0,
+      "contracts_open_eod": 76.0,
+      "premium_opened": 9502.0,
+      "premium_closed": 8585.0,
+      "weekday": "Thursday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-07-03",
+      "premium_at_risk_eod": 4542.0,
+      "premium_at_risk_intraday_peak": 4542.0,
+      "contracts_open_eod": 76.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Friday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-07-04",
+      "premium_at_risk_eod": 4542.0,
+      "premium_at_risk_intraday_peak": 4542.0,
+      "contracts_open_eod": 76.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Saturday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-07-05",
+      "premium_at_risk_eod": 4542.0,
+      "premium_at_risk_intraday_peak": 4542.0,
+      "contracts_open_eod": 76.0,
+      "premium_opened": 0.0,
+      "premium_closed": 0.0,
+      "weekday": "Sunday",
+      "is_weekend": true
+    },
+    {
+      "date": "2026-07-06",
+      "premium_at_risk_eod": 5090.0,
+      "premium_at_risk_intraday_peak": 17646.0,
+      "contracts_open_eod": 21.0,
+      "premium_opened": 13104.0,
+      "premium_closed": 12556.0,
+      "weekday": "Monday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-07-07",
+      "premium_at_risk_eod": 5477.0,
+      "premium_at_risk_intraday_peak": 16952.0,
+      "contracts_open_eod": 25.0,
+      "premium_opened": 11862.0,
+      "premium_closed": 11475.0,
+      "weekday": "Tuesday",
+      "is_weekend": false
+    },
+    {
+      "date": "2026-07-08",
+      "premium_at_risk_eod": 3384.0,
+      "premium_at_risk_intraday_peak": 15281.0,
+      "contracts_open_eod": 16.0,
+      "premium_opened": 9804.0,
+      "premium_closed": 11897.0,
+      "weekday": "Wednesday",
+      "is_weekend": false
+    }
+  ]
+}

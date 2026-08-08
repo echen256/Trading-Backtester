@@ -1,0 +1,7 @@
+{
+  "note": "Webull API rejects starts before ~2024-07-10 (2y lookback). Full 2024 unavailable.",
+  "n": 201,
+  "pnl": -14020.0,
+  "same_day_pct": 5.0,
+  "avg_hold": 5.59
+}

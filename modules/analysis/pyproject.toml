@@ -12,6 +12,7 @@ authors = [{ name = "Trading Systems" }]
 dependencies = [
   "plotly>=5.24",
   "asciichart>=0.1",
+  "streamlit>=1.32",
 ]
 
 [project.scripts]
@@ -19,6 +20,16 @@ trading-parse-orders = "trading_analysis.parse_orders:main"
 trading-schwab-convert = "trading_analysis.schwab.convert:main"
 trading-bucket-analysis = "trading_analysis.bucket_analysis:main"
 trading-webull-bridge = "trading_analysis.webull_bridge:main"
+trading-tpo-grade = "trading_analysis.export_tpo_grades:main"
+trading-trade-hold-review = "trading_analysis.export_trade_hold_review:main"
+trading-rescan-market-data = "trading_analysis.rescan_market_data:main"
+trading-fisher-trade-overlay = "trading_analysis.fisher_trade_overlay:main"
+trading-compliance-monitor = "trading_analysis.compliance_monitor:main"
+trading-options-premium = "trading_analysis.options_premium.cli:main"
+trading-options-premium-ui = "trading_analysis.options_premium.ui:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/trading_analysis"]

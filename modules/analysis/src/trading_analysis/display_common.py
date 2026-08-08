@@ -33,6 +33,20 @@ def extract_contract_expiration(symbol: str) -> date | None:
     return datetime.strptime(expiration_text, "%y%m%d").date()
 
 
+def extract_contract_strike(symbol: str) -> float | None:
+    match = re.match(r"([A-Z]+)(\d{6})([CP])(\d{8})", symbol)
+    if not match:
+        return None
+    return int(match.group(4)) / 1000.0
+
+
+def extract_contract_option_type(symbol: str) -> str | None:
+    match = re.match(r"([A-Z]+)(\d{6})([CP])(\d{8})", symbol)
+    if not match:
+        return None
+    return "CALL" if match.group(3) == "C" else "PUT"
+
+
 def describe_contract_timing(symbol: str, initiated_date: date) -> str | None:
     expiration = extract_contract_expiration(symbol)
     if expiration is None:

@@ -1,0 +1,765 @@
+{
+  "ticker": "QQQ",
+  "source": "Polygon adjusted daily aggregates",
+  "requested_range": [
+    "2024-07-27",
+    "2026-07-27"
+  ],
+  "observed_range": [
+    "2024-07-30",
+    "2026-07-27"
+  ],
+  "sessions_analyzed": 499,
+  "definitions": {
+    "gap": "Current open versus prior adjusted close.",
+    "continuation": "Gap-up close > open; gap-down close < open.",
+    "partial_retrace": "Close finishes between open and prior close.",
+    "full_reversal": "Gap-up close <= prior close; gap-down close >= prior close."
+  },
+  "thresholds_pct": {
+    "0": {
+      "up": {
+        "n": 286,
+        "outcomes": {
+          "continuation": {
+            "count": 152,
+            "pct": 53.14685314685315,
+            "ci95": [
+              47.36007442104206,
+              58.85021423317459
+            ]
+          },
+          "partial_retrace": {
+            "count": 54,
+            "pct": 18.88111888111888,
+            "ci95": [
+              14.769155128761316,
+              23.81799040176294
+            ]
+          },
+          "full_reversal": {
+            "count": 80,
+            "pct": 27.972027972027973,
+            "ci95": [
+              23.08815578858435,
+              33.43982363189912
+            ]
+          }
+        },
+        "median_abs_gap_pct": 0.42239039621250196,
+        "mean_session_return_pct": -0.029645865739190376,
+        "median_extension_beyond_open_pct": 0.5160309315085487,
+        "extended_beyond_open": {
+          "count": 286,
+          "pct": 100.0
+        },
+        "touched_or_crossed_prior_close_intraday": {
+          "count": 161,
+          "pct": 56.29370629370629
+        }
+      },
+      "down": {
+        "n": 213,
+        "outcomes": {
+          "continuation": {
+            "count": 93,
+            "pct": 43.66197183098591,
+            "ci95": [
+              37.17188399273562,
+              50.37663068341508
+            ]
+          },
+          "partial_retrace": {
+            "count": 42,
+            "pct": 19.718309859154928,
+            "ci95": [
+              14.931926399828718,
+              25.57764371955797
+            ]
+          },
+          "full_reversal": {
+            "count": 78,
+            "pct": 36.61971830985915,
+            "ci95": [
+              30.440004021306034,
+              43.27352696167879
+            ]
+          }
+        },
+        "median_abs_gap_pct": 0.420219033756164,
+        "mean_session_return_pct": 0.08143617087168774,
+        "median_extension_beyond_open_pct": 0.5763935455336711,
+        "extended_beyond_open": {
+          "count": 211,
+          "pct": 99.06103286384976
+        },
+        "touched_or_crossed_prior_close_intraday": {
+          "count": 126,
+          "pct": 59.15492957746479
+        }
+      }
+    },
+    "0.1": {
+      "up": {
+        "n": 258,
+        "outcomes": {
+          "continuation": {
+            "count": 139,
+            "pct": 53.87596899224806,
+            "ci95": [
+              47.78076813573568,
+              59.8574375580884
+            ]
+          },
+          "partial_retrace": {
+            "count": 52,
+            "pct": 20.155038759689923,
+            "ci95": [
+              15.714158195266814,
+              25.471657962287985
+            ]
+          },
+          "full_reversal": {
+            "count": 67,
+            "pct": 25.968992248062015,
+            "ci95": [
+              20.998935686896456,
+              31.64418901139443
+            ]
+          }
+        },
+        "median_abs_gap_pct": 0.48027124687820555,
+        "mean_session_return_pct": -0.04353329563487222,
+        "median_extension_beyond_open_pct": 0.5197056115199272,
+        "extended_beyond_open": {
+          "count": 258,
+          "pct": 100.0
+        },
+        "touched_or_crossed_prior_close_intraday": {
+          "count": 133,
+          "pct": 51.55038759689923
+        }
+      },
+      "down": {
+        "n": 182,
+        "outcomes": {
+          "continuation": {
+            "count": 82,
+            "pct": 45.05494505494506,
+            "ci95": [
+              38.00291009286193,
+              52.3114221126292
+            ]
+          },
+          "partial_retrace": {
+            "count": 41,
+            "pct": 22.52747252747253,
+            "ci95": [
+              17.062174053940556,
+              29.128560421010164
+            ]
+          },
+          "full_reversal": {
+            "count": 59,
+            "pct": 32.417582417582416,
+            "ci95": [
+              26.041588409646543,
+              39.52048165432191
+            ]
+          }
+        },
+        "median_abs_gap_pct": 0.5075124155494215,
+        "mean_session_return_pct": 0.06635062713370493,
+        "median_extension_beyond_open_pct": 0.5843120713670102,
+        "extended_beyond_open": {
+          "count": 180,
+          "pct": 98.9010989010989
+        },
+        "touched_or_crossed_prior_close_intraday": {
+          "count": 97,
+          "pct": 53.2967032967033
+        }
+      }
+    },
+    "0.25": {
+      "up": {
+        "n": 186,
+        "outcomes": {
+          "continuation": {
+            "count": 100,
+            "pct": 53.763440860215056,
+            "ci95": [
+              46.59441953911031,
+              60.7801495753514
+            ]
+          },
+          "partial_retrace": {
+            "count": 46,
+            "pct": 24.731182795698924,
+            "ci95": [
+              19.083770318821607,
+              31.401265626935288
+            ]
+          },
+          "full_reversal": {
+            "count": 40,
+            "pct": 21.50537634408602,
+            "ci95": [
+              16.209026292148497,
+              27.954950412641182
+            ]
+          }
+        },
+        "median_abs_gap_pct": 0.679610770021144,
+        "mean_session_return_pct": -0.05113974980872543,
+        "median_extension_beyond_open_pct": 0.5292803152288639,
+        "extended_beyond_open": {
+          "count": 186,
+          "pct": 100.0
+        },
+        "touched_or_crossed_prior_close_intraday": {
+          "count": 75,
+          "pct": 40.32258064516129
+        }
+      },
+      "down": {
+        "n": 138,
+        "outcomes": {
+          "continuation": {
+            "count": 58,
+            "pct": 42.028985507246375,
+            "ci95": [
+              34.11867089821718,
+              50.3710697702468
+            ]
+          },
+          "partial_retrace": {
+            "count": 40,
+            "pct": 28.985507246376812,
+            "ci95": [
+              22.066477651651866,
+              37.0428386561168
+            ]
+          },
+          "full_reversal": {
+            "count": 40,
+            "pct": 28.985507246376812,
+            "ci95": [
+              22.066477651651866,
+              37.0428386561168
+            ]
+          }
+        },
+        "median_abs_gap_pct": 0.6494224976255791,
+        "mean_session_return_pct": 0.09857128400517352,
+        "median_extension_beyond_open_pct": 0.574828845907438,
+        "extended_beyond_open": {
+          "count": 136,
+          "pct": 98.55072463768116
+        },
+        "touched_or_crossed_prior_close_intraday": {
+          "count": 66,
+          "pct": 47.82608695652174
+        }
+      }
+    },
+    "0.5": {
+      "up": {
+        "n": 125,
+        "outcomes": {
+          "continuation": {
+            "count": 64,
+            "pct": 51.2,
+            "ci95": [
+              42.53291174826268,
+              59.795528755425586
+            ]
+          },
+          "partial_retrace": {
+            "count": 40,
+            "pct": 32.0,
+            "ci95": [
+              24.46398584574266,
+              40.6094065989336
+            ]
+          },
+          "full_reversal": {
+            "count": 21,
+            "pct": 16.8,
+            "ci95": [
+              11.258737613828975,
+              24.321075117462783
+            ]
+          }
+        },
+        "median_abs_gap_pct": 0.9245024744656272,
+        "mean_session_return_pct": -0.08902203401883942,
+        "median_extension_beyond_open_pct": 0.5184003645892554,
+        "extended_beyond_open": {
+          "count": 125,
+          "pct": 100.0
+        },
+        "touched_or_crossed_prior_close_intraday": {
+          "count": 40,
+          "pct": 32.0
+        }
+      },
+      "down": {
+        "n": 92,
+        "outcomes": {
+          "continuation": {
+            "count": 42,
+            "pct": 45.65217391304348,
+            "ci95": [
+              35.852497382933834,
+              55.80039655873659
+            ]
+          },
+          "partial_retrace": {
+            "count": 31,
+            "pct": 33.69565217391305,
+            "ci95": [
+              24.86345952356762,
+              43.834892757696466
+            ]
+          },
+          "full_reversal": {
+            "count": 19,
+            "pct": 20.652173913043477,
+            "ci95": [
+              13.639031262233317,
+              30.018002844042037
+            ]
+          }
+        },
+        "median_abs_gap_pct": 0.9501523131469458,
+        "mean_session_return_pct": 0.04940609906074695,
+        "median_extension_beyond_open_pct": 0.683959160231018,
+        "extended_beyond_open": {
+          "count": 90,
+          "pct": 97.82608695652173
+        },
+        "touched_or_crossed_prior_close_intraday": {
+          "count": 35,
+          "pct": 38.04347826086956
+        }
+      }
+    },
+    "1.0": {
+      "up": {
+        "n": 50,
+        "outcomes": {
+          "continuation": {
+            "count": 25,
+            "pct": 50.0,
+            "ci95": [
+              36.64428641233285,
+              63.35571358766714
+            ]
+          },
+          "partial_retrace": {
+            "count": 20,
+            "pct": 40.0,
+            "ci95": [
+              27.608189786245752,
+              53.81881089724063
+            ]
+          },
+          "full_reversal": {
+            "count": 5,
+            "pct": 10.0,
+            "ci95": [
+              4.347512399157111,
+              21.36049033478839
+            ]
+          }
+        },
+        "median_abs_gap_pct": 1.4408653625849088,
+        "mean_session_return_pct": -0.14097533529576833,
+        "median_extension_beyond_open_pct": 0.6814829910369524,
+        "extended_beyond_open": {
+          "count": 50,
+          "pct": 100.0
+        },
+        "touched_or_crossed_prior_close_intraday": {
+          "count": 11,
+          "pct": 22.0
+        }
+      },
+      "down": {
+        "n": 45,
+        "outcomes": {
+          "continuation": {
+            "count": 21,
+            "pct": 46.666666666666664,
+            "ci95": [
+              32.934903942014735,
+              60.92279113758954
+            ]
+          },
+          "partial_retrace": {
+            "count": 16,
+            "pct": 35.55555555555556,
+            "ci95": [
+              23.21889135690405,
+              50.16445398804781
+            ]
+          },
+          "full_reversal": {
+            "count": 8,
+            "pct": 17.77777777777778,
+            "ci95": [
+              9.29427892585383,
+              31.330106843654136
+            ]
+          }
+        },
+        "median_abs_gap_pct": 1.4245014245014342,
+        "mean_session_return_pct": 0.14323399344149784,
+        "median_extension_beyond_open_pct": 0.6505563035929418,
+        "extended_beyond_open": {
+          "count": 44,
+          "pct": 97.77777777777777
+        },
+        "touched_or_crossed_prior_close_intraday": {
+          "count": 11,
+          "pct": 24.444444444444443
+        }
+      }
+    }
+  },
+  "gap_size_bands": [
+    {
+      "label": "0.10\u20130.25%",
+      "up": {
+        "n": 72,
+        "outcomes": {
+          "continuation": {
+            "count": 39,
+            "pct": 54.166666666666664,
+            "ci95": [
+              42.739664196707615,
+              65.17156130486407
+            ]
+          },
+          "partial_retrace": {
+            "count": 6,
+            "pct": 8.333333333333334,
+            "ci95": [
+              3.8751897130490347,
+              17.012555271233996
+            ]
+          },
+          "full_reversal": {
+            "count": 27,
+            "pct": 37.5,
+            "ci95": [
+              27.219009399354576,
+              49.04731409593034
+            ]
+          }
+        },
+        "median_abs_gap_pct": 0.16455369568351141,
+        "mean_session_return_pct": -0.02388328901908475,
+        "median_extension_beyond_open_pct": 0.47882288934378847,
+        "extended_beyond_open": {
+          "count": 72,
+          "pct": 100.0
+        },
+        "touched_or_crossed_prior_close_intraday": {
+          "count": 58,
+          "pct": 80.55555555555556
+        }
+      },
+      "down": {
+        "n": 44,
+        "outcomes": {
+          "continuation": {
+            "count": 24,
+            "pct": 54.54545454545455,
+            "ci95": [
+              40.06593217065349,
+              68.29499221314639
+            ]
+          },
+          "partial_retrace": {
+            "count": 1,
+            "pct": 2.272727272727273,
+            "ci95": [
+              0.40231483856370126,
+              11.807979131537632
+            ]
+          },
+          "full_reversal": {
+            "count": 19,
+            "pct": 43.18181818181818,
+            "ci95": [
+              29.682504164854574,
+              57.776109259445604
+            ]
+          }
+        },
+        "median_abs_gap_pct": 0.16591094095410042,
+        "mean_session_return_pct": -0.03470506941771931,
+        "median_extension_beyond_open_pct": 0.6490161435456221,
+        "extended_beyond_open": {
+          "count": 44,
+          "pct": 100.0
+        },
+        "touched_or_crossed_prior_close_intraday": {
+          "count": 31,
+          "pct": 70.45454545454545
+        }
+      }
+    },
+    {
+      "label": "0.25\u20130.50%",
+      "up": {
+        "n": 61,
+        "outcomes": {
+          "continuation": {
+            "count": 36,
+            "pct": 59.01639344262295,
+            "ci95": [
+              46.49956625382887,
+              70.46485165072622
+            ]
+          },
+          "partial_retrace": {
+            "count": 6,
+            "pct": 9.836065573770492,
+            "ci95": [
+              4.586395136730973,
+              19.844834197523582
+            ]
+          },
+          "full_reversal": {
+            "count": 19,
+            "pct": 31.147540983606557,
+            "ci95": [
+              20.937273683536855,
+              43.59167069784793
+            ]
+          }
+        },
+        "median_abs_gap_pct": 0.37485417025264756,
+        "mean_session_return_pct": 0.026487881769376997,
+        "median_extension_beyond_open_pct": 0.541325587536301,
+        "extended_beyond_open": {
+          "count": 61,
+          "pct": 100.0
+        },
+        "touched_or_crossed_prior_close_intraday": {
+          "count": 35,
+          "pct": 57.377049180327866
+        }
+      },
+      "down": {
+        "n": 46,
+        "outcomes": {
+          "continuation": {
+            "count": 16,
+            "pct": 34.78260869565217,
+            "ci95": [
+              22.680806269918055,
+              49.23020782272744
+            ]
+          },
+          "partial_retrace": {
+            "count": 9,
+            "pct": 19.565217391304348,
+            "ci95": [
+              10.650490444121798,
+              33.171537741169196
+            ]
+          },
+          "full_reversal": {
+            "count": 21,
+            "pct": 45.65217391304348,
+            "ci95": [
+              32.154510421121984,
+              59.82006503391957
+            ]
+          }
+        },
+        "median_abs_gap_pct": 0.37450289604713527,
+        "mean_session_return_pct": 0.19690165389402667,
+        "median_extension_beyond_open_pct": 0.412859294205814,
+        "extended_beyond_open": {
+          "count": 46,
+          "pct": 100.0
+        },
+        "touched_or_crossed_prior_close_intraday": {
+          "count": 31,
+          "pct": 67.3913043478261
+        }
+      }
+    },
+    {
+      "label": "0.50\u20131.00%",
+      "up": {
+        "n": 75,
+        "outcomes": {
+          "continuation": {
+            "count": 39,
+            "pct": 52.0,
+            "ci95": [
+              40.87401957316927,
+              62.931078243211935
+            ]
+          },
+          "partial_retrace": {
+            "count": 20,
+            "pct": 26.666666666666668,
+            "ci95": [
+              17.97617929648875,
+              37.63101284573058
+            ]
+          },
+          "full_reversal": {
+            "count": 16,
+            "pct": 21.333333333333332,
+            "ci95": [
+              13.580086342007997,
+              31.880178289861476
+            ]
+          }
+        },
+        "median_abs_gap_pct": 0.7302770394322255,
+        "mean_session_return_pct": -0.054386499834220135,
+        "median_extension_beyond_open_pct": 0.44995645582686095,
+        "extended_beyond_open": {
+          "count": 75,
+          "pct": 100.0
+        },
+        "touched_or_crossed_prior_close_intraday": {
+          "count": 29,
+          "pct": 38.666666666666664
+        }
+      },
+      "down": {
+        "n": 47,
+        "outcomes": {
+          "continuation": {
+            "count": 21,
+            "pct": 44.680851063829785,
+            "ci95": [
+              31.410747474911304,
+              58.75478626124176
+            ]
+          },
+          "partial_retrace": {
+            "count": 15,
+            "pct": 31.914893617021278,
+            "ci95": [
+              20.39520381739899,
+              46.16761088552146
+            ]
+          },
+          "full_reversal": {
+            "count": 11,
+            "pct": 23.404255319148938,
+            "ci95": [
+              13.603136423924592,
+              37.22453225684077
+            ]
+          }
+        },
+        "median_abs_gap_pct": 0.6542526421741246,
+        "mean_session_return_pct": -0.04042911896337625,
+        "median_extension_beyond_open_pct": 0.848585970944149,
+        "extended_beyond_open": {
+          "count": 46,
+          "pct": 97.87234042553192
+        },
+        "touched_or_crossed_prior_close_intraday": {
+          "count": 24,
+          "pct": 51.06382978723404
+        }
+      }
+    },
+    {
+      "label": "\u22651.00%",
+      "up": {
+        "n": 50,
+        "outcomes": {
+          "continuation": {
+            "count": 25,
+            "pct": 50.0,
+            "ci95": [
+              36.64428641233285,
+              63.35571358766714
+            ]
+          },
+          "partial_retrace": {
+            "count": 20,
+            "pct": 40.0,
+            "ci95": [
+              27.608189786245752,
+              53.81881089724063
+            ]
+          },
+          "full_reversal": {
+            "count": 5,
+            "pct": 10.0,
+            "ci95": [
+              4.347512399157111,
+              21.36049033478839
+            ]
+          }
+        },
+        "median_abs_gap_pct": 1.4408653625849088,
+        "mean_session_return_pct": -0.14097533529576833,
+        "median_extension_beyond_open_pct": 0.6814829910369524,
+        "extended_beyond_open": {
+          "count": 50,
+          "pct": 100.0
+        },
+        "touched_or_crossed_prior_close_intraday": {
+          "count": 11,
+          "pct": 22.0
+        }
+      },
+      "down": {
+        "n": 45,
+        "outcomes": {
+          "continuation": {
+            "count": 21,
+            "pct": 46.666666666666664,
+            "ci95": [
+              32.934903942014735,
+              60.92279113758954
+            ]
+          },
+          "partial_retrace": {
+            "count": 16,
+            "pct": 35.55555555555556,
+            "ci95": [
+              23.21889135690405,
+              50.16445398804781
+            ]
+          },
+          "full_reversal": {
+            "count": 8,
+            "pct": 17.77777777777778,
+            "ci95": [
+              9.29427892585383,
+              31.330106843654136
+            ]
+          }
+        },
+        "median_abs_gap_pct": 1.4245014245014342,
+        "mean_session_return_pct": 0.14323399344149784,
+        "median_extension_beyond_open_pct": 0.6505563035929418,
+        "extended_beyond_open": {
+          "count": 44,
+          "pct": 97.77777777777777
+        },
+        "touched_or_crossed_prior_close_intraday": {
+          "count": 11,
+          "pct": 24.444444444444443
+        }
+      }
+    }
+  ]
+}

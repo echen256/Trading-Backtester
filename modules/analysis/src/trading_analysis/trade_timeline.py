@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import math
 import statistics
+import webbrowser
 from collections import defaultdict
 from datetime import datetime, time
+from pathlib import Path
 from typing import TYPE_CHECKING, List, Sequence
 
 from .daily_timeline import render_day_detail, render_timeline_page
@@ -18,9 +20,18 @@ from .trade_review import analyze_trade
 
 if TYPE_CHECKING:
     from .parse_orders import DayPnL, RealizedTrade
+    from .tpo.schema import TpoGradeRecord, TpoGradesDocument
 
 
-def render_symbol_trade_breakdown(symbol: str, trades: Sequence[RealizedTrade]) -> str:
+def render_symbol_trade_breakdown(
+    symbol: str,
+    trades: Sequence[RealizedTrade],
+    *,
+    tpo_grades: "TpoGradesDocument | None" = None,
+) -> str:
+    from .tpo.render import grade_badge
+    from .tpo.schema import find_grade_for_trade
+
     total_pnl = sum(trade.pnl for trade in trades)
     wins = sum(1 for trade in trades if trade.pnl > 0)
     losses = sum(1 for trade in trades if trade.pnl < 0)
@@ -34,8 +45,10 @@ def render_symbol_trade_breakdown(symbol: str, trades: Sequence[RealizedTrade]) 
     lines.append(f"Wins: {wins} | Losses: {losses} | Flats: {flats}")
     lines.append("-" * 72)
     for index, trade in enumerate(_sort_symbol_trade_list(trades), start=1):
+        badge = grade_badge(find_grade_for_trade(tpo_grades, trade))
+        badge_suffix = f" {badge}" if badge else ""
         lines.append("")
-        lines.append(f"[{index:03d}] {describe_contract(trade.symbol)}")
+        lines.append(f"[{index:03d}] {describe_contract(trade.symbol)}{badge_suffix}")
         lines.append(f"  Direction : {trade.direction}")
         lines.append(f"  Quantity  : {trade.quantity:g}")
         lines.append(f"  Open      : {trade.open_date.isoformat()} @ {trade.open_price:.2f}")
@@ -47,11 +60,21 @@ def render_symbol_trade_breakdown(symbol: str, trades: Sequence[RealizedTrade]) 
         lines.append("  " + "-" * 66)
     lines.append("")
     lines.append("=" * 72)
-    lines.append("Navigation: [B] Back | [R] Date range | [N] Next symbol | [P] Previous symbol | [F] Filter symbol | [K] Kelly | [A] Analyze trade | [Q] Quit")
+    lines.append(
+        "Navigation: [B] Back | [R] Date range | [N] Next symbol | [P] Previous symbol | "
+        "[F] Filter symbol | [K] Kelly | [A] Analyze trade | [G] Grade trade | [Q] Quit"
+    )
     return "\n".join(lines)
 
 
-def render_all_trades(trades: Sequence[RealizedTrade]) -> str:
+def render_all_trades(
+    trades: Sequence[RealizedTrade],
+    *,
+    tpo_grades: "TpoGradesDocument | None" = None,
+) -> str:
+    from .tpo.render import grade_badge
+    from .tpo.schema import find_grade_for_trade
+
     total_pnl = sum(trade.pnl for trade in trades)
     wins = sum(1 for trade in trades if trade.pnl > 0)
     losses = sum(1 for trade in trades if trade.pnl < 0)
@@ -65,8 +88,13 @@ def render_all_trades(trades: Sequence[RealizedTrade]) -> str:
     lines.append(f"Wins: {wins} | Losses: {losses} | Flats: {flats}")
     lines.append("-" * 72)
     for index, trade in enumerate(_sort_trade_list(trades), start=1):
+        badge = grade_badge(find_grade_for_trade(tpo_grades, trade))
+        badge_suffix = f" {badge}" if badge else ""
         lines.append("")
-        lines.append(f"[{index:03d}] {extract_underlying_symbol(trade.symbol)} | {describe_contract(trade.symbol)}")
+        lines.append(
+            f"[{index:03d}] {extract_underlying_symbol(trade.symbol)} | "
+            f"{describe_contract(trade.symbol)}{badge_suffix}"
+        )
         lines.append(f"  Direction : {trade.direction}")
         lines.append(f"  Quantity  : {trade.quantity:g}")
         lines.append(f"  Open      : {trade.open_date.isoformat()} @ {trade.open_price:.2f}")
@@ -78,7 +106,10 @@ def render_all_trades(trades: Sequence[RealizedTrade]) -> str:
         lines.append("  " + "-" * 66)
     lines.append("")
     lines.append("=" * 72)
-    lines.append("Navigation: [B] Back | [R] Date range | [K] Kelly | [A] Analyze trade | [Q] Quit")
+    lines.append(
+        "Navigation: [B] Back | [R] Date range | [K] Kelly | [A] Analyze trade | "
+        "[G] Grade trade | [Q] Quit"
+    )
     return "\n".join(lines)
 
 
@@ -145,6 +176,7 @@ def run_interactive_report(
     day_entries: Sequence[DayPnL],
     realized_trades: Sequence[RealizedTrade],
     symbol_chart: str | None = None,
+    tpo_grades: "TpoGradesDocument | None" = None,
 ) -> None:
     if not day_entries:
         print("No realized trades available to display.")
@@ -158,6 +190,9 @@ def run_interactive_report(
         visible_realized_trades,
         fallback_chart=symbol_chart,
     )
+    grades_doc = tpo_grades
+    if grades_doc is not None:
+        print(f"Loaded {len(grades_doc.trades)} TPO grades for interactive review.")
 
     page = 0
     page_size = 20
@@ -207,6 +242,16 @@ def run_interactive_report(
                 continue
             if command == "k":
                 _show_kelly_breakdown(visible_realized_trades)
+                continue
+            if command == "u":
+                if grades_doc is None or not grades_doc.trades:
+                    print("No TPO grades loaded. Run trading-tpo-grade or use [G] on a trade.")
+                    input("Press Enter to continue...")
+                else:
+                    from .tpo.render import summarize_quality_buckets
+
+                    print(summarize_quality_buckets(grades_doc.trades))
+                    input("Press Enter to continue...")
                 continue
             if command == "t":
                 previous_view = "timeline"
@@ -265,6 +310,15 @@ def run_interactive_report(
                 selected_day = datetime.strptime(visible_day_entries[selected_index].date_label, "%Y-%m-%d").date()
                 day_trades = [trade for trade in visible_realized_trades if trade.trade_date == selected_day]
                 _show_kelly_breakdown(day_trades, title=f"Kelly Criterion Breakdown - {selected_day.isoformat()}")
+                continue
+            if command == "u":
+                if grades_doc is None or not grades_doc.trades:
+                    print("No TPO grades loaded. Run trading-tpo-grade or use [G] on a trade.")
+                else:
+                    from .tpo.render import summarize_quality_buckets
+
+                    print(summarize_quality_buckets(grades_doc.trades))
+                input("Press Enter to continue...")
                 continue
             if command == "t":
                 previous_view = "detail"
@@ -347,7 +401,13 @@ def run_interactive_report(
                 print(f"Unknown command: {command}")
             elif view_mode == "symbol-detail":
                 current_symbol_trades = trades_by_symbol.get(selected_symbol or "", [])
-                print(render_symbol_trade_breakdown(selected_symbol or "", current_symbol_trades))
+                print(
+                    render_symbol_trade_breakdown(
+                        selected_symbol or "",
+                        current_symbol_trades,
+                        tpo_grades=grades_doc,
+                    )
+                )
                 command = input("Command: ").strip().lower()
                 if not command:
                     continue
@@ -408,9 +468,20 @@ def run_interactive_report(
                         print(exc)
                         input("Press Enter to continue...")
                     continue
+                if command == "g":
+                    try:
+                        grades_doc = _grade_trade_from_list(
+                            current_symbol_trades,
+                            sorter=_sort_symbol_trade_list,
+                            tpo_grades=grades_doc,
+                        )
+                    except Exception as exc:
+                        print(exc)
+                        input("Press Enter to continue...")
+                    continue
                 print(f"Unknown command: {command}")
             else:
-                print(render_all_trades(visible_realized_trades))
+                print(render_all_trades(visible_realized_trades, tpo_grades=grades_doc))
                 command = input("Command: ").strip().lower()
                 if not command:
                     continue
@@ -442,7 +513,103 @@ def run_interactive_report(
                         print(exc)
                         input("Press Enter to continue...")
                     continue
+                if command == "g":
+                    try:
+                        grades_doc = _grade_trade_from_list(
+                            visible_realized_trades,
+                            sorter=_sort_trade_list,
+                            tpo_grades=grades_doc,
+                        )
+                    except Exception as exc:
+                        print(exc)
+                        input("Press Enter to continue...")
+                    continue
                 print(f"Unknown command: {command}")
+
+
+def _grade_trade_from_list(
+    trades: Sequence[RealizedTrade],
+    *,
+    sorter,
+    tpo_grades: "TpoGradesDocument | None" = None,
+) -> "TpoGradesDocument | None":
+    from .export_tpo_grades import grade_realized_trade
+    from .tpo.grade import get_grade_api_key
+    from .tpo.render import build_tpo_plotly_chart, render_grade_console
+    from .tpo.schema import TpoGradesDocument, find_grade_for_trade
+
+    if not trades:
+        print("No trades available to grade.")
+        return tpo_grades
+
+    selection = input("Trade #: ").strip()
+    if not selection:
+        return tpo_grades
+    if not selection.isdigit():
+        print(f"Invalid trade number: {selection}")
+        return tpo_grades
+
+    ordered_trades = sorter(trades)
+    trade_index = int(selection) - 1
+    if trade_index < 0 or trade_index >= len(ordered_trades):
+        print(f"Trade number out of range: {selection}")
+        input("Press Enter to continue...")
+        return tpo_grades
+
+    trade = ordered_trades[trade_index]
+    cached = find_grade_for_trade(tpo_grades, trade)
+    record = cached
+    if record is None:
+        use_llm = False
+        if get_grade_api_key():
+            answer = input("LLM API key detected (DeepSeek/OpenAI). Run LLM grade? [y/N]: ").strip().lower()
+            use_llm = answer in {"y", "yes"}
+        print("Building underlying TPO features (Polygon minute bars)...")
+        record = grade_realized_trade(trade, use_llm=use_llm)
+        if tpo_grades is None:
+            tpo_grades = TpoGradesDocument(
+                metadata={"source": "interactive", "trade_count": 1},
+                trades=[record],
+            )
+        else:
+            tpo_grades.trades = [
+                existing
+                for existing in tpo_grades.trades
+                if existing.trade_id != record.trade_id
+            ] + [record]
+    else:
+        print("Using cached TPO grade from loaded JSON.")
+
+    print(render_grade_console(record))
+    nav = input(
+        "Press Enter to return, 'o' to open Plotly TPO chart, 'r' to regrade live: "
+    ).strip().lower()
+    if nav == "o":
+        path = build_tpo_plotly_chart(record)
+        webbrowser.open(path.resolve().as_uri())
+        print(f"Opened TPO chart: {path}")
+        input("Press Enter to continue...")
+    elif nav == "r":
+        use_llm = False
+        if get_grade_api_key():
+            answer = input("Run LLM grade on regrade? [y/N]: ").strip().lower()
+            use_llm = answer in {"y", "yes"}
+        print("Rebuilding TPO features...")
+        record = grade_realized_trade(trade, use_llm=use_llm)
+        if tpo_grades is None:
+            tpo_grades = TpoGradesDocument(
+                metadata={"source": "interactive", "trade_count": 1},
+                trades=[record],
+            )
+        else:
+            tpo_grades.trades = [
+                existing
+                for existing in tpo_grades.trades
+                if existing.trade_id != record.trade_id
+            ] + [record]
+        print(render_grade_console(record))
+        input("Press Enter to continue...")
+    return tpo_grades
 
 
 def _analyze_trade_from_list(

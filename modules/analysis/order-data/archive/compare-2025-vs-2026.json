@@ -1,0 +1,900 @@
+{
+  "year_2025": {
+    "label": "2025",
+    "n_orders_loaded": 3639,
+    "n_realized_long": 2053,
+    "total_pnl": 24382.0,
+    "avg_pnl": 11.88,
+    "median_pnl": -37.0,
+    "win_rate": 39.9,
+    "gross_wins": 283400.0,
+    "gross_losses": -259018.0,
+    "profit_factor": 1.09,
+    "avg_winner": 346.03,
+    "avg_loser": -213.54,
+    "avg_hold": 1.83,
+    "median_hold": 1,
+    "same_day_pct": 40.0,
+    "one_day_pct": 27.5,
+    "swing_2_5_pct": 25.0,
+    "longer_pct": 7.5,
+    "avg_qty": 4.35,
+    "median_qty": 2.0,
+    "avg_notional": 782.0,
+    "median_notional": 605.0,
+    "unique_underlyings": 163,
+    "top_underlyings": [
+      [
+        "GLD",
+        18717.0,
+        126
+      ],
+      [
+        "MU",
+        14614.0,
+        72
+      ],
+      [
+        "SLV",
+        12178.0,
+        58
+      ],
+      [
+        "INTC",
+        10082.0,
+        78
+      ],
+      [
+        "QQQ",
+        7217.0,
+        262
+      ],
+      [
+        "AAPL",
+        7024.0,
+        51
+      ],
+      [
+        "NVDA",
+        5802.0,
+        41
+      ],
+      [
+        "APP",
+        4566.0,
+        6
+      ]
+    ],
+    "worst_underlyings": [
+      [
+        "ASML",
+        -6964.0,
+        11
+      ],
+      [
+        "TSLA",
+        -5903.0,
+        163
+      ],
+      [
+        "QCOM",
+        -5691.0,
+        28
+      ],
+      [
+        "AMD",
+        -5528.0,
+        28
+      ],
+      [
+        "GTLB",
+        -4928.0,
+        13
+      ],
+      [
+        "BABA",
+        -3933.0,
+        48
+      ],
+      [
+        "CRWV",
+        -3627.0,
+        31
+      ],
+      [
+        "USO",
+        -3452.0,
+        12
+      ]
+    ],
+    "by_option_type": {
+      "CALL": {
+        "n": 1125,
+        "pnl": 25335.0
+      },
+      "PUT": {
+        "n": 928,
+        "pnl": -953.0
+      }
+    },
+    "avg_dte_open": 33.9,
+    "median_dte_open": 31,
+    "hold_bucket_pnl": {
+      "0d": {
+        "n": 821,
+        "pnl": -15357.0
+      },
+      "1d": {
+        "n": 565,
+        "pnl": 2965.0
+      },
+      "2-5d": {
+        "n": 514,
+        "pnl": 16845.0
+      },
+      ">5d": {
+        "n": 153,
+        "pnl": 19929.0
+      }
+    },
+    "quarters": {
+      "2025-Q1": {
+        "n": 144,
+        "pnl": 17849.0,
+        "win_rate": 54.9,
+        "avg_hold": 3.24,
+        "median_hold": 2.0,
+        "same_day_pct": 9.0,
+        "avg_qty": 4.17,
+        "median_qty": 2.0,
+        "avg_notional": 942.0
+      },
+      "2025-Q2": {
+        "n": 628,
+        "pnl": 5352.0,
+        "win_rate": 38.7,
+        "avg_hold": 1.48,
+        "median_hold": 0.0,
+        "same_day_pct": 51.9,
+        "avg_qty": 5.01,
+        "median_qty": 2.0,
+        "avg_notional": 800.0
+      },
+      "2025-Q3": {
+        "n": 473,
+        "pnl": 3973.0,
+        "win_rate": 34.5,
+        "avg_hold": 2.18,
+        "median_hold": 1,
+        "same_day_pct": 31.3,
+        "avg_qty": 4.36,
+        "median_qty": 2.0,
+        "avg_notional": 680.0
+      },
+      "2025-Q4": {
+        "n": 808,
+        "pnl": -2792.0,
+        "win_rate": 41.3,
+        "avg_hold": 1.65,
+        "median_hold": 1.0,
+        "same_day_pct": 41.3,
+        "avg_qty": 3.85,
+        "median_qty": 2.0,
+        "avg_notional": 799.0
+      }
+    },
+    "monthly_pnl": {
+      "2025-01": 148.0,
+      "2025-02": 3586.0,
+      "2025-03": 14115.0,
+      "2025-04": 24586.0,
+      "2025-05": -13837.0,
+      "2025-06": -5397.0,
+      "2025-07": -3426.0,
+      "2025-08": -2561.0,
+      "2025-09": 9960.0,
+      "2025-10": -759.0,
+      "2025-11": -6587.0,
+      "2025-12": 4554.0
+    },
+    "date_range": "2025-01-03 \u2192 2025-12-30"
+  },
+  "year_2026": {
+    "label": "2026",
+    "n_orders_loaded": 2437,
+    "n_realized_long": 1294,
+    "total_pnl": 5509.0,
+    "avg_pnl": 4.26,
+    "median_pnl": -46.0,
+    "win_rate": 38.8,
+    "gross_wins": 189815.0,
+    "gross_losses": -184306.0,
+    "profit_factor": 1.03,
+    "avg_winner": 378.12,
+    "avg_loser": -238.12,
+    "avg_hold": 1.82,
+    "median_hold": 1.0,
+    "same_day_pct": 49.4,
+    "one_day_pct": 21.2,
+    "swing_2_5_pct": 19.9,
+    "longer_pct": 9.6,
+    "avg_qty": 5.38,
+    "median_qty": 2.0,
+    "avg_notional": 762.0,
+    "median_notional": 555.0,
+    "unique_underlyings": 128,
+    "top_underlyings": [
+      [
+        "MSTR",
+        10167.0,
+        51
+      ],
+      [
+        "MU",
+        7963.0,
+        125
+      ],
+      [
+        "IREN",
+        6726.0,
+        45
+      ],
+      [
+        "CAR",
+        6104.0,
+        5
+      ],
+      [
+        "QCOM",
+        5414.0,
+        35
+      ],
+      [
+        "GLD",
+        3538.0,
+        60
+      ],
+      [
+        "UAL",
+        3497.0,
+        17
+      ],
+      [
+        "NTR",
+        2957.0,
+        14
+      ]
+    ],
+    "worst_underlyings": [
+      [
+        "INTC",
+        -9737.0,
+        72
+      ],
+      [
+        "USO",
+        -6363.0,
+        28
+      ],
+      [
+        "TSLA",
+        -3197.0,
+        44
+      ],
+      [
+        "EWJ",
+        -2464.0,
+        4
+      ],
+      [
+        "EWY",
+        -2265.0,
+        6
+      ],
+      [
+        "VET",
+        -2080.0,
+        4
+      ],
+      [
+        "SLV",
+        -1928.0,
+        30
+      ],
+      [
+        "CRWV",
+        -1872.0,
+        26
+      ]
+    ],
+    "by_option_type": {
+      "CALL": {
+        "n": 583,
+        "pnl": 3069.0
+      },
+      "PUT": {
+        "n": 711,
+        "pnl": 2440.0
+      }
+    },
+    "avg_dte_open": 18.7,
+    "median_dte_open": 10.0,
+    "hold_bucket_pnl": {
+      "0d": {
+        "n": 639,
+        "pnl": -6378.0
+      },
+      "1d": {
+        "n": 274,
+        "pnl": 3514.0
+      },
+      "2-5d": {
+        "n": 257,
+        "pnl": 9459.0
+      },
+      ">5d": {
+        "n": 124,
+        "pnl": -1086.0
+      }
+    },
+    "quarters": {
+      "2026-Q1": {
+        "n": 464,
+        "pnl": 19104.0,
+        "win_rate": 45.3,
+        "avg_hold": 2.87,
+        "median_hold": 1.0,
+        "same_day_pct": 36.6,
+        "avg_qty": 5.55,
+        "median_qty": 3.0,
+        "avg_notional": 764.0
+      },
+      "2026-Q2": {
+        "n": 729,
+        "pnl": -10585.0,
+        "win_rate": 35.1,
+        "avg_hold": 1.34,
+        "median_hold": 0,
+        "same_day_pct": 54.3,
+        "avg_qty": 5.06,
+        "median_qty": 2.0,
+        "avg_notional": 778.0
+      },
+      "2026-Q3": {
+        "n": 101,
+        "pnl": -3010.0,
+        "win_rate": 35.6,
+        "avg_hold": 0.47,
+        "median_hold": 0,
+        "same_day_pct": 72.3,
+        "avg_qty": 6.94,
+        "median_qty": 3.0,
+        "avg_notional": 641.0
+      }
+    },
+    "monthly_pnl": {
+      "2026-01": 5194.0,
+      "2026-02": 8159.0,
+      "2026-03": 5751.0,
+      "2026-04": -10759.0,
+      "2026-05": -4908.0,
+      "2026-06": 5082.0,
+      "2026-07": -3010.0
+    },
+    "date_range": "2026-01-02 \u2192 2026-07-09"
+  },
+  "q1_2025": {
+    "label": "2025-Q1",
+    "n_orders_loaded": 3639,
+    "n_realized_long": 144,
+    "total_pnl": 17849.0,
+    "avg_pnl": 123.95,
+    "median_pnl": 47.5,
+    "win_rate": 54.9,
+    "gross_wins": 33252.0,
+    "gross_losses": -15403.0,
+    "profit_factor": 2.16,
+    "avg_winner": 420.91,
+    "avg_loser": -240.67,
+    "avg_hold": 3.24,
+    "median_hold": 2.0,
+    "same_day_pct": 9.0,
+    "one_day_pct": 31.2,
+    "swing_2_5_pct": 40.3,
+    "longer_pct": 19.4,
+    "avg_qty": 4.17,
+    "median_qty": 2.0,
+    "avg_notional": 942.0,
+    "median_notional": 960.0,
+    "unique_underlyings": 26,
+    "top_underlyings": [
+      [
+        "GLD",
+        4316.0,
+        13
+      ],
+      [
+        "MSTR",
+        4304.0,
+        21
+      ],
+      [
+        "WMT",
+        3466.0,
+        13
+      ],
+      [
+        "COIN",
+        2810.0,
+        3
+      ],
+      [
+        "TSLA",
+        2619.0,
+        22
+      ],
+      [
+        "MU",
+        2428.0,
+        6
+      ],
+      [
+        "NVDA",
+        1240.0,
+        1
+      ],
+      [
+        "QQQ",
+        1212.0,
+        8
+      ]
+    ],
+    "worst_underlyings": [
+      [
+        "JD",
+        -2436.0,
+        12
+      ],
+      [
+        "BILI",
+        -1785.0,
+        3
+      ],
+      [
+        "BABA",
+        -648.0,
+        10
+      ],
+      [
+        "ACHR",
+        -450.0,
+        1
+      ],
+      [
+        "TMUS",
+        -330.0,
+        1
+      ],
+      [
+        "BA",
+        -320.0,
+        1
+      ],
+      [
+        "USO",
+        -184.0,
+        1
+      ],
+      [
+        "NIO",
+        -160.0,
+        1
+      ]
+    ],
+    "by_option_type": {
+      "CALL": {
+        "n": 90,
+        "pnl": 1072.0
+      },
+      "PUT": {
+        "n": 54,
+        "pnl": 16777.0
+      }
+    },
+    "avg_dte_open": 47.8,
+    "median_dte_open": 54.0,
+    "hold_bucket_pnl": {
+      "0d": {
+        "n": 13,
+        "pnl": -753.0
+      },
+      "1d": {
+        "n": 45,
+        "pnl": 3601.0
+      },
+      "2-5d": {
+        "n": 58,
+        "pnl": 6192.0
+      },
+      ">5d": {
+        "n": 28,
+        "pnl": 8809.0
+      }
+    },
+    "quarters": {
+      "2025-Q1": {
+        "n": 144,
+        "pnl": 17849.0,
+        "win_rate": 54.9,
+        "avg_hold": 3.24,
+        "median_hold": 2.0,
+        "same_day_pct": 9.0,
+        "avg_qty": 4.17,
+        "median_qty": 2.0,
+        "avg_notional": 942.0
+      }
+    },
+    "monthly_pnl": {
+      "2025-01": 148.0,
+      "2025-02": 3586.0,
+      "2025-03": 14115.0
+    },
+    "date_range": "2025-01-03 \u2192 2025-03-31"
+  },
+  "q1_2026": {
+    "label": "2026-Q1",
+    "n_orders_loaded": 2437,
+    "n_realized_long": 464,
+    "total_pnl": 19104.0,
+    "avg_pnl": 41.17,
+    "median_pnl": -30.0,
+    "win_rate": 45.3,
+    "gross_wins": 88567.0,
+    "gross_losses": -69463.0,
+    "profit_factor": 1.28,
+    "avg_winner": 421.75,
+    "avg_loser": -284.68,
+    "avg_hold": 2.87,
+    "median_hold": 1.0,
+    "same_day_pct": 36.6,
+    "one_day_pct": 20.0,
+    "swing_2_5_pct": 25.2,
+    "longer_pct": 18.1,
+    "avg_qty": 5.55,
+    "median_qty": 3.0,
+    "avg_notional": 764.0,
+    "median_notional": 548.0,
+    "unique_underlyings": 71,
+    "top_underlyings": [
+      [
+        "MU",
+        8377.0,
+        26
+      ],
+      [
+        "MSTR",
+        6760.0,
+        13
+      ],
+      [
+        "UAL",
+        4288.0,
+        8
+      ],
+      [
+        "NTR",
+        3337.0,
+        10
+      ],
+      [
+        "UVXY",
+        3245.0,
+        21
+      ],
+      [
+        "COIN",
+        3101.0,
+        13
+      ],
+      [
+        "PPLT",
+        2616.0,
+        6
+      ],
+      [
+        "BABA",
+        2385.0,
+        16
+      ]
+    ],
+    "worst_underlyings": [
+      [
+        "USO",
+        -3963.0,
+        10
+      ],
+      [
+        "QQQ",
+        -3599.0,
+        98
+      ],
+      [
+        "TSLA",
+        -2364.0,
+        18
+      ],
+      [
+        "AMZN",
+        -1691.0,
+        14
+      ],
+      [
+        "BMNR",
+        -1305.0,
+        4
+      ],
+      [
+        "AVGO",
+        -1264.0,
+        3
+      ],
+      [
+        "ASML",
+        -1155.0,
+        1
+      ],
+      [
+        "LUMN",
+        -1134.0,
+        4
+      ]
+    ],
+    "by_option_type": {
+      "CALL": {
+        "n": 174,
+        "pnl": 5901.0
+      },
+      "PUT": {
+        "n": 290,
+        "pnl": 13203.0
+      }
+    },
+    "avg_dte_open": 23.5,
+    "median_dte_open": 16.0,
+    "hold_bucket_pnl": {
+      "0d": {
+        "n": 170,
+        "pnl": 4653.0
+      },
+      "1d": {
+        "n": 93,
+        "pnl": 6620.0
+      },
+      "2-5d": {
+        "n": 117,
+        "pnl": 7264.0
+      },
+      ">5d": {
+        "n": 84,
+        "pnl": 567.0
+      }
+    },
+    "quarters": {
+      "2026-Q1": {
+        "n": 464,
+        "pnl": 19104.0,
+        "win_rate": 45.3,
+        "avg_hold": 2.87,
+        "median_hold": 1.0,
+        "same_day_pct": 36.6,
+        "avg_qty": 5.55,
+        "median_qty": 3.0,
+        "avg_notional": 764.0
+      }
+    },
+    "monthly_pnl": {
+      "2026-01": 5194.0,
+      "2026-02": 8159.0,
+      "2026-03": 5751.0
+    },
+    "date_range": "2026-01-02 \u2192 2026-03-31"
+  },
+  "q1_2025_winners": {
+    "n": 79,
+    "pnl": 33252.0,
+    "avg_hold": 3.58,
+    "median_hold": 3,
+    "same_day_pct": 6.3,
+    "avg_qty": 3.73,
+    "median_qty": 2.0,
+    "avg_notional": 796.0,
+    "call_pct": 58.2,
+    "put_pct": 41.8,
+    "top5": [
+      [
+        "TSLA",
+        14
+      ],
+      [
+        "MSTR",
+        11
+      ],
+      [
+        "GLD",
+        11
+      ],
+      [
+        "QQQ",
+        8
+      ],
+      [
+        "WMT",
+        7
+      ]
+    ]
+  },
+  "q1_2025_losers": {
+    "n": 65,
+    "pnl": -15403.0,
+    "avg_hold": 2.82,
+    "median_hold": 2,
+    "same_day_pct": 12.3,
+    "avg_qty": 4.71,
+    "median_qty": 2.0,
+    "avg_notional": 1121.0,
+    "call_pct": 67.7,
+    "put_pct": 32.3,
+    "top5": [
+      [
+        "JD",
+        11
+      ],
+      [
+        "MSTR",
+        10
+      ],
+      [
+        "TSLA",
+        8
+      ],
+      [
+        "BABA",
+        7
+      ],
+      [
+        "WMT",
+        6
+      ]
+    ]
+  },
+  "q1_2025_best_trades": [
+    {
+      "sym": "MU",
+      "type": "PUT",
+      "open": "2025-03-25",
+      "close": "2025-03-31",
+      "hold": 6,
+      "qty": 8.0,
+      "open_px": 1.26,
+      "close_px": 3.24,
+      "pnl": 1584.0,
+      "ret_pct": 157.1
+    },
+    {
+      "sym": "MSTR",
+      "type": "PUT",
+      "open": "2025-02-24",
+      "close": "2025-02-25",
+      "hold": 1,
+      "qty": 1.0,
+      "open_px": 13.9,
+      "close_px": 29.6,
+      "pnl": 1570.0,
+      "ret_pct": 112.9
+    },
+    {
+      "sym": "MSTR",
+      "type": "PUT",
+      "open": "2025-02-24",
+      "close": "2025-02-28",
+      "hold": 4,
+      "qty": 1.0,
+      "open_px": 13.75,
+      "close_px": 29.2,
+      "pnl": 1545.0,
+      "ret_pct": 112.4
+    },
+    {
+      "sym": "WMT",
+      "type": "PUT",
+      "open": "2025-03-03",
+      "close": "2025-03-07",
+      "hold": 4,
+      "qty": 10.0,
+      "open_px": 1.11,
+      "close_px": 2.62,
+      "pnl": 1510.0,
+      "ret_pct": 136.0
+    },
+    {
+      "sym": "GLD",
+      "type": "CALL",
+      "open": "2025-03-21",
+      "close": "2025-03-31",
+      "hold": 10,
+      "qty": 3.0,
+      "open_px": 5.6,
+      "close_px": 9.95,
+      "pnl": 1305.0,
+      "ret_pct": 77.7
+    },
+    {
+      "sym": "MSTR",
+      "type": "PUT",
+      "open": "2025-02-24",
+      "close": "2025-02-25",
+      "hold": 1,
+      "qty": 1.0,
+      "open_px": 13.37,
+      "close_px": 26.3,
+      "pnl": 1293.0,
+      "ret_pct": 96.7
+    },
+    {
+      "sym": "COIN",
+      "type": "PUT",
+      "open": "2025-03-26",
+      "close": "2025-03-31",
+      "hold": 5,
+      "qty": 1.0,
+      "open_px": 8.6,
+      "close_px": 21.25,
+      "pnl": 1265.0,
+      "ret_pct": 147.1
+    },
+    {
+      "sym": "TSLA",
+      "type": "PUT",
+      "open": "2025-03-27",
+      "close": "2025-03-31",
+      "hold": 4,
+      "qty": 1.0,
+      "open_px": 6.12,
+      "close_px": 18.65,
+      "pnl": 1253.0,
+      "ret_pct": 204.7
+    },
+    {
+      "sym": "NVDA",
+      "type": "PUT",
+      "open": "2025-02-27",
+      "close": "2025-02-28",
+      "hold": 1,
+      "qty": 4.0,
+      "open_px": 2.51,
+      "close_px": 5.61,
+      "pnl": 1240.0,
+      "ret_pct": 123.5
+    },
+    {
+      "sym": "COIN",
+      "type": "PUT",
+      "open": "2025-03-26",
+      "close": "2025-03-31",
+      "hold": 5,
+      "qty": 1.0,
+      "open_px": 7.9,
+      "close_px": 18.55,
+      "pnl": 1065.0,
+      "ret_pct": 134.8
+    }
+  ],
+  "q1_2025_concentration": {
+    "top_5_pnl": 7514.0,
+    "top_5_share_of_gross_if_pos": 22.6,
+    "top_10_pnl": 13630.0,
+    "top_10_share_of_gross_if_pos": 41.0,
+    "top_20_pnl": 20745.0,
+    "top_20_share_of_gross_if_pos": 62.4
+  }
+}
