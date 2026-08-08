@@ -1,0 +1,89 @@
+{
+  "definitions": {
+    "X": "Dollar distance from current open to nearest prior candle-body edge",
+    "failed_at_close": "Confirmed one-minute reclaim of prior close, then daily close below prior close",
+    "tight": "After first loss of prior close, maximum downside from prior close remained under X/2"
+  },
+  "all": {
+    "confirmed_reclaims": 61,
+    "ever_lost_intraday": 53,
+    "failed_at_close": 22,
+    "tight_intraday_under_half_x": 3,
+    "at_least_half_x_intraday": 19,
+    "at_least_one_x_intraday": 14,
+    "broke_open_intraday_after_loss": 9,
+    "closed_within_half_x_below_prior": 7,
+    "closed_at_least_half_x_below_prior": 15,
+    "closed_at_least_one_x_below_prior": 9,
+    "median_max_downside_x": 1.2880508599689875,
+    "mean_max_downside_x": 3.1622778547580292,
+    "median_close_below_prior_x": 0.7776744433225316,
+    "mean_close_below_prior_x": 2.3534944443495838
+  },
+  "bands": {
+    "0.10\u20130.25%": {
+      "confirmed_reclaims": 24,
+      "ever_lost_intraday": 18,
+      "failed_at_close": 5,
+      "tight_intraday_under_half_x": 0,
+      "at_least_half_x_intraday": 5,
+      "at_least_one_x_intraday": 5,
+      "broke_open_intraday_after_loss": 4,
+      "closed_within_half_x_below_prior": 1,
+      "closed_at_least_half_x_below_prior": 4,
+      "closed_at_least_one_x_below_prior": 3,
+      "median_max_downside_x": 4.774193548387029,
+      "mean_max_downside_x": 9.530117751782418,
+      "median_close_below_prior_x": 1.0,
+      "mean_close_below_prior_x": 7.312351805900346
+    },
+    "0.25\u20130.50%": {
+      "confirmed_reclaims": 17,
+      "ever_lost_intraday": 17,
+      "failed_at_close": 8,
+      "tight_intraday_under_half_x": 0,
+      "at_least_half_x_intraday": 8,
+      "at_least_one_x_intraday": 5,
+      "broke_open_intraday_after_loss": 2,
+      "closed_within_half_x_below_prior": 2,
+      "closed_at_least_half_x_below_prior": 6,
+      "closed_at_least_one_x_below_prior": 4,
+      "median_max_downside_x": 1.2834199015855443,
+      "mean_max_downside_x": 1.4698446747492144,
+      "median_close_below_prior_x": 1.0329141607435721,
+      "mean_close_below_prior_x": 0.9691945756474365
+    },
+    "0.50\u20131.00%": {
+      "confirmed_reclaims": 15,
+      "ever_lost_intraday": 13,
+      "failed_at_close": 8,
+      "tight_intraday_under_half_x": 2,
+      "at_least_half_x_intraday": 6,
+      "at_least_one_x_intraday": 4,
+      "broke_open_intraday_after_loss": 3,
+      "closed_within_half_x_below_prior": 3,
+      "closed_at_least_half_x_below_prior": 5,
+      "closed_at_least_one_x_below_prior": 2,
+      "median_max_downside_x": 1.0427876860552485,
+      "mean_max_downside_x": 1.2462354321109552,
+      "median_close_below_prior_x": 0.6196436464246953,
+      "mean_close_below_prior_x": 0.9323391422700776
+    },
+    "\u22651.00%": {
+      "confirmed_reclaims": 5,
+      "ever_lost_intraday": 5,
+      "failed_at_close": 1,
+      "tight_intraday_under_half_x": 1,
+      "at_least_half_x_intraday": 0,
+      "at_least_one_x_intraday": 0,
+      "broke_open_intraday_after_loss": 0,
+      "closed_within_half_x_below_prior": 1,
+      "closed_at_least_half_x_below_prior": 0,
+      "closed_at_least_one_x_below_prior": 0,
+      "median_max_downside_x": 0.1908831908831878,
+      "mean_max_downside_x": 0.1908831908831878,
+      "median_close_below_prior_x": 0.0028490028490002653,
+      "mean_close_below_prior_x": 0.0028490028490002653
+    }
+  }
+}

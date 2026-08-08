@@ -1,0 +1,3762 @@
+{
+  "definition": {
+    "touch_reclaim": "Minute high/low reaches prior close",
+    "close_confirmed_reclaim": "One-minute close crosses prior close",
+    "hold": "Daily close remains across prior close",
+    "failed_partial": "Daily close returns inside gap but remains between open and prior close",
+    "failed_to_continuation": "Daily close returns beyond open in original gap direction"
+  },
+  "range": [
+    "2024-07-29",
+    "2026-07-27"
+  ],
+  "sessions": 305,
+  "all": {
+    "up": {
+      "sessions": 183,
+      "touch_reclaim": {
+        "count": 94,
+        "n": 183,
+        "pct": 51.36612021857923,
+        "ci95": [
+          44.171146415789586,
+          58.50491715891755
+        ]
+      },
+      "close_confirmed_reclaim": {
+        "count": 91,
+        "n": 183,
+        "pct": 49.72677595628415,
+        "ci95": [
+          42.56299158835342,
+          56.90179569670515
+        ]
+      },
+      "wick_only": {
+        "count": 3,
+        "n": 183,
+        "pct": 1.639344262295082,
+        "ci95": [
+          0.5590545476989186,
+          4.708294907668623
+        ]
+      },
+      "confirmed_reclaim_hold": {
+        "count": 43,
+        "n": 91,
+        "pct": 47.252747252747255,
+        "ci95": [
+          37.315630375359085,
+          57.41242145000025
+        ]
+      },
+      "time_buckets": {
+        "\u226410m": {
+          "reclaims": 21,
+          "hold": {
+            "count": 11,
+            "n": 21,
+            "pct": 52.38095238095238,
+            "ci95": [
+              32.369217900266754,
+              71.65628770323706
+            ]
+          },
+          "outcomes": {
+            "held_reversal": 11,
+            "failed_partial": 1,
+            "failed_to_continuation": 9
+          },
+          "median_post_reclaim_extension_pct": 0.6902004931918058
+        },
+        "10\u201330m": {
+          "reclaims": 22,
+          "hold": {
+            "count": 11,
+            "n": 22,
+            "pct": 50.0,
+            "ci95": [
+              30.72180469247956,
+              69.27819530752043
+            ]
+          },
+          "outcomes": {
+            "held_reversal": 11,
+            "failed_partial": 4,
+            "failed_to_continuation": 7
+          },
+          "median_post_reclaim_extension_pct": 0.5589297673293325
+        },
+        "30\u201360m": {
+          "reclaims": 21,
+          "hold": {
+            "count": 13,
+            "n": 21,
+            "pct": 61.904761904761905,
+            "ci95": [
+              40.87829581550152,
+              79.2492322020175
+            ]
+          },
+          "outcomes": {
+            "held_reversal": 13,
+            "failed_partial": 3,
+            "failed_to_continuation": 5
+          },
+          "median_post_reclaim_extension_pct": 0.6059346421947885
+        },
+        "60\u2013120m": {
+          "reclaims": 7,
+          "hold": {
+            "count": 2,
+            "n": 7,
+            "pct": 28.571428571428573,
+            "ci95": [
+              8.221716570901549,
+              64.10709098517873
+            ]
+          },
+          "outcomes": {
+            "held_reversal": 2,
+            "failed_partial": 3,
+            "failed_to_continuation": 2
+          },
+          "median_post_reclaim_extension_pct": 0.19572731437138172
+        },
+        ">120m": {
+          "reclaims": 20,
+          "hold": {
+            "count": 6,
+            "n": 20,
+            "pct": 30.0,
+            "ci95": [
+              14.547527396899385,
+              51.89767762289793
+            ]
+          },
+          "outcomes": {
+            "held_reversal": 6,
+            "failed_partial": 10,
+            "failed_to_continuation": 4
+          },
+          "median_post_reclaim_extension_pct": 0.37256559322956956
+        }
+      }
+    },
+    "down": {
+      "sessions": 122,
+      "touch_reclaim": {
+        "count": 61,
+        "n": 122,
+        "pct": 50.0,
+        "ci95": [
+          41.26397315375602,
+          58.73602684624397
+        ]
+      },
+      "close_confirmed_reclaim": {
+        "count": 61,
+        "n": 122,
+        "pct": 50.0,
+        "ci95": [
+          41.26397315375602,
+          58.73602684624397
+        ]
+      },
+      "wick_only": {
+        "count": 0,
+        "n": 122,
+        "pct": 0.0,
+        "ci95": [
+          0.0,
+          3.05272660233182
+        ]
+      },
+      "confirmed_reclaim_hold": {
+        "count": 39,
+        "n": 61,
+        "pct": 63.9344262295082,
+        "ci95": [
+          51.39167326739971,
+          74.82606349418546
+        ]
+      },
+      "time_buckets": {
+        "\u226410m": {
+          "reclaims": 15,
+          "hold": {
+            "count": 13,
+            "n": 15,
+            "pct": 86.66666666666667,
+            "ci95": [
+              62.11750079348376,
+              96.26395301086407
+            ]
+          },
+          "outcomes": {
+            "held_reversal": 13,
+            "failed_partial": 1,
+            "failed_to_continuation": 1
+          },
+          "median_post_reclaim_extension_pct": 0.7331029817729741
+        },
+        "10\u201330m": {
+          "reclaims": 10,
+          "hold": {
+            "count": 7,
+            "n": 10,
+            "pct": 70.0,
+            "ci95": [
+              39.67732199795652,
+              89.2210712513788
+            ]
+          },
+          "outcomes": {
+            "held_reversal": 7,
+            "failed_partial": 2,
+            "failed_to_continuation": 1
+          },
+          "median_post_reclaim_extension_pct": 0.6429461650845912
+        },
+        "30\u201360m": {
+          "reclaims": 8,
+          "hold": {
+            "count": 5,
+            "n": 8,
+            "pct": 62.5,
+            "ci95": [
+              30.573785458380186,
+              86.3158240538479
+            ]
+          },
+          "outcomes": {
+            "held_reversal": 5,
+            "failed_partial": 0,
+            "failed_to_continuation": 3
+          },
+          "median_post_reclaim_extension_pct": 0.534127226102709
+        },
+        "60\u2013120m": {
+          "reclaims": 9,
+          "hold": {
+            "count": 5,
+            "n": 9,
+            "pct": 55.55555555555556,
+            "ci95": [
+              26.66473457440297,
+              81.1224570528086
+            ]
+          },
+          "outcomes": {
+            "held_reversal": 5,
+            "failed_partial": 3,
+            "failed_to_continuation": 1
+          },
+          "median_post_reclaim_extension_pct": 0.5247275453130141
+        },
+        ">120m": {
+          "reclaims": 19,
+          "hold": {
+            "count": 9,
+            "n": 19,
+            "pct": 47.36842105263158,
+            "ci95": [
+              27.329505487448547,
+              68.29251748817488
+            ]
+          },
+          "outcomes": {
+            "held_reversal": 9,
+            "failed_partial": 10,
+            "failed_to_continuation": 0
+          },
+          "median_post_reclaim_extension_pct": 0.2272770317619738
+        }
+      }
+    }
+  },
+  "bands": [
+    {
+      "label": "0.10\u20130.25%",
+      "directions": {
+        "up": {
+          "sessions": 54,
+          "touch_reclaim": {
+            "count": 43,
+            "n": 54,
+            "pct": 79.62962962962963,
+            "ci95": [
+              67.09743827734083,
+              88.22606591341462
+            ]
+          },
+          "close_confirmed_reclaim": {
+            "count": 42,
+            "n": 54,
+            "pct": 77.77777777777777,
+            "ci95": [
+              65.0610731684122,
+              86.80471201042104
+            ]
+          },
+          "wick_only": {
+            "count": 1,
+            "n": 54,
+            "pct": 1.8518518518518519,
+            "ci95": [
+              0.32764033153519845,
+              9.771665358487208
+            ]
+          },
+          "confirmed_reclaim_hold": {
+            "count": 21,
+            "n": 42,
+            "pct": 50.0,
+            "ci95": [
+              35.52574591652803,
+              64.47425408347198
+            ]
+          },
+          "time_buckets": {
+            "\u226410m": {
+              "reclaims": 13,
+              "hold": {
+                "count": 7,
+                "n": 13,
+                "pct": 53.84615384615385,
+                "ci95": [
+                  29.14343243183205,
+                  76.79424569851186
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 7,
+                "failed_partial": 0,
+                "failed_to_continuation": 6
+              },
+              "median_post_reclaim_extension_pct": 0.6383115216833491
+            },
+            "10\u201330m": {
+              "reclaims": 11,
+              "hold": {
+                "count": 5,
+                "n": 11,
+                "pct": 45.45454545454545,
+                "ci95": [
+                  21.270957543988047,
+                  71.99122443100117
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 5,
+                "failed_partial": 2,
+                "failed_to_continuation": 4
+              },
+              "median_post_reclaim_extension_pct": 0.4877954729495185
+            },
+            "30\u201360m": {
+              "reclaims": 13,
+              "hold": {
+                "count": 8,
+                "n": 13,
+                "pct": 61.53846153846154,
+                "ci95": [
+                  35.52248097226855,
+                  82.2905534187632
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 8,
+                "failed_partial": 2,
+                "failed_to_continuation": 3
+              },
+              "median_post_reclaim_extension_pct": 0.4508284383895239
+            },
+            "60\u2013120m": {
+              "reclaims": 2,
+              "hold": {
+                "count": 0,
+                "n": 2,
+                "pct": 0.0,
+                "ci95": [
+                  0.0,
+                  65.76280471103807
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 1,
+                "failed_to_continuation": 1
+              },
+              "median_post_reclaim_extension_pct": 0.3493852669239936
+            },
+            ">120m": {
+              "reclaims": 3,
+              "hold": {
+                "count": 1,
+                "n": 3,
+                "pct": 33.333333333333336,
+                "ci95": [
+                  6.14903152761605,
+                  79.23450448735122
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 1,
+                "failed_partial": 0,
+                "failed_to_continuation": 2
+              },
+              "median_post_reclaim_extension_pct": 0.30665299696094395
+            }
+          }
+        },
+        "down": {
+          "sessions": 28,
+          "touch_reclaim": {
+            "count": 24,
+            "n": 28,
+            "pct": 85.71428571428571,
+            "ci95": [
+              68.50982695512266,
+              94.3010870692982
+            ]
+          },
+          "close_confirmed_reclaim": {
+            "count": 24,
+            "n": 28,
+            "pct": 85.71428571428571,
+            "ci95": [
+              68.50982695512266,
+              94.3010870692982
+            ]
+          },
+          "wick_only": {
+            "count": 0,
+            "n": 28,
+            "pct": 0.0,
+            "ci95": [
+              0.0,
+              12.064720365810762
+            ]
+          },
+          "confirmed_reclaim_hold": {
+            "count": 19,
+            "n": 24,
+            "pct": 79.16666666666667,
+            "ci95": [
+              59.52915551476452,
+              90.75531089521192
+            ]
+          },
+          "time_buckets": {
+            "\u226410m": {
+              "reclaims": 10,
+              "hold": {
+                "count": 8,
+                "n": 10,
+                "pct": 80.0,
+                "ci95": [
+                  49.01568467207233,
+                  94.33190520193067
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 8,
+                "failed_partial": 1,
+                "failed_to_continuation": 1
+              },
+              "median_post_reclaim_extension_pct": 0.4363620895174728
+            },
+            "10\u201330m": {
+              "reclaims": 4,
+              "hold": {
+                "count": 3,
+                "n": 4,
+                "pct": 75.0,
+                "ci95": [
+                  30.06360524426366,
+                  95.44139373553637
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 3,
+                "failed_partial": 1,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.6429461650845912
+            },
+            "30\u201360m": {
+              "reclaims": 2,
+              "hold": {
+                "count": 1,
+                "n": 2,
+                "pct": 50.0,
+                "ci95": [
+                  9.452865480086615,
+                  90.54713451991339
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 1,
+                "failed_partial": 0,
+                "failed_to_continuation": 1
+              },
+              "median_post_reclaim_extension_pct": 0.37193210502296176
+            },
+            "60\u2013120m": {
+              "reclaims": 4,
+              "hold": {
+                "count": 3,
+                "n": 4,
+                "pct": 75.0,
+                "ci95": [
+                  30.06360524426366,
+                  95.44139373553637
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 3,
+                "failed_partial": 1,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.41217106171469264
+            },
+            ">120m": {
+              "reclaims": 4,
+              "hold": {
+                "count": 4,
+                "n": 4,
+                "pct": 100.0,
+                "ci95": [
+                  51.009997959600085,
+                  100.0
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 4,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.2510785797166937
+            }
+          }
+        }
+      }
+    },
+    {
+      "label": "0.25\u20130.50%",
+      "directions": {
+        "up": {
+          "sessions": 50,
+          "touch_reclaim": {
+            "count": 25,
+            "n": 50,
+            "pct": 50.0,
+            "ci95": [
+              36.64428641233285,
+              63.35571358766714
+            ]
+          },
+          "close_confirmed_reclaim": {
+            "count": 24,
+            "n": 50,
+            "pct": 48.0,
+            "ci95": [
+              34.79691239550571,
+              61.48848774119157
+            ]
+          },
+          "wick_only": {
+            "count": 1,
+            "n": 50,
+            "pct": 2.0,
+            "ci95": [
+              0.35391680889764604,
+              10.495686471836953
+            ]
+          },
+          "confirmed_reclaim_hold": {
+            "count": 11,
+            "n": 24,
+            "pct": 45.833333333333336,
+            "ci95": [
+              27.89105835168143,
+              64.92544644689336
+            ]
+          },
+          "time_buckets": {
+            "\u226410m": {
+              "reclaims": 6,
+              "hold": {
+                "count": 4,
+                "n": 6,
+                "pct": 66.66666666666667,
+                "ci95": [
+                  29.998832134152863,
+                  90.3230667440783
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 4,
+                "failed_partial": 0,
+                "failed_to_continuation": 2
+              },
+              "median_post_reclaim_extension_pct": 1.096558895363756
+            },
+            "10\u201330m": {
+              "reclaims": 6,
+              "hold": {
+                "count": 2,
+                "n": 6,
+                "pct": 33.333333333333336,
+                "ci95": [
+                  9.676933255921682,
+                  70.00116786584712
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 2,
+                "failed_partial": 1,
+                "failed_to_continuation": 3
+              },
+              "median_post_reclaim_extension_pct": 0.4030713650087169
+            },
+            "30\u201360m": {
+              "reclaims": 5,
+              "hold": {
+                "count": 4,
+                "n": 5,
+                "pct": 80.0,
+                "ci95": [
+                  37.55282641185388,
+                  96.37768390302125
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 4,
+                "failed_partial": 0,
+                "failed_to_continuation": 1
+              },
+              "median_post_reclaim_extension_pct": 0.6059346421947885
+            },
+            "60\u2013120m": {
+              "reclaims": 3,
+              "hold": {
+                "count": 1,
+                "n": 3,
+                "pct": 33.333333333333336,
+                "ci95": [
+                  6.14903152761605,
+                  79.23450448735122
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 1,
+                "failed_partial": 1,
+                "failed_to_continuation": 1
+              },
+              "median_post_reclaim_extension_pct": 0.19136281355053877
+            },
+            ">120m": {
+              "reclaims": 4,
+              "hold": {
+                "count": 0,
+                "n": 4,
+                "pct": 0.0,
+                "ci95": [
+                  0.0,
+                  48.990002040399915
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 2,
+                "failed_to_continuation": 2
+              },
+              "median_post_reclaim_extension_pct": 0.2609115624698553
+            }
+          }
+        },
+        "down": {
+          "sessions": 27,
+          "touch_reclaim": {
+            "count": 17,
+            "n": 27,
+            "pct": 62.96296296296296,
+            "ci95": [
+              44.228904623446304,
+              78.46771293206314
+            ]
+          },
+          "close_confirmed_reclaim": {
+            "count": 17,
+            "n": 27,
+            "pct": 62.96296296296296,
+            "ci95": [
+              44.228904623446304,
+              78.46771293206314
+            ]
+          },
+          "wick_only": {
+            "count": 0,
+            "n": 27,
+            "pct": 0.0,
+            "ci95": [
+              6.938893903907228e-16,
+              12.455903714463581
+            ]
+          },
+          "confirmed_reclaim_hold": {
+            "count": 9,
+            "n": 17,
+            "pct": 52.94117647058823,
+            "ci95": [
+              30.962897311549487,
+              73.8351988039119
+            ]
+          },
+          "time_buckets": {
+            "\u226410m": {
+              "reclaims": 4,
+              "hold": {
+                "count": 4,
+                "n": 4,
+                "pct": 100.0,
+                "ci95": [
+                  51.009997959600085,
+                  100.0
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 4,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.9880597765540846
+            },
+            "10\u201330m": {
+              "reclaims": 4,
+              "hold": {
+                "count": 3,
+                "n": 4,
+                "pct": 75.0,
+                "ci95": [
+                  30.06360524426366,
+                  95.44139373553637
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 3,
+                "failed_partial": 1,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.8848822460793873
+            },
+            "30\u201360m": {
+              "reclaims": 4,
+              "hold": {
+                "count": 2,
+                "n": 4,
+                "pct": 50.0,
+                "ci95": [
+                  15.003570882017147,
+                  84.99642911798286
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 2,
+                "failed_partial": 0,
+                "failed_to_continuation": 2
+              },
+              "median_post_reclaim_extension_pct": 0.4900537713384733
+            },
+            "60\u2013120m": {
+              "reclaims": 1,
+              "hold": {
+                "count": 0,
+                "n": 1,
+                "pct": 0.0,
+                "ci95": [
+                  0.0,
+                  79.34567085261071
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 1,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.09591379042836086
+            },
+            ">120m": {
+              "reclaims": 4,
+              "hold": {
+                "count": 0,
+                "n": 4,
+                "pct": 0.0,
+                "ci95": [
+                  0.0,
+                  48.990002040399915
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 4,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.051062824699198886
+            }
+          }
+        }
+      }
+    },
+    {
+      "label": "0.50\u20131.00%",
+      "directions": {
+        "up": {
+          "sessions": 53,
+          "touch_reclaim": {
+            "count": 18,
+            "n": 53,
+            "pct": 33.9622641509434,
+            "ci95": [
+              22.686862857429073,
+              47.405463889179025
+            ]
+          },
+          "close_confirmed_reclaim": {
+            "count": 18,
+            "n": 53,
+            "pct": 33.9622641509434,
+            "ci95": [
+              22.686862857429073,
+              47.405463889179025
+            ]
+          },
+          "wick_only": {
+            "count": 0,
+            "n": 53,
+            "pct": 0.0,
+            "ci95": [
+              -6.938893903907228e-16,
+              6.758430445307662
+            ]
+          },
+          "confirmed_reclaim_hold": {
+            "count": 7,
+            "n": 18,
+            "pct": 38.888888888888886,
+            "ci95": [
+              20.304991926931162,
+              61.381331419343844
+            ]
+          },
+          "time_buckets": {
+            "\u226410m": {
+              "reclaims": 2,
+              "hold": {
+                "count": 0,
+                "n": 2,
+                "pct": 0.0,
+                "ci95": [
+                  0.0,
+                  65.76280471103807
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 1,
+                "failed_to_continuation": 1
+              },
+              "median_post_reclaim_extension_pct": 0.8605326144753502
+            },
+            "10\u201330m": {
+              "reclaims": 4,
+              "hold": {
+                "count": 4,
+                "n": 4,
+                "pct": 100.0,
+                "ci95": [
+                  51.009997959600085,
+                  100.0
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 4,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 2.0671698924846265
+            },
+            "30\u201360m": {
+              "reclaims": 3,
+              "hold": {
+                "count": 1,
+                "n": 3,
+                "pct": 33.333333333333336,
+                "ci95": [
+                  6.14903152761605,
+                  79.23450448735122
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 1,
+                "failed_partial": 1,
+                "failed_to_continuation": 1
+              },
+              "median_post_reclaim_extension_pct": 0.6432209724805809
+            },
+            "60\u2013120m": {
+              "reclaims": 2,
+              "hold": {
+                "count": 1,
+                "n": 2,
+                "pct": 50.0,
+                "ci95": [
+                  9.452865480086615,
+                  90.54713451991339
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 1,
+                "failed_partial": 1,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.419156911325102
+            },
+            ">120m": {
+              "reclaims": 7,
+              "hold": {
+                "count": 1,
+                "n": 7,
+                "pct": 14.285714285714286,
+                "ci95": [
+                  2.567895594897479,
+                  51.313450331903
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 1,
+                "failed_partial": 6,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.3376341492825337
+            }
+          }
+        },
+        "down": {
+          "sessions": 38,
+          "touch_reclaim": {
+            "count": 15,
+            "n": 38,
+            "pct": 39.473684210526315,
+            "ci95": [
+              25.597859263618904,
+              55.28241300130403
+            ]
+          },
+          "close_confirmed_reclaim": {
+            "count": 15,
+            "n": 38,
+            "pct": 39.473684210526315,
+            "ci95": [
+              25.597859263618904,
+              55.28241300130403
+            ]
+          },
+          "wick_only": {
+            "count": 0,
+            "n": 38,
+            "pct": 0.0,
+            "ci95": [
+              0.0,
+              9.181293258383999
+            ]
+          },
+          "confirmed_reclaim_hold": {
+            "count": 7,
+            "n": 15,
+            "pct": 46.666666666666664,
+            "ci95": [
+              24.80922525974644,
+              69.8833698489492
+            ]
+          },
+          "time_buckets": {
+            "\u226410m": {
+              "reclaims": 1,
+              "hold": {
+                "count": 1,
+                "n": 1,
+                "pct": 100.0,
+                "ci95": [
+                  20.654329147389294,
+                  100.0
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 1,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 1.064531172109927
+            },
+            "10\u201330m": {
+              "reclaims": 2,
+              "hold": {
+                "count": 1,
+                "n": 2,
+                "pct": 50.0,
+                "ci95": [
+                  9.452865480086615,
+                  90.54713451991339
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 1,
+                "failed_partial": 0,
+                "failed_to_continuation": 1
+              },
+              "median_post_reclaim_extension_pct": 0.44315143725853984
+            },
+            "30\u201360m": {
+              "reclaims": 1,
+              "hold": {
+                "count": 1,
+                "n": 1,
+                "pct": 100.0,
+                "ci95": [
+                  20.654329147389294,
+                  100.0
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 1,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 2.071299375692882
+            },
+            "60\u2013120m": {
+              "reclaims": 2,
+              "hold": {
+                "count": 0,
+                "n": 2,
+                "pct": 0.0,
+                "ci95": [
+                  0.0,
+                  65.76280471103807
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 1,
+                "failed_to_continuation": 1
+              },
+              "median_post_reclaim_extension_pct": 0.5481956082598922
+            },
+            ">120m": {
+              "reclaims": 9,
+              "hold": {
+                "count": 4,
+                "n": 9,
+                "pct": 44.44444444444444,
+                "ci95": [
+                  18.8775429471914,
+                  73.33526542559703
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 4,
+                "failed_partial": 5,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.35118709650285285
+            }
+          }
+        }
+      }
+    },
+    {
+      "label": "\u22651.00%",
+      "directions": {
+        "up": {
+          "sessions": 26,
+          "touch_reclaim": {
+            "count": 8,
+            "n": 26,
+            "pct": 30.76923076923077,
+            "ci95": [
+              16.501120939792674,
+              49.988611514231245
+            ]
+          },
+          "close_confirmed_reclaim": {
+            "count": 7,
+            "n": 26,
+            "pct": 26.923076923076923,
+            "ci95": [
+              13.704275525067386,
+              46.083403419761304
+            ]
+          },
+          "wick_only": {
+            "count": 1,
+            "n": 26,
+            "pct": 3.8461538461538463,
+            "ci95": [
+              0.6821808976989876,
+              18.893176991958406
+            ]
+          },
+          "confirmed_reclaim_hold": {
+            "count": 4,
+            "n": 7,
+            "pct": 57.142857142857146,
+            "ci95": [
+              25.04542304090258,
+              84.17830777373732
+            ]
+          },
+          "time_buckets": {
+            "\u226410m": {
+              "reclaims": 0,
+              "hold": {
+                "count": 0,
+                "n": 0,
+                "pct": null,
+                "ci95": [
+                  null,
+                  null
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": null
+            },
+            "10\u201330m": {
+              "reclaims": 1,
+              "hold": {
+                "count": 0,
+                "n": 1,
+                "pct": 0.0,
+                "ci95": [
+                  0.0,
+                  79.34567085261071
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 1,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.7486420309025991
+            },
+            "30\u201360m": {
+              "reclaims": 0,
+              "hold": {
+                "count": 0,
+                "n": 0,
+                "pct": null,
+                "ci95": [
+                  null,
+                  null
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": null
+            },
+            "60\u2013120m": {
+              "reclaims": 0,
+              "hold": {
+                "count": 0,
+                "n": 0,
+                "pct": null,
+                "ci95": [
+                  null,
+                  null
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": null
+            },
+            ">120m": {
+              "reclaims": 6,
+              "hold": {
+                "count": 4,
+                "n": 6,
+                "pct": 66.66666666666667,
+                "ci95": [
+                  29.998832134152863,
+                  90.3230667440783
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 4,
+                "failed_partial": 2,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.9522946876926353
+            }
+          }
+        },
+        "down": {
+          "sessions": 29,
+          "touch_reclaim": {
+            "count": 5,
+            "n": 29,
+            "pct": 17.24137931034483,
+            "ci95": [
+              7.597745271479928,
+              34.54880057281511
+            ]
+          },
+          "close_confirmed_reclaim": {
+            "count": 5,
+            "n": 29,
+            "pct": 17.24137931034483,
+            "ci95": [
+              7.597745271479928,
+              34.54880057281511
+            ]
+          },
+          "wick_only": {
+            "count": 0,
+            "n": 29,
+            "pct": 0.0,
+            "ci95": [
+              0.0,
+              11.697359446555588
+            ]
+          },
+          "confirmed_reclaim_hold": {
+            "count": 4,
+            "n": 5,
+            "pct": 80.0,
+            "ci95": [
+              37.55282641185388,
+              96.37768390302125
+            ]
+          },
+          "time_buckets": {
+            "\u226410m": {
+              "reclaims": 0,
+              "hold": {
+                "count": 0,
+                "n": 0,
+                "pct": null,
+                "ci95": [
+                  null,
+                  null
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": null
+            },
+            "10\u201330m": {
+              "reclaims": 0,
+              "hold": {
+                "count": 0,
+                "n": 0,
+                "pct": null,
+                "ci95": [
+                  null,
+                  null
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": null
+            },
+            "30\u201360m": {
+              "reclaims": 1,
+              "hold": {
+                "count": 1,
+                "n": 1,
+                "pct": 100.0,
+                "ci95": [
+                  20.654329147389294,
+                  100.0
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 1,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 4.843021742730729
+            },
+            "60\u2013120m": {
+              "reclaims": 2,
+              "hold": {
+                "count": 2,
+                "n": 2,
+                "pct": 100.0,
+                "ci95": [
+                  34.23719528896193,
+                  100.0
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 2,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.5556983004988785
+            },
+            ">120m": {
+              "reclaims": 2,
+              "hold": {
+                "count": 1,
+                "n": 2,
+                "pct": 50.0,
+                "ci95": [
+                  9.452865480086615,
+                  90.54713451991339
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 1,
+                "failed_partial": 1,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.195886520141251
+            }
+          }
+        }
+      }
+    }
+  ],
+  "quarters": [
+    {
+      "quarter": "2024 Q3",
+      "partial": true,
+      "directions": {
+        "up": {
+          "sessions": 17,
+          "touch_reclaim": {
+            "count": 13,
+            "n": 17,
+            "pct": 76.47058823529412,
+            "ci95": [
+              52.73775411082839,
+              90.44511092832406
+            ]
+          },
+          "close_confirmed_reclaim": {
+            "count": 11,
+            "n": 17,
+            "pct": 64.70588235294117,
+            "ci95": [
+              41.299966721211824,
+              82.69051385609511
+            ]
+          },
+          "wick_only": {
+            "count": 2,
+            "n": 17,
+            "pct": 11.764705882352942,
+            "ci95": [
+              3.287908001292092,
+              34.33684249770991
+            ]
+          },
+          "confirmed_reclaim_hold": {
+            "count": 3,
+            "n": 11,
+            "pct": 27.272727272727273,
+            "ci95": [
+              9.745880573921466,
+              56.56502930102463
+            ]
+          },
+          "time_buckets": {
+            "\u226410m": {
+              "reclaims": 1,
+              "hold": {
+                "count": 0,
+                "n": 1,
+                "pct": 0.0,
+                "ci95": [
+                  0.0,
+                  79.34567085261071
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 0,
+                "failed_to_continuation": 1
+              },
+              "median_post_reclaim_extension_pct": 1.6090350150438346
+            },
+            "10\u201330m": {
+              "reclaims": 3,
+              "hold": {
+                "count": 0,
+                "n": 3,
+                "pct": 0.0,
+                "ci95": [
+                  0.0,
+                  56.15060804490177
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 2,
+                "failed_to_continuation": 1
+              },
+              "median_post_reclaim_extension_pct": 0.41193579183411366
+            },
+            "30\u201360m": {
+              "reclaims": 3,
+              "hold": {
+                "count": 2,
+                "n": 3,
+                "pct": 66.66666666666667,
+                "ci95": [
+                  20.76549551264879,
+                  93.85096847238394
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 2,
+                "failed_partial": 0,
+                "failed_to_continuation": 1
+              },
+              "median_post_reclaim_extension_pct": 1.8010362694300515
+            },
+            "60\u2013120m": {
+              "reclaims": 1,
+              "hold": {
+                "count": 0,
+                "n": 1,
+                "pct": 0.0,
+                "ci95": [
+                  0.0,
+                  79.34567085261071
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 0,
+                "failed_to_continuation": 1
+              },
+              "median_post_reclaim_extension_pct": 0.19572731437138172
+            },
+            ">120m": {
+              "reclaims": 3,
+              "hold": {
+                "count": 1,
+                "n": 3,
+                "pct": 33.333333333333336,
+                "ci95": [
+                  6.14903152761605,
+                  79.23450448735122
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 1,
+                "failed_partial": 1,
+                "failed_to_continuation": 1
+              },
+              "median_post_reclaim_extension_pct": 0.4906922501430184
+            }
+          }
+        },
+        "down": {
+          "sessions": 6,
+          "touch_reclaim": {
+            "count": 3,
+            "n": 6,
+            "pct": 50.0,
+            "ci95": [
+              18.761280689940868,
+              81.23871931005912
+            ]
+          },
+          "close_confirmed_reclaim": {
+            "count": 3,
+            "n": 6,
+            "pct": 50.0,
+            "ci95": [
+              18.761280689940868,
+              81.23871931005912
+            ]
+          },
+          "wick_only": {
+            "count": 0,
+            "n": 6,
+            "pct": 0.0,
+            "ci95": [
+              0.0,
+              39.03430336530645
+            ]
+          },
+          "confirmed_reclaim_hold": {
+            "count": 2,
+            "n": 3,
+            "pct": 66.66666666666667,
+            "ci95": [
+              20.76549551264879,
+              93.85096847238394
+            ]
+          },
+          "time_buckets": {
+            "\u226410m": {
+              "reclaims": 1,
+              "hold": {
+                "count": 1,
+                "n": 1,
+                "pct": 100.0,
+                "ci95": [
+                  20.654329147389294,
+                  100.0
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 1,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.3410374935798716
+            },
+            "10\u201330m": {
+              "reclaims": 0,
+              "hold": {
+                "count": 0,
+                "n": 0,
+                "pct": null,
+                "ci95": [
+                  null,
+                  null
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": null
+            },
+            "30\u201360m": {
+              "reclaims": 1,
+              "hold": {
+                "count": 1,
+                "n": 1,
+                "pct": 100.0,
+                "ci95": [
+                  20.654329147389294,
+                  100.0
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 1,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.5259393276391635
+            },
+            "60\u2013120m": {
+              "reclaims": 1,
+              "hold": {
+                "count": 0,
+                "n": 1,
+                "pct": 0.0,
+                "ci95": [
+                  0.0,
+                  79.34567085261071
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 1,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.5716636712067704
+            },
+            ">120m": {
+              "reclaims": 0,
+              "hold": {
+                "count": 0,
+                "n": 0,
+                "pct": null,
+                "ci95": [
+                  null,
+                  null
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": null
+            }
+          }
+        }
+      }
+    },
+    {
+      "quarter": "2024 Q4",
+      "partial": false,
+      "directions": {
+        "up": {
+          "sessions": 19,
+          "touch_reclaim": {
+            "count": 6,
+            "n": 19,
+            "pct": 31.57894736842105,
+            "ci95": [
+              15.364171004428599,
+              53.98998982493537
+            ]
+          },
+          "close_confirmed_reclaim": {
+            "count": 6,
+            "n": 19,
+            "pct": 31.57894736842105,
+            "ci95": [
+              15.364171004428599,
+              53.98998982493537
+            ]
+          },
+          "wick_only": {
+            "count": 0,
+            "n": 19,
+            "pct": 0.0,
+            "ci95": [
+              0.0,
+              16.818436536845052
+            ]
+          },
+          "confirmed_reclaim_hold": {
+            "count": 2,
+            "n": 6,
+            "pct": 33.333333333333336,
+            "ci95": [
+              9.676933255921682,
+              70.00116786584712
+            ]
+          },
+          "time_buckets": {
+            "\u226410m": {
+              "reclaims": 2,
+              "hold": {
+                "count": 1,
+                "n": 2,
+                "pct": 50.0,
+                "ci95": [
+                  9.452865480086615,
+                  90.54713451991339
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 1,
+                "failed_partial": 1,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 1.0762686389049458
+            },
+            "10\u201330m": {
+              "reclaims": 2,
+              "hold": {
+                "count": 1,
+                "n": 2,
+                "pct": 50.0,
+                "ci95": [
+                  9.452865480086615,
+                  90.54713451991339
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 1,
+                "failed_partial": 0,
+                "failed_to_continuation": 1
+              },
+              "median_post_reclaim_extension_pct": 0.5570420162429129
+            },
+            "30\u201360m": {
+              "reclaims": 0,
+              "hold": {
+                "count": 0,
+                "n": 0,
+                "pct": null,
+                "ci95": [
+                  null,
+                  null
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": null
+            },
+            "60\u2013120m": {
+              "reclaims": 0,
+              "hold": {
+                "count": 0,
+                "n": 0,
+                "pct": null,
+                "ci95": [
+                  null,
+                  null
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": null
+            },
+            ">120m": {
+              "reclaims": 2,
+              "hold": {
+                "count": 0,
+                "n": 2,
+                "pct": 0.0,
+                "ci95": [
+                  0.0,
+                  65.76280471103807
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 2,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.1732092693668613
+            }
+          }
+        },
+        "down": {
+          "sessions": 13,
+          "touch_reclaim": {
+            "count": 8,
+            "n": 13,
+            "pct": 61.53846153846154,
+            "ci95": [
+              35.52248097226855,
+              82.2905534187632
+            ]
+          },
+          "close_confirmed_reclaim": {
+            "count": 8,
+            "n": 13,
+            "pct": 61.53846153846154,
+            "ci95": [
+              35.52248097226855,
+              82.2905534187632
+            ]
+          },
+          "wick_only": {
+            "count": 0,
+            "n": 13,
+            "pct": 0.0,
+            "ci95": [
+              0.0,
+              22.810184305529166
+            ]
+          },
+          "confirmed_reclaim_hold": {
+            "count": 6,
+            "n": 8,
+            "pct": 75.0,
+            "ci95": [
+              40.926987910258916,
+              92.85223111419724
+            ]
+          },
+          "time_buckets": {
+            "\u226410m": {
+              "reclaims": 2,
+              "hold": {
+                "count": 2,
+                "n": 2,
+                "pct": 100.0,
+                "ci95": [
+                  34.23719528896193,
+                  100.0
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 2,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.33143975433764844
+            },
+            "10\u201330m": {
+              "reclaims": 1,
+              "hold": {
+                "count": 0,
+                "n": 1,
+                "pct": 0.0,
+                "ci95": [
+                  0.0,
+                  79.34567085261071
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 1,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.5384375972611324
+            },
+            "30\u201360m": {
+              "reclaims": 3,
+              "hold": {
+                "count": 2,
+                "n": 3,
+                "pct": 66.66666666666667,
+                "ci95": [
+                  20.76549551264879,
+                  93.85096847238394
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 2,
+                "failed_partial": 0,
+                "failed_to_continuation": 1
+              },
+              "median_post_reclaim_extension_pct": 0.5423151245662546
+            },
+            "60\u2013120m": {
+              "reclaims": 1,
+              "hold": {
+                "count": 1,
+                "n": 1,
+                "pct": 100.0,
+                "ci95": [
+                  20.654329147389294,
+                  100.0
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 1,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.7866885324587042
+            },
+            ">120m": {
+              "reclaims": 1,
+              "hold": {
+                "count": 1,
+                "n": 1,
+                "pct": 100.0,
+                "ci95": [
+                  20.654329147389294,
+                  100.0
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 1,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.4087440959186099
+            }
+          }
+        }
+      }
+    },
+    {
+      "quarter": "2025 Q1",
+      "partial": false,
+      "directions": {
+        "up": {
+          "sessions": 22,
+          "touch_reclaim": {
+            "count": 14,
+            "n": 22,
+            "pct": 63.63636363636363,
+            "ci95": [
+              42.95134934371804,
+              80.26702722739209
+            ]
+          },
+          "close_confirmed_reclaim": {
+            "count": 14,
+            "n": 22,
+            "pct": 63.63636363636363,
+            "ci95": [
+              42.95134934371804,
+              80.26702722739209
+            ]
+          },
+          "wick_only": {
+            "count": 0,
+            "n": 22,
+            "pct": 0.0,
+            "ci95": [
+              1.3877787807814457e-15,
+              14.865952572596125
+            ]
+          },
+          "confirmed_reclaim_hold": {
+            "count": 8,
+            "n": 14,
+            "pct": 57.142857142857146,
+            "ci95": [
+              32.59026690286936,
+              78.61949006959948
+            ]
+          },
+          "time_buckets": {
+            "\u226410m": {
+              "reclaims": 4,
+              "hold": {
+                "count": 2,
+                "n": 4,
+                "pct": 50.0,
+                "ci95": [
+                  15.003570882017147,
+                  84.99642911798286
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 2,
+                "failed_partial": 0,
+                "failed_to_continuation": 2
+              },
+              "median_post_reclaim_extension_pct": 0.9034451307230467
+            },
+            "10\u201330m": {
+              "reclaims": 6,
+              "hold": {
+                "count": 3,
+                "n": 6,
+                "pct": 50.0,
+                "ci95": [
+                  18.761280689940868,
+                  81.23871931005912
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 3,
+                "failed_partial": 1,
+                "failed_to_continuation": 2
+              },
+              "median_post_reclaim_extension_pct": 0.5589218099316351
+            },
+            "30\u201360m": {
+              "reclaims": 1,
+              "hold": {
+                "count": 1,
+                "n": 1,
+                "pct": 100.0,
+                "ci95": [
+                  20.654329147389294,
+                  100.0
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 1,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 1.3991691842900242
+            },
+            "60\u2013120m": {
+              "reclaims": 2,
+              "hold": {
+                "count": 1,
+                "n": 2,
+                "pct": 50.0,
+                "ci95": [
+                  9.452865480086615,
+                  90.54713451991339
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 1,
+                "failed_partial": 1,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.6441555206489787
+            },
+            ">120m": {
+              "reclaims": 1,
+              "hold": {
+                "count": 1,
+                "n": 1,
+                "pct": 100.0,
+                "ci95": [
+                  20.654329147389294,
+                  100.0
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 1,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.3556065385718192
+            }
+          }
+        },
+        "down": {
+          "sessions": 18,
+          "touch_reclaim": {
+            "count": 9,
+            "n": 18,
+            "pct": 50.0,
+            "ci95": [
+              29.03070395897999,
+              70.96929604102
+            ]
+          },
+          "close_confirmed_reclaim": {
+            "count": 9,
+            "n": 18,
+            "pct": 50.0,
+            "ci95": [
+              29.03070395897999,
+              70.96929604102
+            ]
+          },
+          "wick_only": {
+            "count": 0,
+            "n": 18,
+            "pct": 0.0,
+            "ci95": [
+              0.0,
+              17.58845505823749
+            ]
+          },
+          "confirmed_reclaim_hold": {
+            "count": 5,
+            "n": 9,
+            "pct": 55.55555555555556,
+            "ci95": [
+              26.66473457440297,
+              81.1224570528086
+            ]
+          },
+          "time_buckets": {
+            "\u226410m": {
+              "reclaims": 1,
+              "hold": {
+                "count": 1,
+                "n": 1,
+                "pct": 100.0,
+                "ci95": [
+                  20.654329147389294,
+                  100.0
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 1,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 1.040557148709542
+            },
+            "10\u201330m": {
+              "reclaims": 0,
+              "hold": {
+                "count": 0,
+                "n": 0,
+                "pct": null,
+                "ci95": [
+                  null,
+                  null
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": null
+            },
+            "30\u201360m": {
+              "reclaims": 1,
+              "hold": {
+                "count": 0,
+                "n": 1,
+                "pct": 0.0,
+                "ci95": [
+                  0.0,
+                  79.34567085261071
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 0,
+                "failed_to_continuation": 1
+              },
+              "median_post_reclaim_extension_pct": 0.4541682150377831
+            },
+            "60\u2013120m": {
+              "reclaims": 1,
+              "hold": {
+                "count": 0,
+                "n": 1,
+                "pct": 0.0,
+                "ci95": [
+                  0.0,
+                  79.34567085261071
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 1,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.1265942371280036
+            },
+            ">120m": {
+              "reclaims": 6,
+              "hold": {
+                "count": 4,
+                "n": 6,
+                "pct": 66.66666666666667,
+                "ci95": [
+                  29.998832134152863,
+                  90.3230667440783
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 4,
+                "failed_partial": 2,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.2510785797166937
+            }
+          }
+        }
+      }
+    },
+    {
+      "quarter": "2025 Q2",
+      "partial": false,
+      "directions": {
+        "up": {
+          "sessions": 26,
+          "touch_reclaim": {
+            "count": 13,
+            "n": 26,
+            "pct": 50.0,
+            "ci95": [
+              32.06030631500207,
+              67.93969368499792
+            ]
+          },
+          "close_confirmed_reclaim": {
+            "count": 13,
+            "n": 26,
+            "pct": 50.0,
+            "ci95": [
+              32.06030631500207,
+              67.93969368499792
+            ]
+          },
+          "wick_only": {
+            "count": 0,
+            "n": 26,
+            "pct": 0.0,
+            "ci95": [
+              0.0,
+              12.873304380462175
+            ]
+          },
+          "confirmed_reclaim_hold": {
+            "count": 6,
+            "n": 13,
+            "pct": 46.15384615384615,
+            "ci95": [
+              23.205754301488142,
+              70.85656756816796
+            ]
+          },
+          "time_buckets": {
+            "\u226410m": {
+              "reclaims": 2,
+              "hold": {
+                "count": 1,
+                "n": 2,
+                "pct": 50.0,
+                "ci95": [
+                  9.452865480086615,
+                  90.54713451991339
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 1,
+                "failed_partial": 0,
+                "failed_to_continuation": 1
+              },
+              "median_post_reclaim_extension_pct": 1.0584272853355867
+            },
+            "10\u201330m": {
+              "reclaims": 3,
+              "hold": {
+                "count": 2,
+                "n": 3,
+                "pct": 66.66666666666667,
+                "ci95": [
+                  20.76549551264879,
+                  93.85096847238394
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 2,
+                "failed_partial": 0,
+                "failed_to_continuation": 1
+              },
+              "median_post_reclaim_extension_pct": 0.5429569087909214
+            },
+            "30\u201360m": {
+              "reclaims": 3,
+              "hold": {
+                "count": 2,
+                "n": 3,
+                "pct": 66.66666666666667,
+                "ci95": [
+                  20.76549551264879,
+                  93.85096847238394
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 2,
+                "failed_partial": 0,
+                "failed_to_continuation": 1
+              },
+              "median_post_reclaim_extension_pct": 0.4290483114542643
+            },
+            "60\u2013120m": {
+              "reclaims": 0,
+              "hold": {
+                "count": 0,
+                "n": 0,
+                "pct": null,
+                "ci95": [
+                  null,
+                  null
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": null
+            },
+            ">120m": {
+              "reclaims": 5,
+              "hold": {
+                "count": 1,
+                "n": 5,
+                "pct": 20.0,
+                "ci95": [
+                  3.6223160969787447,
+                  62.44717358814613
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 1,
+                "failed_partial": 3,
+                "failed_to_continuation": 1
+              },
+              "median_post_reclaim_extension_pct": 0.30665299696094395
+            }
+          }
+        },
+        "down": {
+          "sessions": 18,
+          "touch_reclaim": {
+            "count": 11,
+            "n": 18,
+            "pct": 61.111111111111114,
+            "ci95": [
+              38.61866858065617,
+              79.69500807306883
+            ]
+          },
+          "close_confirmed_reclaim": {
+            "count": 11,
+            "n": 18,
+            "pct": 61.111111111111114,
+            "ci95": [
+              38.61866858065617,
+              79.69500807306883
+            ]
+          },
+          "wick_only": {
+            "count": 0,
+            "n": 18,
+            "pct": 0.0,
+            "ci95": [
+              0.0,
+              17.58845505823749
+            ]
+          },
+          "confirmed_reclaim_hold": {
+            "count": 8,
+            "n": 11,
+            "pct": 72.72727272727273,
+            "ci95": [
+              43.43497069897537,
+              90.25411942607853
+            ]
+          },
+          "time_buckets": {
+            "\u226410m": {
+              "reclaims": 3,
+              "hold": {
+                "count": 3,
+                "n": 3,
+                "pct": 100.0,
+                "ci95": [
+                  43.84939195509823,
+                  100.0
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 3,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 2.1538392576986896
+            },
+            "10\u201330m": {
+              "reclaims": 2,
+              "hold": {
+                "count": 2,
+                "n": 2,
+                "pct": 100.0,
+                "ci95": [
+                  34.23719528896193,
+                  100.0
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 2,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.6346565142598758
+            },
+            "30\u201360m": {
+              "reclaims": 2,
+              "hold": {
+                "count": 2,
+                "n": 2,
+                "pct": 100.0,
+                "ci95": [
+                  34.23719528896193,
+                  100.0
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 2,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 3.1471296570645406
+            },
+            "60\u2013120m": {
+              "reclaims": 1,
+              "hold": {
+                "count": 0,
+                "n": 1,
+                "pct": 0.0,
+                "ci95": [
+                  0.0,
+                  79.34567085261071
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 0,
+                "failed_to_continuation": 1
+              },
+              "median_post_reclaim_extension_pct": 0.5247275453130141
+            },
+            ">120m": {
+              "reclaims": 3,
+              "hold": {
+                "count": 1,
+                "n": 3,
+                "pct": 33.333333333333336,
+                "ci95": [
+                  6.14903152761605,
+                  79.23450448735122
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 1,
+                "failed_partial": 2,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.19558589480546526
+            }
+          }
+        }
+      }
+    },
+    {
+      "quarter": "2025 Q3",
+      "partial": false,
+      "directions": {
+        "up": {
+          "sessions": 26,
+          "touch_reclaim": {
+            "count": 16,
+            "n": 26,
+            "pct": 61.53846153846154,
+            "ci95": [
+              42.53452003942007,
+              77.57164048816557
+            ]
+          },
+          "close_confirmed_reclaim": {
+            "count": 15,
+            "n": 26,
+            "pct": 57.69230769230769,
+            "ci95": [
+              38.94829692111983,
+              74.4558100972706
+            ]
+          },
+          "wick_only": {
+            "count": 1,
+            "n": 26,
+            "pct": 3.8461538461538463,
+            "ci95": [
+              0.6821808976989876,
+              18.893176991958406
+            ]
+          },
+          "confirmed_reclaim_hold": {
+            "count": 6,
+            "n": 15,
+            "pct": 40.0,
+            "ci95": [
+              19.824228082594665,
+              64.2535572434923
+            ]
+          },
+          "time_buckets": {
+            "\u226410m": {
+              "reclaims": 2,
+              "hold": {
+                "count": 1,
+                "n": 2,
+                "pct": 50.0,
+                "ci95": [
+                  9.452865480086615,
+                  90.54713451991339
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 1,
+                "failed_partial": 0,
+                "failed_to_continuation": 1
+              },
+              "median_post_reclaim_extension_pct": 0.5226838396135731
+            },
+            "10\u201330m": {
+              "reclaims": 2,
+              "hold": {
+                "count": 1,
+                "n": 2,
+                "pct": 50.0,
+                "ci95": [
+                  9.452865480086615,
+                  90.54713451991339
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 1,
+                "failed_partial": 0,
+                "failed_to_continuation": 1
+              },
+              "median_post_reclaim_extension_pct": 0.1903621568540524
+            },
+            "30\u201360m": {
+              "reclaims": 6,
+              "hold": {
+                "count": 2,
+                "n": 6,
+                "pct": 33.333333333333336,
+                "ci95": [
+                  9.676933255921682,
+                  70.00116786584712
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 2,
+                "failed_partial": 2,
+                "failed_to_continuation": 2
+              },
+              "median_post_reclaim_extension_pct": 0.3200459300707389
+            },
+            "60\u2013120m": {
+              "reclaims": 2,
+              "hold": {
+                "count": 1,
+                "n": 2,
+                "pct": 50.0,
+                "ci95": [
+                  9.452865480086615,
+                  90.54713451991339
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 1,
+                "failed_partial": 1,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.23737183519080196
+            },
+            ">120m": {
+              "reclaims": 3,
+              "hold": {
+                "count": 1,
+                "n": 3,
+                "pct": 33.333333333333336,
+                "ci95": [
+                  6.14903152761605,
+                  79.23450448735122
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 1,
+                "failed_partial": 2,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.3895508707607763
+            }
+          }
+        },
+        "down": {
+          "sessions": 10,
+          "touch_reclaim": {
+            "count": 5,
+            "n": 10,
+            "pct": 50.0,
+            "ci95": [
+              23.65895936154873,
+              76.34104063845126
+            ]
+          },
+          "close_confirmed_reclaim": {
+            "count": 5,
+            "n": 10,
+            "pct": 50.0,
+            "ci95": [
+              23.65895936154873,
+              76.34104063845126
+            ]
+          },
+          "wick_only": {
+            "count": 0,
+            "n": 10,
+            "pct": 0.0,
+            "ci95": [
+              -2.7755575615628914e-15,
+              27.75401687666166
+            ]
+          },
+          "confirmed_reclaim_hold": {
+            "count": 1,
+            "n": 5,
+            "pct": 20.0,
+            "ci95": [
+              3.6223160969787447,
+              62.44717358814613
+            ]
+          },
+          "time_buckets": {
+            "\u226410m": {
+              "reclaims": 2,
+              "hold": {
+                "count": 1,
+                "n": 2,
+                "pct": 50.0,
+                "ci95": [
+                  9.452865480086615,
+                  90.54713451991339
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 1,
+                "failed_partial": 1,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.40335822521980486
+            },
+            "10\u201330m": {
+              "reclaims": 1,
+              "hold": {
+                "count": 0,
+                "n": 1,
+                "pct": 0.0,
+                "ci95": [
+                  0.0,
+                  79.34567085261071
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 1,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.2653616845297521
+            },
+            "30\u201360m": {
+              "reclaims": 1,
+              "hold": {
+                "count": 0,
+                "n": 1,
+                "pct": 0.0,
+                "ci95": [
+                  0.0,
+                  79.34567085261071
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 0,
+                "failed_to_continuation": 1
+              },
+              "median_post_reclaim_extension_pct": 0.10425870295105706
+            },
+            "60\u2013120m": {
+              "reclaims": 0,
+              "hold": {
+                "count": 0,
+                "n": 0,
+                "pct": null,
+                "ci95": [
+                  null,
+                  null
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": null
+            },
+            ">120m": {
+              "reclaims": 1,
+              "hold": {
+                "count": 0,
+                "n": 1,
+                "pct": 0.0,
+                "ci95": [
+                  0.0,
+                  79.34567085261071
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 1,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.06121163020972511
+            }
+          }
+        }
+      }
+    },
+    {
+      "quarter": "2025 Q4",
+      "partial": false,
+      "directions": {
+        "up": {
+          "sessions": 24,
+          "touch_reclaim": {
+            "count": 10,
+            "n": 24,
+            "pct": 41.666666666666664,
+            "ci95": [
+              24.467347246538232,
+              61.16566235061137
+            ]
+          },
+          "close_confirmed_reclaim": {
+            "count": 10,
+            "n": 24,
+            "pct": 41.666666666666664,
+            "ci95": [
+              24.467347246538232,
+              61.16566235061137
+            ]
+          },
+          "wick_only": {
+            "count": 0,
+            "n": 24,
+            "pct": 0.0,
+            "ci95": [
+              0.0,
+              13.798057582897535
+            ]
+          },
+          "confirmed_reclaim_hold": {
+            "count": 7,
+            "n": 10,
+            "pct": 70.0,
+            "ci95": [
+              39.67732199795652,
+              89.2210712513788
+            ]
+          },
+          "time_buckets": {
+            "\u226410m": {
+              "reclaims": 2,
+              "hold": {
+                "count": 2,
+                "n": 2,
+                "pct": 100.0,
+                "ci95": [
+                  34.23719528896193,
+                  100.0
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 2,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 1.2566302193623144
+            },
+            "10\u201330m": {
+              "reclaims": 1,
+              "hold": {
+                "count": 1,
+                "n": 1,
+                "pct": 100.0,
+                "ci95": [
+                  20.654329147389294,
+                  100.0
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 1,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.6049197998616574
+            },
+            "30\u201360m": {
+              "reclaims": 2,
+              "hold": {
+                "count": 2,
+                "n": 2,
+                "pct": 100.0,
+                "ci95": [
+                  34.23719528896193,
+                  100.0
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 2,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.36627570505071944
+            },
+            "60\u2013120m": {
+              "reclaims": 1,
+              "hold": {
+                "count": 0,
+                "n": 1,
+                "pct": 0.0,
+                "ci95": [
+                  0.0,
+                  79.34567085261071
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 1,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.05304600082885205
+            },
+            ">120m": {
+              "reclaims": 4,
+              "hold": {
+                "count": 2,
+                "n": 4,
+                "pct": 50.0,
+                "ci95": [
+                  15.003570882017147,
+                  84.99642911798286
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 2,
+                "failed_partial": 1,
+                "failed_to_continuation": 1
+              },
+              "median_post_reclaim_extension_pct": 0.7688627695298982
+            }
+          }
+        },
+        "down": {
+          "sessions": 16,
+          "touch_reclaim": {
+            "count": 9,
+            "n": 16,
+            "pct": 56.25,
+            "ci95": [
+              33.17819560677652,
+              76.90163666481448
+            ]
+          },
+          "close_confirmed_reclaim": {
+            "count": 9,
+            "n": 16,
+            "pct": 56.25,
+            "ci95": [
+              33.17819560677652,
+              76.90163666481448
+            ]
+          },
+          "wick_only": {
+            "count": 0,
+            "n": 16,
+            "pct": 0.0,
+            "ci95": [
+              0.0,
+              19.361341827271993
+            ]
+          },
+          "confirmed_reclaim_hold": {
+            "count": 7,
+            "n": 9,
+            "pct": 77.77777777777777,
+            "ci95": [
+              45.25833436728054,
+              93.67762376877728
+            ]
+          },
+          "time_buckets": {
+            "\u226410m": {
+              "reclaims": 2,
+              "hold": {
+                "count": 2,
+                "n": 2,
+                "pct": 100.0,
+                "ci95": [
+                  34.23719528896193,
+                  100.0
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 2,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.5016210667648519
+            },
+            "10\u201330m": {
+              "reclaims": 2,
+              "hold": {
+                "count": 2,
+                "n": 2,
+                "pct": 100.0,
+                "ci95": [
+                  34.23719528896193,
+                  100.0
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 2,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 1.0534674972344953
+            },
+            "30\u201360m": {
+              "reclaims": 0,
+              "hold": {
+                "count": 0,
+                "n": 0,
+                "pct": null,
+                "ci95": [
+                  null,
+                  null
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": null
+            },
+            "60\u2013120m": {
+              "reclaims": 3,
+              "hold": {
+                "count": 3,
+                "n": 3,
+                "pct": 100.0,
+                "ci95": [
+                  43.84939195509823,
+                  100.0
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 3,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.5696487166247413
+            },
+            ">120m": {
+              "reclaims": 2,
+              "hold": {
+                "count": 0,
+                "n": 2,
+                "pct": 0.0,
+                "ci95": [
+                  0.0,
+                  65.76280471103807
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 2,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.0718266799090839
+            }
+          }
+        }
+      }
+    },
+    {
+      "quarter": "2026 Q1",
+      "partial": false,
+      "directions": {
+        "up": {
+          "sessions": 13,
+          "touch_reclaim": {
+            "count": 5,
+            "n": 13,
+            "pct": 38.46153846153846,
+            "ci95": [
+              17.70944658123682,
+              64.47751902773146
+            ]
+          },
+          "close_confirmed_reclaim": {
+            "count": 5,
+            "n": 13,
+            "pct": 38.46153846153846,
+            "ci95": [
+              17.70944658123682,
+              64.47751902773146
+            ]
+          },
+          "wick_only": {
+            "count": 0,
+            "n": 13,
+            "pct": 0.0,
+            "ci95": [
+              0.0,
+              22.810184305529166
+            ]
+          },
+          "confirmed_reclaim_hold": {
+            "count": 3,
+            "n": 5,
+            "pct": 60.0,
+            "ci95": [
+              23.07199322088371,
+              88.23817688407468
+            ]
+          },
+          "time_buckets": {
+            "\u226410m": {
+              "reclaims": 3,
+              "hold": {
+                "count": 2,
+                "n": 3,
+                "pct": 66.66666666666667,
+                "ci95": [
+                  20.76549551264879,
+                  93.85096847238394
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 2,
+                "failed_partial": 0,
+                "failed_to_continuation": 1
+              },
+              "median_post_reclaim_extension_pct": 0.538807136345888
+            },
+            "10\u201330m": {
+              "reclaims": 0,
+              "hold": {
+                "count": 0,
+                "n": 0,
+                "pct": null,
+                "ci95": [
+                  null,
+                  null
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": null
+            },
+            "30\u201360m": {
+              "reclaims": 2,
+              "hold": {
+                "count": 1,
+                "n": 2,
+                "pct": 50.0,
+                "ci95": [
+                  9.452865480086615,
+                  90.54713451991339
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 1,
+                "failed_partial": 1,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.5345054256317068
+            },
+            "60\u2013120m": {
+              "reclaims": 0,
+              "hold": {
+                "count": 0,
+                "n": 0,
+                "pct": null,
+                "ci95": [
+                  null,
+                  null
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": null
+            },
+            ">120m": {
+              "reclaims": 0,
+              "hold": {
+                "count": 0,
+                "n": 0,
+                "pct": null,
+                "ci95": [
+                  null,
+                  null
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": null
+            }
+          }
+        },
+        "down": {
+          "sessions": 20,
+          "touch_reclaim": {
+            "count": 7,
+            "n": 20,
+            "pct": 35.0,
+            "ci95": [
+              18.118954786794465,
+              56.714948978053535
+            ]
+          },
+          "close_confirmed_reclaim": {
+            "count": 7,
+            "n": 20,
+            "pct": 35.0,
+            "ci95": [
+              18.118954786794465,
+              56.714948978053535
+            ]
+          },
+          "wick_only": {
+            "count": 0,
+            "n": 20,
+            "pct": 0.0,
+            "ci95": [
+              -1.3877787807814457e-15,
+              16.113012549493323
+            ]
+          },
+          "confirmed_reclaim_hold": {
+            "count": 5,
+            "n": 7,
+            "pct": 71.42857142857143,
+            "ci95": [
+              35.892909014821264,
+              91.77828342909844
+            ]
+          },
+          "time_buckets": {
+            "\u226410m": {
+              "reclaims": 2,
+              "hold": {
+                "count": 2,
+                "n": 2,
+                "pct": 100.0,
+                "ci95": [
+                  34.23719528896193,
+                  100.0
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 2,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 1.1023022075937305
+            },
+            "10\u201330m": {
+              "reclaims": 1,
+              "hold": {
+                "count": 1,
+                "n": 1,
+                "pct": 100.0,
+                "ci95": [
+                  20.654329147389294,
+                  100.0
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 1,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.7474547329080501
+            },
+            "30\u201360m": {
+              "reclaims": 0,
+              "hold": {
+                "count": 0,
+                "n": 0,
+                "pct": null,
+                "ci95": [
+                  null,
+                  null
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": null
+            },
+            "60\u2013120m": {
+              "reclaims": 0,
+              "hold": {
+                "count": 0,
+                "n": 0,
+                "pct": null,
+                "ci95": [
+                  null,
+                  null
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": null
+            },
+            ">120m": {
+              "reclaims": 4,
+              "hold": {
+                "count": 2,
+                "n": 4,
+                "pct": 50.0,
+                "ci95": [
+                  15.003570882017147,
+                  84.99642911798286
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 2,
+                "failed_partial": 2,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.38516281729092167
+            }
+          }
+        }
+      }
+    },
+    {
+      "quarter": "2026 Q2",
+      "partial": false,
+      "directions": {
+        "up": {
+          "sessions": 30,
+          "touch_reclaim": {
+            "count": 15,
+            "n": 30,
+            "pct": 50.0,
+            "ci95": [
+              33.15385122717377,
+              66.84614877282624
+            ]
+          },
+          "close_confirmed_reclaim": {
+            "count": 15,
+            "n": 30,
+            "pct": 50.0,
+            "ci95": [
+              33.15385122717377,
+              66.84614877282624
+            ]
+          },
+          "wick_only": {
+            "count": 0,
+            "n": 30,
+            "pct": 0.0,
+            "ci95": [
+              -1.3877787807814457e-15,
+              11.3517091390478
+            ]
+          },
+          "confirmed_reclaim_hold": {
+            "count": 6,
+            "n": 15,
+            "pct": 40.0,
+            "ci95": [
+              19.824228082594665,
+              64.2535572434923
+            ]
+          },
+          "time_buckets": {
+            "\u226410m": {
+              "reclaims": 5,
+              "hold": {
+                "count": 2,
+                "n": 5,
+                "pct": 40.0,
+                "ci95": [
+                  11.76182311592533,
+                  76.9280067791163
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 2,
+                "failed_partial": 0,
+                "failed_to_continuation": 3
+              },
+              "median_post_reclaim_extension_pct": 0.6061338936167154
+            },
+            "10\u201330m": {
+              "reclaims": 4,
+              "hold": {
+                "count": 2,
+                "n": 4,
+                "pct": 50.0,
+                "ci95": [
+                  15.003570882017147,
+                  84.99642911798286
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 2,
+                "failed_partial": 1,
+                "failed_to_continuation": 1
+              },
+              "median_post_reclaim_extension_pct": 0.6617723283851713
+            },
+            "30\u201360m": {
+              "reclaims": 3,
+              "hold": {
+                "count": 2,
+                "n": 3,
+                "pct": 66.66666666666667,
+                "ci95": [
+                  20.76549551264879,
+                  93.85096847238394
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 2,
+                "failed_partial": 0,
+                "failed_to_continuation": 1
+              },
+              "median_post_reclaim_extension_pct": 0.8411871134995028
+            },
+            "60\u2013120m": {
+              "reclaims": 1,
+              "hold": {
+                "count": 0,
+                "n": 1,
+                "pct": 0.0,
+                "ci95": [
+                  0.0,
+                  79.34567085261071
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 0,
+                "failed_to_continuation": 1
+              },
+              "median_post_reclaim_extension_pct": 0.036840674279509496
+            },
+            ">120m": {
+              "reclaims": 2,
+              "hold": {
+                "count": 0,
+                "n": 2,
+                "pct": 0.0,
+                "ci95": [
+                  0.0,
+                  65.76280471103807
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 1,
+                "failed_to_continuation": 1
+              },
+              "median_post_reclaim_extension_pct": 0.07477160328985806
+            }
+          }
+        },
+        "down": {
+          "sessions": 13,
+          "touch_reclaim": {
+            "count": 6,
+            "n": 13,
+            "pct": 46.15384615384615,
+            "ci95": [
+              23.205754301488142,
+              70.85656756816796
+            ]
+          },
+          "close_confirmed_reclaim": {
+            "count": 6,
+            "n": 13,
+            "pct": 46.15384615384615,
+            "ci95": [
+              23.205754301488142,
+              70.85656756816796
+            ]
+          },
+          "wick_only": {
+            "count": 0,
+            "n": 13,
+            "pct": 0.0,
+            "ci95": [
+              0.0,
+              22.810184305529166
+            ]
+          },
+          "confirmed_reclaim_hold": {
+            "count": 4,
+            "n": 6,
+            "pct": 66.66666666666667,
+            "ci95": [
+              29.998832134152863,
+              90.3230667440783
+            ]
+          },
+          "time_buckets": {
+            "\u226410m": {
+              "reclaims": 1,
+              "hold": {
+                "count": 1,
+                "n": 1,
+                "pct": 100.0,
+                "ci95": [
+                  20.654329147389294,
+                  100.0
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 1,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.9941623437309576
+            },
+            "10\u201330m": {
+              "reclaims": 2,
+              "hold": {
+                "count": 1,
+                "n": 2,
+                "pct": 50.0,
+                "ci95": [
+                  9.452865480086615,
+                  90.54713451991339
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 1,
+                "failed_partial": 0,
+                "failed_to_continuation": 1
+              },
+              "median_post_reclaim_extension_pct": 1.5258797485993876
+            },
+            "30\u201360m": {
+              "reclaims": 0,
+              "hold": {
+                "count": 0,
+                "n": 0,
+                "pct": null,
+                "ci95": [
+                  null,
+                  null
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": null
+            },
+            "60\u2013120m": {
+              "reclaims": 1,
+              "hold": {
+                "count": 1,
+                "n": 1,
+                "pct": 100.0,
+                "ci95": [
+                  20.654329147389294,
+                  100.0
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 1,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.2977871335421282
+            },
+            ">120m": {
+              "reclaims": 2,
+              "hold": {
+                "count": 1,
+                "n": 2,
+                "pct": 50.0,
+                "ci95": [
+                  9.452865480086615,
+                  90.54713451991339
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 1,
+                "failed_partial": 1,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.08399012561987748
+            }
+          }
+        }
+      }
+    },
+    {
+      "quarter": "2026 Q3",
+      "partial": true,
+      "directions": {
+        "up": {
+          "sessions": 6,
+          "touch_reclaim": {
+            "count": 2,
+            "n": 6,
+            "pct": 33.333333333333336,
+            "ci95": [
+              9.676933255921682,
+              70.00116786584712
+            ]
+          },
+          "close_confirmed_reclaim": {
+            "count": 2,
+            "n": 6,
+            "pct": 33.333333333333336,
+            "ci95": [
+              9.676933255921682,
+              70.00116786584712
+            ]
+          },
+          "wick_only": {
+            "count": 0,
+            "n": 6,
+            "pct": 0.0,
+            "ci95": [
+              0.0,
+              39.03430336530645
+            ]
+          },
+          "confirmed_reclaim_hold": {
+            "count": 2,
+            "n": 2,
+            "pct": 100.0,
+            "ci95": [
+              34.23719528896193,
+              100.0
+            ]
+          },
+          "time_buckets": {
+            "\u226410m": {
+              "reclaims": 0,
+              "hold": {
+                "count": 0,
+                "n": 0,
+                "pct": null,
+                "ci95": [
+                  null,
+                  null
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": null
+            },
+            "10\u201330m": {
+              "reclaims": 1,
+              "hold": {
+                "count": 1,
+                "n": 1,
+                "pct": 100.0,
+                "ci95": [
+                  20.654329147389294,
+                  100.0
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 1,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 1.3144548347205096
+            },
+            "30\u201360m": {
+              "reclaims": 1,
+              "hold": {
+                "count": 1,
+                "n": 1,
+                "pct": 100.0,
+                "ci95": [
+                  20.654329147389294,
+                  100.0
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 1,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 1.2108501527264177
+            },
+            "60\u2013120m": {
+              "reclaims": 0,
+              "hold": {
+                "count": 0,
+                "n": 0,
+                "pct": null,
+                "ci95": [
+                  null,
+                  null
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": null
+            },
+            ">120m": {
+              "reclaims": 0,
+              "hold": {
+                "count": 0,
+                "n": 0,
+                "pct": null,
+                "ci95": [
+                  null,
+                  null
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": null
+            }
+          }
+        },
+        "down": {
+          "sessions": 8,
+          "touch_reclaim": {
+            "count": 3,
+            "n": 8,
+            "pct": 37.5,
+            "ci95": [
+              13.684175946152106,
+              69.42621454161981
+            ]
+          },
+          "close_confirmed_reclaim": {
+            "count": 3,
+            "n": 8,
+            "pct": 37.5,
+            "ci95": [
+              13.684175946152106,
+              69.42621454161981
+            ]
+          },
+          "wick_only": {
+            "count": 0,
+            "n": 8,
+            "pct": 0.0,
+            "ci95": [
+              0.0,
+              32.441561951087685
+            ]
+          },
+          "confirmed_reclaim_hold": {
+            "count": 1,
+            "n": 3,
+            "pct": 33.333333333333336,
+            "ci95": [
+              6.14903152761605,
+              79.23450448735122
+            ]
+          },
+          "time_buckets": {
+            "\u226410m": {
+              "reclaims": 1,
+              "hold": {
+                "count": 0,
+                "n": 1,
+                "pct": 0.0,
+                "ci95": [
+                  0.0,
+                  79.34567085261071
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 0,
+                "failed_to_continuation": 1
+              },
+              "median_post_reclaim_extension_pct": 0.09682640615063863
+            },
+            "10\u201330m": {
+              "reclaims": 1,
+              "hold": {
+                "count": 1,
+                "n": 1,
+                "pct": 100.0,
+                "ci95": [
+                  20.654329147389294,
+                  100.0
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 1,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.3988977066095409
+            },
+            "30\u201360m": {
+              "reclaims": 0,
+              "hold": {
+                "count": 0,
+                "n": 0,
+                "pct": null,
+                "ci95": [
+                  null,
+                  null
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": null
+            },
+            "60\u2013120m": {
+              "reclaims": 1,
+              "hold": {
+                "count": 0,
+                "n": 1,
+                "pct": 0.0,
+                "ci95": [
+                  0.0,
+                  79.34567085261071
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 1,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": 0.09591379042836086
+            },
+            ">120m": {
+              "reclaims": 0,
+              "hold": {
+                "count": 0,
+                "n": 0,
+                "pct": null,
+                "ci95": [
+                  null,
+                  null
+                ]
+              },
+              "outcomes": {
+                "held_reversal": 0,
+                "failed_partial": 0,
+                "failed_to_continuation": 0
+              },
+              "median_post_reclaim_extension_pct": null
+            }
+          }
+        }
+      }
+    }
+  ]
+}

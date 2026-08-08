@@ -1,0 +1,390 @@
+{
+  "source": "Cboe Global Markets VIX_History.csv",
+  "source_url": "https://cdn.cboe.com/api/global/us_indices/daily_prices/VIX_History.csv",
+  "range": [
+    "2024-07-29",
+    "2026-07-28"
+  ],
+  "definition": "VIX open exceeds both prior open and close by at least 0.10%",
+  "focused_10_to_20pct_downtrends": {
+    "beginning": {
+      "sessions": 8,
+      "vix_open_mean": 17.755,
+      "vix_open_median": 18.22,
+      "vix_close_mean": 18.75625,
+      "vix_close_median": 18.835,
+      "vix_high_max": 22.18,
+      "vix_gap_up_count": 4,
+      "vix_gap_up_rate_pct": 50.0,
+      "vix_gap_up_mean_size_pct": 1.264122249691657,
+      "vix_gap_up_outcomes": {
+        "continuation": {
+          "count": 4,
+          "pct": 100.0
+        },
+        "partial_retrace": {
+          "count": 0,
+          "pct": 0.0
+        },
+        "full_reversal": {
+          "count": 0,
+          "pct": 0.0
+        }
+      },
+      "level_buckets": {
+        "<20": 8,
+        "20\u201325": 0,
+        "25\u201330": 0,
+        "\u226530": 0
+      }
+    },
+    "middle": {
+      "sessions": 8,
+      "vix_open_mean": 21.71875,
+      "vix_open_median": 22.18,
+      "vix_close_mean": 21.8175,
+      "vix_close_median": 21.85,
+      "vix_high_max": 26.35,
+      "vix_gap_up_count": 4,
+      "vix_gap_up_rate_pct": 50.0,
+      "vix_gap_up_mean_size_pct": 3.4048260019621415,
+      "vix_gap_up_outcomes": {
+        "continuation": {
+          "count": 1,
+          "pct": 25.0
+        },
+        "partial_retrace": {
+          "count": 1,
+          "pct": 25.0
+        },
+        "full_reversal": {
+          "count": 2,
+          "pct": 50.0
+        }
+      },
+      "level_buckets": {
+        "<20": 2,
+        "20\u201325": 6,
+        "25\u201330": 0,
+        "\u226530": 0
+      }
+    },
+    "end": {
+      "sessions": 10,
+      "vix_open_mean": 31.256,
+      "vix_open_median": 26.63,
+      "vix_close_mean": 32.655,
+      "vix_close_median": 27.39,
+      "vix_high_max": 60.13,
+      "vix_gap_up_count": 4,
+      "vix_gap_up_rate_pct": 40.0,
+      "vix_gap_up_mean_size_pct": 12.906059224277527,
+      "vix_gap_up_outcomes": {
+        "continuation": {
+          "count": 2,
+          "pct": 50.0
+        },
+        "partial_retrace": {
+          "count": 1,
+          "pct": 25.0
+        },
+        "full_reversal": {
+          "count": 1,
+          "pct": 25.0
+        }
+      },
+      "level_buckets": {
+        "<20": 0,
+        "20\u201325": 4,
+        "25\u201330": 3,
+        "\u226530": 3
+      }
+    }
+  },
+  "all_3pct_downtrends": {
+    "beginning": {
+      "sessions": 41,
+      "vix_open_mean": 18.85829268292683,
+      "vix_open_median": 17.21,
+      "vix_close_mean": 19.17292682926829,
+      "vix_close_median": 17.55,
+      "vix_high_max": 54.87,
+      "vix_gap_up_count": 16,
+      "vix_gap_up_rate_pct": 39.02439024390244,
+      "vix_gap_up_mean_size_pct": 4.520824818560694,
+      "vix_gap_up_outcomes": {
+        "continuation": {
+          "count": 9,
+          "pct": 56.25
+        },
+        "partial_retrace": {
+          "count": 4,
+          "pct": 25.0
+        },
+        "full_reversal": {
+          "count": 3,
+          "pct": 18.75
+        }
+      },
+      "level_buckets": {
+        "<20": 34,
+        "20\u201325": 5,
+        "25\u201330": 0,
+        "\u226530": 2
+      }
+    },
+    "middle": {
+      "sessions": 50,
+      "vix_open_mean": 19.9192,
+      "vix_open_median": 18.305,
+      "vix_close_mean": 20.0094,
+      "vix_close_median": 19.0,
+      "vix_high_max": 35.3,
+      "vix_gap_up_count": 14,
+      "vix_gap_up_rate_pct": 28.0,
+      "vix_gap_up_mean_size_pct": 5.4528479641716885,
+      "vix_gap_up_outcomes": {
+        "continuation": {
+          "count": 4,
+          "pct": 28.571428571428573
+        },
+        "partial_retrace": {
+          "count": 4,
+          "pct": 28.571428571428573
+        },
+        "full_reversal": {
+          "count": 6,
+          "pct": 42.857142857142854
+        }
+      },
+      "level_buckets": {
+        "<20": 32,
+        "20\u201325": 12,
+        "25\u201330": 3,
+        "\u226530": 3
+      }
+    },
+    "end": {
+      "sessions": 55,
+      "vix_open_mean": 23.66709090909091,
+      "vix_open_median": 21.98,
+      "vix_close_mean": 24.67890909090909,
+      "vix_close_median": 23.37,
+      "vix_high_max": 65.73,
+      "vix_gap_up_count": 25,
+      "vix_gap_up_rate_pct": 45.45454545454545,
+      "vix_gap_up_mean_size_pct": 7.187328392384357,
+      "vix_gap_up_outcomes": {
+        "continuation": {
+          "count": 13,
+          "pct": 52.0
+        },
+        "partial_retrace": {
+          "count": 4,
+          "pct": 16.0
+        },
+        "full_reversal": {
+          "count": 8,
+          "pct": 32.0
+        }
+      },
+      "level_buckets": {
+        "<20": 20,
+        "20\u201325": 18,
+        "25\u201330": 8,
+        "\u226530": 9
+      }
+    }
+  },
+  "focused_legs": [
+    {
+      "qqq_start": "2025-02-19",
+      "qqq_end": "2025-03-13",
+      "qqq_return_pct": -13.193208778173194,
+      "vix_start_close": 15.66,
+      "vix_end_close": 24.66,
+      "vix_peak": 29.57,
+      "summary": {
+        "sessions": 16,
+        "vix_open_mean": 21.53375,
+        "vix_open_median": 21.905,
+        "vix_close_mean": 22.016875,
+        "vix_close_median": 22.355,
+        "vix_high_max": 29.57,
+        "vix_gap_up_count": 5,
+        "vix_gap_up_rate_pct": 31.25,
+        "vix_gap_up_mean_size_pct": 0.8524141944622077,
+        "vix_gap_up_outcomes": {
+          "continuation": {
+            "count": 3,
+            "pct": 60.0
+          },
+          "partial_retrace": {
+            "count": 0,
+            "pct": 0.0
+          },
+          "full_reversal": {
+            "count": 2,
+            "pct": 40.0
+          }
+        },
+        "level_buckets": {
+          "<20": 7,
+          "20\u201325": 7,
+          "25\u201330": 2,
+          "\u226530": 0
+        }
+      }
+    },
+    {
+      "qqq_start": "2025-03-25",
+      "qqq_end": "2025-04-08",
+      "qqq_return_pct": -15.685161917885948,
+      "vix_start_close": 18.33,
+      "vix_end_close": 52.33,
+      "vix_peak": 60.13,
+      "summary": {
+        "sessions": 10,
+        "vix_open_mean": 28.381,
+        "vix_open_median": 23.205,
+        "vix_close_mean": 29.887,
+        "vix_close_median": 22.025,
+        "vix_high_max": 60.13,
+        "vix_gap_up_count": 7,
+        "vix_gap_up_rate_pct": 70.0,
+        "vix_gap_up_mean_size_pct": 9.43399413305918,
+        "vix_gap_up_outcomes": {
+          "continuation": {
+            "count": 4,
+            "pct": 57.142857142857146
+          },
+          "partial_retrace": {
+            "count": 2,
+            "pct": 28.571428571428573
+          },
+          "full_reversal": {
+            "count": 1,
+            "pct": 14.285714285714286
+          }
+        },
+        "level_buckets": {
+          "<20": 3,
+          "20\u201325": 3,
+          "25\u201330": 1,
+          "\u226530": 3
+        }
+      }
+    }
+  ],
+  "focused_joint": {
+    "qqq_gap_down_days": 13,
+    "also_vix_gap_up": 9,
+    "by_stage": {
+      "beginning": {
+        "qqq_gap_down": 3,
+        "also_vix_gap_up": 3
+      },
+      "middle": {
+        "qqq_gap_down": 3,
+        "also_vix_gap_up": 3
+      },
+      "end": {
+        "qqq_gap_down": 7,
+        "also_vix_gap_up": 3
+      }
+    },
+    "events": [
+      {
+        "date": "2025-02-25",
+        "stage": "beginning",
+        "vix_gap_up": true,
+        "vix_open": 19.09,
+        "vix_close": 19.43
+      },
+      {
+        "date": "2025-03-04",
+        "stage": "middle",
+        "vix_gap_up": true,
+        "vix_open": 22.96,
+        "vix_close": 23.51
+      },
+      {
+        "date": "2025-03-06",
+        "stage": "end",
+        "vix_gap_up": false,
+        "vix_open": 22.6,
+        "vix_close": 24.87
+      },
+      {
+        "date": "2025-03-07",
+        "stage": "end",
+        "vix_gap_up": false,
+        "vix_open": 24.85,
+        "vix_close": 23.37
+      },
+      {
+        "date": "2025-03-10",
+        "stage": "end",
+        "vix_gap_up": false,
+        "vix_open": 24.7,
+        "vix_close": 27.86
+      },
+      {
+        "date": "2025-03-13",
+        "stage": "end",
+        "vix_gap_up": false,
+        "vix_open": 24.92,
+        "vix_close": 24.66
+      },
+      {
+        "date": "2025-03-27",
+        "stage": "beginning",
+        "vix_gap_up": true,
+        "vix_open": 18.36,
+        "vix_close": 18.69
+      },
+      {
+        "date": "2025-03-28",
+        "stage": "beginning",
+        "vix_gap_up": true,
+        "vix_open": 19.08,
+        "vix_close": 21.65
+      },
+      {
+        "date": "2025-03-31",
+        "stage": "middle",
+        "vix_gap_up": true,
+        "vix_open": 24.11,
+        "vix_close": 22.28
+      },
+      {
+        "date": "2025-04-02",
+        "stage": "middle",
+        "vix_gap_up": true,
+        "vix_open": 22.3,
+        "vix_close": 21.51
+      },
+      {
+        "date": "2025-04-03",
+        "stage": "end",
+        "vix_gap_up": true,
+        "vix_open": 26.38,
+        "vix_close": 30.02
+      },
+      {
+        "date": "2025-04-04",
+        "stage": "end",
+        "vix_gap_up": true,
+        "vix_open": 30.12,
+        "vix_close": 45.31
+      },
+      {
+        "date": "2025-04-07",
+        "stage": "end",
+        "vix_gap_up": true,
+        "vix_open": 60.13,
+        "vix_close": 46.98
+      }
+    ]
+  }
+}
