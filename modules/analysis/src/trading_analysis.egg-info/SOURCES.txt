@@ -42,6 +42,12 @@ src/trading_analysis/options_premium/ui.py
 src/trading_analysis/options_premium/watchlist.py
 src/trading_analysis/schwab/__init__.py
 src/trading_analysis/schwab/convert.py
+src/trading_analysis/strategies/__init__.py
+src/trading_analysis/strategies/chart_hub.py
+src/trading_analysis/strategies/composite_trend.py
+src/trading_analysis/strategies/levered_weekly_trend.py
+src/trading_analysis/strategies/scanner_batch.py
+src/trading_analysis/strategies/weekly_control_experiment.py
 src/trading_analysis/tpo/__init__.py
 src/trading_analysis/tpo/bars.py
 src/trading_analysis/tpo/features.py

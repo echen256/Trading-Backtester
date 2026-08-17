@@ -52,6 +52,7 @@ After installation these commands are available:
 
 ```bash
 # List liquid contracts (JSON)
+# Volume scan defaults to strikes within ±50% of spot (`--moneyness-band 0.5`).
 trading-options-premium list --symbol MU --dte-min 15 --dte-max 60
 
 # Fetch underlying OHLC + premium series for agents

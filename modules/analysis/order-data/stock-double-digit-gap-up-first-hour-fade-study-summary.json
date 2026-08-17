@@ -1,0 +1,310 @@
+{
+  "source": "Polygon adjusted daily + RTH 1-minute aggregates",
+  "range": [
+    "2024-07-29",
+    "2026-08-11"
+  ],
+  "universe": [
+    "ALAB",
+    "AMD",
+    "AMKR",
+    "APLD",
+    "ARM",
+    "BIDU",
+    "CAR",
+    "CIFR",
+    "COIN",
+    "CRDO",
+    "EOSE",
+    "FUTU",
+    "GRAL",
+    "HUT",
+    "INTC",
+    "IREN",
+    "MRVL",
+    "MSTR",
+    "MU",
+    "NBIS",
+    "NVDA",
+    "NVTS",
+    "OPEN",
+    "PLTR",
+    "QCOM",
+    "RIOT",
+    "RKLB",
+    "SMCI",
+    "SNDK",
+    "TSLA",
+    "USAR"
+  ],
+  "filters": {
+    "gap_up_pct_min": 10.0,
+    "prior_close_min": 5.0,
+    "session_volume_min": 1000000,
+    "first_hour_end": "10:30 America/New_York",
+    "condition": "first-hour high <= open (no new high) AND 10:30 close < open (filling)"
+  },
+  "n_candidates_daily": 128,
+  "n_with_minutes": 128,
+  "key_finding": "After a >=10% gap up, a literal first-hour high that never exceeds the open is extremely rare (1/128). The practical fade signal is price back below the open by 10:30.",
+  "prevalence": {
+    "pct_still_above_open_at_1030": 58.59375,
+    "pct_below_open_at_1030": 41.40625,
+    "pct_strict_no_new_high": 0.78125,
+    "pct_filling_and_fh_high_le_1pct": 13.28125
+  },
+  "states": {
+    "baseline": {
+      "label": "all >=10% gap ups",
+      "n": 128,
+      "outcomes": {
+        "continuation": {
+          "count": 68,
+          "pct": 53.125,
+          "ci95": [
+            44.51521555712906,
+            61.55267196850777
+          ]
+        },
+        "partial_retrace": {
+          "count": 54,
+          "pct": 42.1875,
+          "ci95": [
+            33.98196990498745,
+            50.84831128092049
+          ]
+        },
+        "full_reversal": {
+          "count": 6,
+          "pct": 4.6875,
+          "ci95": [
+            2.1657548893279905,
+            9.849875988938049
+          ]
+        }
+      },
+      "mean_session_return_pct": 0.9972000048180537,
+      "median_session_return_pct": 0.3598706891768999,
+      "pct_touched_prior_close": 7.8125,
+      "pct_closed_below_open": 46.09375,
+      "median_gap_pct": 13.797783280470055,
+      "median_fh_return_pct": 0.8834896380836676
+    },
+    "still_above_open_1030": {
+      "label": "10:30 close >= open",
+      "n": 75,
+      "outcomes": {
+        "continuation": {
+          "count": 60,
+          "pct": 80.0,
+          "ci95": [
+            69.58850544883829,
+            87.48796179687972
+          ]
+        },
+        "partial_retrace": {
+          "count": 14,
+          "pct": 18.666666666666668,
+          "ci95": [
+            11.458005622312067,
+            28.92879525438247
+          ]
+        },
+        "full_reversal": {
+          "count": 1,
+          "pct": 1.3333333333333335,
+          "ci95": [
+            0.2357490433136912,
+            7.173537424743781
+          ]
+        }
+      },
+      "mean_session_return_pct": 5.192240833613844,
+      "median_session_return_pct": 4.278863887864248,
+      "pct_touched_prior_close": 1.3333333333333335,
+      "pct_closed_below_open": 20.0,
+      "median_gap_pct": 14.187976902454125,
+      "median_fh_return_pct": 3.5748172842672066
+    },
+    "filling_below_open_1030": {
+      "label": "10:30 close < open",
+      "n": 53,
+      "outcomes": {
+        "continuation": {
+          "count": 8,
+          "pct": 15.09433962264151,
+          "ci95": [
+            7.852324257781651,
+            27.05450454365954
+          ]
+        },
+        "partial_retrace": {
+          "count": 40,
+          "pct": 75.47169811320755,
+          "ci95": [
+            62.43318493782992,
+            85.06723728814542
+          ]
+        },
+        "full_reversal": {
+          "count": 5,
+          "pct": 9.433962264150944,
+          "ci95": [
+            4.0972037441896845,
+            20.253975673701436
+          ]
+        }
+      },
+      "mean_session_return_pct": -4.939178526496743,
+      "median_session_return_pct": -3.8074260541220872,
+      "pct_touched_prior_close": 16.9811320754717,
+      "pct_closed_below_open": 83.01886792452831,
+      "median_gap_pct": 13.424383744170543,
+      "median_fh_return_pct": -3.926631982683315
+    },
+    "filling_fill_0_25": {
+      "label": "fill <25% of gap",
+      "n": 6,
+      "outcomes": {
+        "continuation": {
+          "count": 1,
+          "pct": 16.666666666666664,
+          "ci95": [
+            3.005258587173032,
+            56.350943656364606
+          ]
+        },
+        "partial_retrace": {
+          "count": 5,
+          "pct": 83.33333333333334,
+          "ci95": [
+            43.649056343635394,
+            96.99474141282697
+          ]
+        },
+        "full_reversal": {
+          "count": 0,
+          "pct": 0.0,
+          "ci95": [
+            0.0,
+            39.03430336530645
+          ]
+        }
+      },
+      "mean_session_return_pct": -0.991600812597628,
+      "median_session_return_pct": -1.1005973369506483,
+      "pct_touched_prior_close": 0.0,
+      "pct_closed_below_open": 66.66666666666666,
+      "median_gap_pct": 18.43835059772345,
+      "median_fh_return_pct": -0.9117236624119951
+    },
+    "filling_fill_25_50": {
+      "label": "fill 25-50%",
+      "n": 22,
+      "outcomes": {
+        "continuation": {
+          "count": 5,
+          "pct": 22.727272727272727,
+          "ci95": [
+            10.122890794820357,
+            43.44035606295935
+          ]
+        },
+        "partial_retrace": {
+          "count": 17,
+          "pct": 77.27272727272727,
+          "ci95": [
+            56.55964393704065,
+            89.87710920517964
+          ]
+        },
+        "full_reversal": {
+          "count": 0,
+          "pct": 0.0,
+          "ci95": [
+            1.3877787807814457e-15,
+            14.865952572596125
+          ]
+        }
+      },
+      "mean_session_return_pct": -2.8669399253724634,
+      "median_session_return_pct": -2.5988609146544164,
+      "pct_touched_prior_close": 4.545454545454546,
+      "pct_closed_below_open": 77.27272727272727,
+      "median_gap_pct": 13.804583072783227,
+      "median_fh_return_pct": -2.759554218236848
+    },
+    "filling_fill_ge_50": {
+      "label": "fill >=50%",
+      "n": 25,
+      "outcomes": {
+        "continuation": {
+          "count": 2,
+          "pct": 8.0,
+          "ci95": [
+            2.2219933691091933,
+            24.966512122957816
+          ]
+        },
+        "partial_retrace": {
+          "count": 18,
+          "pct": 72.0,
+          "ci95": [
+            52.423028103441695,
+            85.71632616261843
+          ]
+        },
+        "full_reversal": {
+          "count": 5,
+          "pct": 20.0,
+          "ci95": [
+            8.860454100652488,
+            39.131335536538245
+          ]
+        }
+      },
+      "mean_session_return_pct": -7.710167146821897,
+      "median_session_return_pct": -4.9043566191960934,
+      "pct_touched_prior_close": 32.0,
+      "pct_closed_below_open": 92.0,
+      "median_gap_pct": 12.32135123430056,
+      "median_fh_return_pct": -5.848875968992251
+    },
+    "filling_weak_ext_le_1pct": {
+      "label": "filling + FH high <= +1%",
+      "n": 17,
+      "outcomes": {
+        "continuation": {
+          "count": 1,
+          "pct": 5.88235294117647,
+          "ci95": [
+            1.046013064516424,
+            26.9825452035628
+          ]
+        },
+        "partial_retrace": {
+          "count": 14,
+          "pct": 82.35294117647058,
+          "ci95": [
+            58.97007098262422,
+            93.808986287451
+          ]
+        },
+        "full_reversal": {
+          "count": 2,
+          "pct": 11.76470588235294,
+          "ci95": [
+            3.287908001292092,
+            34.33684249770991
+          ]
+        }
+      },
+      "mean_session_return_pct": -6.1184036767206145,
+      "median_session_return_pct": -4.3441381399575985,
+      "pct_touched_prior_close": 17.647058823529413,
+      "pct_closed_below_open": 94.11764705882352,
+      "median_gap_pct": 14.314075034438044,
+      "median_fh_return_pct": -5.98653846153846
+    }
+  }
+}

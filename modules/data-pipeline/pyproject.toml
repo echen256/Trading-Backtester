@@ -15,6 +15,7 @@ dependencies = [
   "python-dotenv>=1.0",
   "requests>=2.32",
   "google-cloud-bigquery>=3.25",
+  "db-dtypes>=1.4",
   "pyarrow>=23.0.1"
 ]
 
@@ -28,6 +29,7 @@ trading-data-pull = "trading_data_pipeline.bigquery_pull:main"
 trading-data-visualize = "trading_data_pipeline.visualize:main"
 trading-data-download-cmc = "trading_data_pipeline.coinmarketcap_downloader:main"
 trading-data-fisher-adaptive = "trading_data_pipeline.strategies.fisher_adaptive_macd:main"
+trading-weekly-adaptive-trends = "trading_data_pipeline.weekly_adaptive_trend_report:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/trading_data_pipeline"]

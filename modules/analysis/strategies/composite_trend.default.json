@@ -1,0 +1,5 @@
+{
+  "breakout_lookback_3d": 8,
+  "efficiency_lookback_3d": 5,
+  "minimum_price_efficiency": 0.45
+}

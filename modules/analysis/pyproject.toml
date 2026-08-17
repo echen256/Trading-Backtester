@@ -27,6 +27,12 @@ trading-fisher-trade-overlay = "trading_analysis.fisher_trade_overlay:main"
 trading-compliance-monitor = "trading_analysis.compliance_monitor:main"
 trading-options-premium = "trading_analysis.options_premium.cli:main"
 trading-options-premium-ui = "trading_analysis.options_premium.ui:main"
+trading-levered-trend-following = "trading_analysis.strategies.levered_weekly_trend:main"
+trading-composite-trend = "trading_analysis.strategies.composite_trend:main"
+trading-scanner-weekly-batch = "trading_analysis.strategies.scanner_batch:main"
+trading-strategy-chart-hub = "trading_analysis.strategies.chart_hub:main"
+trading-weekly-control-experiment = "trading_analysis.strategies.weekly_control_experiment:main"
+trading-evaluate-trade = "trading_analysis.evaluate_trade:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

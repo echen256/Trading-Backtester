@@ -126,6 +126,18 @@ class PolygonDownloader:
         timeframe_dir.mkdir(parents=True, exist_ok=True)
         filename = f"{self._sanitize_symbol(symbol)}-{resolved_settings.interval_minutes}M.csv"
         output_path = timeframe_dir / filename
+        if output_path.exists():
+            # A short refresh window must extend the archive rather than
+            # silently replacing all prior history.  Timestamp is explicit in
+            # both legacy and normalized archive layouts, even when it is not
+            # the first CSV column.
+            existing = pd.read_csv(output_path)
+            if "timestamp" not in existing.columns:
+                raise ValueError(f"Existing archive {output_path} has no timestamp column")
+            existing["timestamp"] = pd.to_datetime(existing["timestamp"], utc=True)
+            existing.set_index("timestamp", inplace=True)
+            df = pd.concat([existing, df], sort=False)
+            df = df[~df.index.duplicated(keep="last")].sort_index()
         df.to_csv(output_path)
         return output_path
 

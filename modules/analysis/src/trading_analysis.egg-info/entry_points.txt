@@ -1,12 +1,17 @@
 [console_scripts]
 trading-bucket-analysis = trading_analysis.bucket_analysis:main
 trading-compliance-monitor = trading_analysis.compliance_monitor:main
+trading-composite-trend = trading_analysis.strategies.composite_trend:main
 trading-fisher-trade-overlay = trading_analysis.fisher_trade_overlay:main
+trading-levered-trend-following = trading_analysis.strategies.levered_weekly_trend:main
 trading-options-premium = trading_analysis.options_premium.cli:main
 trading-options-premium-ui = trading_analysis.options_premium.ui:main
 trading-parse-orders = trading_analysis.parse_orders:main
 trading-rescan-market-data = trading_analysis.rescan_market_data:main
+trading-scanner-weekly-batch = trading_analysis.strategies.scanner_batch:main
 trading-schwab-convert = trading_analysis.schwab.convert:main
+trading-strategy-chart-hub = trading_analysis.strategies.chart_hub:main
 trading-tpo-grade = trading_analysis.export_tpo_grades:main
 trading-trade-hold-review = trading_analysis.export_trade_hold_review:main
 trading-webull-bridge = trading_analysis.webull_bridge:main
+trading-weekly-control-experiment = trading_analysis.strategies.weekly_control_experiment:main

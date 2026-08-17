@@ -1,0 +1,12 @@
+{
+  "core_exposure": 1.0,
+  "max_exposure": 2.0,
+  "pyramid_increment": 0.25,
+  "pyramid_atr_multiple": 1.0,
+  "emergency_stop_atr_multiple": 3.5,
+  "extreme_releverage_cap": 1.25,
+  "fresh_deceleration_bars": 3,
+  "developed_deceleration_bars": 2,
+  "mature_deceleration_bars": 1,
+  "extreme_deceleration_bars": 1
+}
