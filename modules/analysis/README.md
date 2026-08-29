@@ -5,6 +5,22 @@ were previously nested directly under `backend/analysis`.  Converting them into 
 self-contained module makes it easier to run ad-hoc analysis or reuse the
 helpers in notebooks without pulling in the entire backend.
 
+## Canonical analysis dashboard
+
+`modules/analysis/dashboard/` is the single interactive renderer for market
+data and generated studies. Its Python companion normalizes CSV, CSV.gz, and
+Parquet archives, catalogs them locally, and serves viewport-sized OHLCV ranges.
+Study generators publish validated `trading-study-run/v1` artifact bundles
+instead of creating one-off dashboards.
+
+```bash
+trading-analysis-dashboard import /path/to/market-data.csv
+npm --prefix modules/analysis/dashboard run build
+trading-analysis-dashboard serve --open
+```
+
+See [dashboard/README.md](dashboard/README.md) for contracts and generator API.
+
 ## Installation
 
 ```bash
@@ -36,6 +52,8 @@ After installation these commands are available:
   Watchlist: `order-data/watchlist.txt` (or `--symbol`).
 - `trading-options-premium-ui` – Streamlit dashboard (thin wrapper over the
   same `build_premium_payload` API).
+- `trading-analysis-dashboard` – import/catalog market data, publish annotation
+  studies, rebuild the study index, and serve the canonical React dashboard.
 
 ### Options premium vs underlying
 

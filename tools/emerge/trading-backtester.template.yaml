@@ -86,7 +86,7 @@ analyses:
   - tabular_console_overall
   - d3
 - analysis_name: frontend-typescript
-  source_directory: __ROOT__/modules/frontend/src
+  source_directory: __ROOT__/modules/analysis/dashboard/src
   git_directory: __ROOT__
   only_permit_languages:
   - typescript

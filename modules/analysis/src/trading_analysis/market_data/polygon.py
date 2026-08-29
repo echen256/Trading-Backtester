@@ -13,6 +13,8 @@ from typing import Any
 from .env import get_polygon_api_key
 
 POLYGON_API_BASE_URL = "https://api.polygon.io/v2/aggs/ticker"
+POLYGON_LAST_TRADE_URL = "https://api.polygon.io/v2/last/trade"
+POLYGON_PREV_CLOSE_URL = "https://api.polygon.io/v2/aggs/ticker"
 
 
 class PolygonHttpError(RuntimeError):
@@ -122,3 +124,50 @@ def _request_json(
                 continue
             raise PolygonHttpError(f"Polygon request timed out: {exc}") from exc
     raise PolygonHttpError(f"Polygon request failed after retries: {last_error}")
+
+
+def fetch_last_trade(
+    ticker: str,
+    *,
+    api_key: str | None = None,
+    timeout: float = 15.0,
+    max_retries: int = 3,
+) -> dict[str, Any]:
+    """Latest trade for `ticker`. Returns Polygon `results` (price in `p`)."""
+    key = api_key or get_polygon_api_key()
+    if not key:
+        raise RuntimeError(
+            "POLYGON_API_KEY is not set. Expected it in the environment or Trading-Backtester/.env."
+        )
+    encoded = urllib.parse.quote(ticker, safe="")
+    query = urllib.parse.urlencode({"apiKey": key})
+    url = f"{POLYGON_LAST_TRADE_URL}/{encoded}?{query}"
+    payload = _request_json(url, key=key, timeout=timeout, max_retries=max_retries)
+    results = payload.get("results")
+    if not isinstance(results, dict) or results.get("p") is None:
+        raise PolygonHttpError(f"Polygon last trade for {ticker} had no price: {payload!r}")
+    return results
+
+
+def fetch_prev_close(
+    ticker: str,
+    *,
+    api_key: str | None = None,
+    timeout: float = 15.0,
+    max_retries: int = 3,
+) -> dict[str, Any]:
+    """Previous daily bar. Starter plans usually allow this when last-trade does not."""
+    key = api_key or get_polygon_api_key()
+    if not key:
+        raise RuntimeError(
+            "POLYGON_API_KEY is not set. Expected it in the environment or Trading-Backtester/.env."
+        )
+    encoded = urllib.parse.quote(ticker, safe="")
+    query = urllib.parse.urlencode({"apiKey": key, "adjusted": "true"})
+    url = f"{POLYGON_API_BASE_URL}/{encoded}/prev?{query}"
+    payload = _request_json(url, key=key, timeout=timeout, max_retries=max_retries)
+    results = payload.get("results")
+    bar = results[0] if isinstance(results, list) and results else None
+    if not isinstance(bar, dict) or bar.get("c") is None:
+        raise PolygonHttpError(f"Polygon prev close for {ticker} had no close: {payload!r}")
+    return bar

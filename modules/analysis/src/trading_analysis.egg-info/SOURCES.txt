@@ -5,6 +5,7 @@ src/trading_analysis/bucket_analysis.py
 src/trading_analysis/compliance_monitor.py
 src/trading_analysis/daily_timeline.py
 src/trading_analysis/display_common.py
+src/trading_analysis/evaluate_trade.py
 src/trading_analysis/export_tpo_grades.py
 src/trading_analysis/export_trade_hold_review.py
 src/trading_analysis/fisher_trade_overlay.py
@@ -24,6 +25,14 @@ src/trading_analysis.egg-info/top_level.txt
 src/trading_analysis/charts/__init__.py
 src/trading_analysis/charts/enhanced_plotly.py
 src/trading_analysis/charts/trade_drilldown.py
+src/trading_analysis/dashboard/__init__.py
+src/trading_analysis/dashboard/api.py
+src/trading_analysis/dashboard/artifacts.py
+src/trading_analysis/dashboard/catalog.py
+src/trading_analysis/dashboard/cli.py
+src/trading_analysis/dashboard/config.py
+src/trading_analysis/dashboard/ingestion.py
+src/trading_analysis/dashboard/schemas.py
 src/trading_analysis/market_data/__init__.py
 src/trading_analysis/market_data/cache.py
 src/trading_analysis/market_data/env.py
@@ -56,3 +65,6 @@ src/trading_analysis/tpo/profile.py
 src/trading_analysis/tpo/render.py
 src/trading_analysis/tpo/schema.py
 src/trading_analysis/tpo/sessions.py
+tests/test_dashboard.py
+tests/test_gap_up_afternoon_reentry.py
+tests/test_qqq_gap_sweep_sequence.py

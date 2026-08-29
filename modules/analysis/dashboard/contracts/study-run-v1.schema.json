@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:trading:study-run:v1",
+  "title": "Trading study run",
+  "type": "object",
+  "required": ["schema_version", "study", "run", "inputs", "views", "metrics", "tables", "resources"],
+  "properties": {
+    "schema_version": {"const": "trading-study-run/v1"},
+    "study": {
+      "type": "object",
+      "required": ["id", "name", "version"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$"},
+        "name": {"type": "string", "minLength": 1},
+        "version": {"type": "string", "minLength": 1},
+        "description": {"type": "string"},
+        "generator": {"type": "string"}
+      },
+      "additionalProperties": true
+    },
+    "run": {
+      "type": "object",
+      "required": ["id", "generated_at", "status", "parameters"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "generated_at": {"type": "string"},
+        "status": {"enum": ["complete", "partial", "failed"]},
+        "parameters": {"type": "object"},
+        "code_revision": {"type": ["string", "null"]}
+      },
+      "additionalProperties": true
+    },
+    "inputs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["dataset_id"],
+        "properties": {
+          "dataset_id": {"type": "string"},
+          "fingerprint": {"type": ["string", "null"]},
+          "start": {"type": ["string", "null"]},
+          "end": {"type": ["string", "null"]}
+        },
+        "additionalProperties": true
+      }
+    },
+    "views": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "dataset_id", "chart"],
+        "properties": {
+          "id": {"type": "string"},
+          "label": {"type": "string"},
+          "dataset_id": {"type": "string"},
+          "symbol": {"type": "string"},
+          "timeframe": {"type": "string"},
+          "default_start": {"type": ["string", "null"]},
+          "default_end": {"type": ["string", "null"]},
+          "chart": {"$ref": "urn:trading:chart-study:v2"}
+        },
+        "additionalProperties": true
+      }
+    },
+    "metrics": {"type": "array", "items": {"type": "object"}},
+    "tables": {"type": "array", "items": {"type": "object"}},
+    "resources": {"type": "object"},
+    "methodology": {"type": ["string", "null"]}
+  },
+  "additionalProperties": true
+}

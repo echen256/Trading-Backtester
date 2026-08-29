@@ -17,6 +17,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from trading_analysis.dashboard import StudyArtifactWriter
+
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 PIPELINE_SRC = REPO_ROOT / "modules" / "data-pipeline" / "src"
@@ -136,9 +138,23 @@ def main() -> None:
     fig.savefig(PNG_PATH, dpi=180, bbox_inches="tight")
     plt.close(fig)
     write_dashboard(close, normalized, correlation, divergence)
+    dashboard_output = StudyArtifactWriter().publish_report_study(
+        study_id="us30y-gold-comparison",
+        study_name="US 30Y Yield / Gold Comparison",
+        version="1.0",
+        generator="modules/analysis/scripts/analyze_us30y_gold.py",
+        files={"chart": PNG_PATH, "legacy_dashboard": HTML_PATH},
+        metrics=[
+            {"label": "Latest gold", "value": float(close.Gold.iloc[-1])},
+            {"label": "Latest US30Y", "value": float(close.US30Y.iloc[-1])},
+            {"label": "60d correlation", "value": float(correlation.iloc[-1])},
+            {"label": "Divergence z", "value": float(divergence.iloc[-1])},
+        ],
+    )
     print(f"Data: {close.index.min():%Y-%m-%d} to {close.index.max():%Y-%m-%d}")
     print(f"Latest: Gold {close.Gold.iloc[-1]:.1f}; US30Y {close.US30Y.iloc[-1]:.2f}%; 60d corr {correlation.iloc[-1]:.2f}; divergence z {divergence.iloc[-1]:.2f}")
     print(f"Wrote {PNG_PATH}\nWrote {HTML_PATH}")
+    print(f"Published dashboard study {dashboard_output}")
 
 
 if __name__ == "__main__":

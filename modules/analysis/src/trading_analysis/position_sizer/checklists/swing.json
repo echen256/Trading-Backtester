@@ -1,0 +1,51 @@
+{
+  "name": "swing-charter",
+  "description": "H2 2026 swing-book gates plus MACD histogram sanity. Add checks here; evaluators live in checklist.py.",
+  "checks": [
+    {
+      "id": "stop_side",
+      "label": "Stop is on the correct side of entry",
+      "evaluator": "stop_side"
+    },
+    {
+      "id": "macd_histogram",
+      "label": "Long is not buying the top of a MACD histogram; short is not selling the bottom",
+      "evaluator": "macd_histogram"
+    },
+    {
+      "id": "three_r",
+      "label": "3R target is defined (price that pays 3× the stop distance)",
+      "evaluator": "three_r"
+    },
+    {
+      "id": "debit_cap",
+      "label": "Options debit ≤ 4% of equity (stock: skip)",
+      "evaluator": "debit_cap"
+    },
+    {
+      "id": "qty_nonzero",
+      "label": "1R can actually buy at least one unit",
+      "evaluator": "qty_nonzero"
+    },
+    {
+      "id": "hurry",
+      "label": "Not sending this because I have time, a deadline, or a hole to fill",
+      "evaluator": "manual"
+    },
+    {
+      "id": "concurrent_names",
+      "label": "After this fill, open underlyings this week ≤ 3. Clustered names (e.g. BTC+gold+QQQ) count as one",
+      "evaluator": "manual"
+    },
+    {
+      "id": "revenge",
+      "label": "Size is still 2% of current equity — no revenge, no press",
+      "evaluator": "manual"
+    },
+    {
+      "id": "harvest_flat",
+      "label": "If I just cashed a winner, I am flat until the next session",
+      "evaluator": "manual"
+    }
+  ]
+}

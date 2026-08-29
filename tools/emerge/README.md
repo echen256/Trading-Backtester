@@ -13,7 +13,7 @@ The script prefers a local `emerge` install and falls back to Docker if availabl
 - `backend`
 - `modules/data-pipeline`
 - `modules/analysis`
-- `modules/frontend/src`
+- `modules/analysis/dashboard/src`
 
 Useful commands:
 

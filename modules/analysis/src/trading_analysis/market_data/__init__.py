@@ -10,7 +10,7 @@ from .cache import (
 )
 from .env import REPO_ROOT, get_polygon_api_key, load_env_value
 from .option_dailies import fetch_option_daily_bars
-from .polygon import PolygonHttpError, fetch_aggs
+from .polygon import PolygonHttpError, fetch_aggs, fetch_last_trade, fetch_prev_close
 from .underlying_dailies import fetch_underlying_daily_bars
 from .underlying_minutes import (
     fetch_session_minute_bars,
@@ -30,6 +30,8 @@ __all__ = [
     "PolygonHttpError",
     "REPO_ROOT",
     "fetch_aggs",
+    "fetch_last_trade",
+    "fetch_prev_close",
     "fetch_option_daily_bars",
     "fetch_session_minute_bars",
     "fetch_sessions_minute_bars",

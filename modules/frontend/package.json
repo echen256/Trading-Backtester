@@ -4,10 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "dev": "npm --prefix ../analysis/dashboard run dev",
+    "build": "npm --prefix ../analysis/dashboard run build",
+    "lint": "npm --prefix ../analysis/dashboard run lint",
+    "preview": "npm --prefix ../analysis/dashboard run preview"
   },
   "dependencies": {
     "lightweight-charts": "^5.0.1",

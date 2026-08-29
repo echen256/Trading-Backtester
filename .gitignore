@@ -23,6 +23,10 @@ backend/csv/data.csv
 reports/emerge/
 modules/analysis/scanner/**
 modules/analysis/strategies/runs/**
+modules/analysis/artifacts/**
+!modules/analysis/artifacts/.gitkeep
+modules/analysis/dashboard/dist/
+modules/analysis/dashboard/node_modules/
 
 # Webull OpenAPI local outputs
 webull_trade_sdk.log

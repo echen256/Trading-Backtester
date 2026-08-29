@@ -16,6 +16,8 @@ from urllib.request import Request, urlopen
 import numpy as np
 import pandas as pd
 
+from trading_analysis.dashboard import StudyArtifactWriter
+
 
 START = pd.Timestamp("2010-01-01")
 END = pd.Timestamp("2026-08-16")
@@ -197,8 +199,17 @@ def main() -> None:
         )
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    dashboard_output = StudyArtifactWriter().publish_report_study(
+        study_id="smh-semivol",
+        study_name="SMH SEMI-VOL Event Study",
+        version="1.0",
+        generator="modules/analysis/scripts/analyze_smh_semivol.py",
+        files={"report": output},
+        metrics=[{"label": "Events", "value": len(events)}],
+    )
     print("\n".join(lines[:70]))
     print(f"\nWrote {output}")
+    print(f"Published dashboard study {dashboard_output}")
 
 
 if __name__ == "__main__":

@@ -16,6 +16,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from trading_analysis.dashboard import StudyArtifactWriter
+
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 PIPELINE_SRC = REPO_ROOT / "modules" / "data-pipeline" / "src"
@@ -365,8 +367,17 @@ def main() -> None:
         )
     REPORT.parent.mkdir(parents=True, exist_ok=True)
     REPORT.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    dashboard_output = StudyArtifactWriter().publish_report_study(
+        study_id="qqq-early-green-to-red",
+        study_name="QQQ Early Green-to-red",
+        version="1.0",
+        generator="modules/analysis/scripts/analyze_qqq_early_green_to_red.py",
+        files={"report": REPORT},
+        metrics=[{"label": "Events", "value": len(event_frame)}],
+    )
     print("\n".join(lines[:36]))
     print(f"\nWrote {REPORT}")
+    print(f"Published dashboard study {dashboard_output}")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:trading:market-dataset:v1",
+  "title": "Trading market dataset",
+  "type": "object",
+  "required": [
+    "schema_version", "id", "asset_class", "symbol", "interval_seconds",
+    "timezone", "source", "storage", "quality"
+  ],
+  "properties": {
+    "schema_version": {"const": "trading-market-dataset/v1"},
+    "id": {"type": "string", "minLength": 1},
+    "asset_class": {"enum": ["stock", "crypto", "index", "option", "forex", "unknown"]},
+    "symbol": {"type": "string", "minLength": 1},
+    "base_asset": {"type": ["string", "null"]},
+    "quote_asset": {"type": ["string", "null"]},
+    "venue": {"type": ["string", "null"]},
+    "interval_seconds": {"type": "integer", "minimum": 1},
+    "timezone": {"type": "string", "minLength": 1},
+    "calendar": {"type": ["string", "null"]},
+    "adjustment": {"type": ["string", "null"]},
+    "source": {
+      "type": "object",
+      "required": ["provider", "path", "fingerprint"],
+      "properties": {
+        "provider": {"type": "string"},
+        "path": {"type": "string"},
+        "fingerprint": {"type": "string"}
+      },
+      "additionalProperties": true
+    },
+    "storage": {
+      "type": "object",
+      "required": ["format", "path"],
+      "properties": {
+        "format": {"const": "parquet"},
+        "path": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "quality": {
+      "type": "object",
+      "required": ["row_count", "first_timestamp", "last_timestamp", "duplicates_removed", "missing_intervals"],
+      "properties": {
+        "row_count": {"type": "integer", "minimum": 0},
+        "first_timestamp": {"type": ["string", "null"]},
+        "last_timestamp": {"type": ["string", "null"]},
+        "duplicates_removed": {"type": "integer", "minimum": 0},
+        "missing_intervals": {"type": "integer", "minimum": 0},
+        "gap_ranges": {"type": "array", "items": {"type": "object"}},
+        "warnings": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": true
+    },
+    "created_at": {"type": "string"}
+  },
+  "additionalProperties": true
+}

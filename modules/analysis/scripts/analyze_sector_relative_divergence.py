@@ -18,6 +18,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from trading_analysis.dashboard import StudyArtifactWriter
+
 REPO_ROOT = Path(__file__).resolve().parents[3]
 PIPELINE_SRC = REPO_ROOT / "modules" / "data-pipeline" / "src"
 if str(PIPELINE_SRC) not in sys.path:
@@ -363,10 +365,18 @@ def main() -> None:
         ]
     )
     REPORT_PATH.write_text("\n".join(lines), encoding="utf-8")
+    dashboard_output = StudyArtifactWriter().publish_report_study(
+        study_id="qqq-sector-relative-divergence",
+        study_name="QQQ Sector Relative Divergence",
+        version="1.0",
+        generator="modules/analysis/scripts/analyze_sector_relative_divergence.py",
+        files={"report": REPORT_PATH, "bands": CSV_PATH, "chart": CHART_PATH, "legacy_dashboard": DASHBOARD_PATH},
+    )
     print(f"Wrote {CHART_PATH}")
     print(f"Wrote {REPORT_PATH}")
     print(f"Wrote {CSV_PATH}")
     print(f"Wrote {DASHBOARD_PATH}")
+    print(f"Published dashboard study {dashboard_output}")
     energy = next(row for row in current_rows if row["symbol"] == "XLE")
     print(
         "XLE snapshot: "

@@ -8,6 +8,7 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import Sequence
 
+from .dashboard import StudyArtifactWriter
 from .display_common import extract_underlying_symbol
 from .parse_orders import (
     DEFAULT_WEBULL_ORDERS_CSV,
@@ -350,7 +351,17 @@ def main(argv: Sequence[str] | None = None) -> None:
     )
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(doc.to_dict(), indent=2), encoding="utf-8")
+    dashboard_output = StudyArtifactWriter().publish_report_study(
+        study_id="trade-tpo-grades",
+        study_name="Trade TPO Execution Grades",
+        version="1.0",
+        generator="trading_analysis.export_tpo_grades",
+        files={"grades": output},
+        parameters={"start_date": start_date.isoformat(), "end_date": end_date.isoformat()},
+        metrics=[{"label": "Trades graded", "value": len(doc.trades)}],
+    )
     print(f"Wrote {len(doc.trades)} TPO grades to {output}")
+    print(f"Published dashboard study {dashboard_output}")
     if args.grade_llm:
         print(f"LLM grader: provider={get_grade_provider()} model={get_grade_model()}")
     if args.print_summary:

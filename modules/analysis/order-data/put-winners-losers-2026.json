@@ -1,0 +1,851 @@
+{
+  "range": "2026-01-02 to 2026-08-27",
+  "all": {
+    "n": 947,
+    "pnl": -5467.0,
+    "wr": 0.3812,
+    "avg": -5.77
+  },
+  "winners": {
+    "n": 361,
+    "pnl": 119750.0,
+    "wr": 1.0,
+    "avg": 331.72
+  },
+  "losers": {
+    "n": 586,
+    "pnl": -125217.0,
+    "wr": 0.0,
+    "avg": -213.68
+  },
+  "same_day": {
+    "n": 496,
+    "pnl": 2763.0,
+    "wr": 0.381,
+    "avg": 5.57
+  },
+  "overnight": {
+    "n": 451,
+    "pnl": -8230.0,
+    "wr": 0.3814,
+    "avg": -18.25
+  },
+  "same_day_winners": {
+    "n": 189,
+    "pnl": 37705.0,
+    "wr": 1.0,
+    "avg": 199.5
+  },
+  "same_day_losers": {
+    "n": 307,
+    "pnl": -34942.0,
+    "wr": 0.0,
+    "avg": -113.82
+  },
+  "overnight_winners": {
+    "n": 172,
+    "pnl": 82045.0,
+    "wr": 1.0,
+    "avg": 477.01
+  },
+  "overnight_losers": {
+    "n": 279,
+    "pnl": -90275.0,
+    "wr": 0.0,
+    "avg": -323.57
+  },
+  "h1": {
+    "n": 664,
+    "pnl": 2670.0,
+    "wr": 0.3916,
+    "avg": 4.02
+  },
+  "h2": {
+    "n": 283,
+    "pnl": -8137.0,
+    "wr": 0.3569,
+    "avg": -28.75
+  },
+  "long_puts": {
+    "n": 930,
+    "pnl": -5121.0,
+    "wr": 0.3882,
+    "avg": -5.51
+  },
+  "short_puts": {
+    "n": 17,
+    "pnl": -346.0,
+    "wr": 0.0,
+    "avg": -20.35
+  },
+  "monthly": {
+    "2026-01": {
+      "n": 46,
+      "pnl": -406.0
+    },
+    "2026-02": {
+      "n": 114,
+      "pnl": 11795.0
+    },
+    "2026-03": {
+      "n": 143,
+      "pnl": 1438.0
+    },
+    "2026-04": {
+      "n": 108,
+      "pnl": -13089.0
+    },
+    "2026-05": {
+      "n": 68,
+      "pnl": -10586.0
+    },
+    "2026-06": {
+      "n": 185,
+      "pnl": 13518.0
+    },
+    "2026-07": {
+      "n": 196,
+      "pnl": -1107.0
+    },
+    "2026-08": {
+      "n": 87,
+      "pnl": -7030.0
+    }
+  },
+  "monthly_same": {
+    "2026-01": {
+      "n": 15,
+      "pnl": 1367.0
+    },
+    "2026-02": {
+      "n": 48,
+      "pnl": 3904.0
+    },
+    "2026-03": {
+      "n": 55,
+      "pnl": -1012.0
+    },
+    "2026-04": {
+      "n": 46,
+      "pnl": -4012.0
+    },
+    "2026-05": {
+      "n": 28,
+      "pnl": -707.0
+    },
+    "2026-06": {
+      "n": 105,
+      "pnl": 4080.0
+    },
+    "2026-07": {
+      "n": 150,
+      "pnl": 1334.0
+    },
+    "2026-08": {
+      "n": 49,
+      "pnl": -2191.0
+    }
+  },
+  "monthly_ovn": {
+    "2026-01": {
+      "n": 31,
+      "pnl": -1773.0
+    },
+    "2026-02": {
+      "n": 66,
+      "pnl": 7891.0
+    },
+    "2026-03": {
+      "n": 88,
+      "pnl": 2450.0
+    },
+    "2026-04": {
+      "n": 62,
+      "pnl": -9077.0
+    },
+    "2026-05": {
+      "n": 40,
+      "pnl": -9879.0
+    },
+    "2026-06": {
+      "n": 80,
+      "pnl": 9438.0
+    },
+    "2026-07": {
+      "n": 46,
+      "pnl": -2441.0
+    },
+    "2026-08": {
+      "n": 38,
+      "pnl": -4839.0
+    }
+  },
+  "top_winners": [
+    {
+      "name": "MSTR",
+      "n": 47,
+      "pnl": 8874.0,
+      "win_n": 23,
+      "win_pnl": 13403.0,
+      "lose_n": 24,
+      "lose_pnl": -4529.0,
+      "same_n": 20,
+      "same_pnl": 1055.0,
+      "ovn_n": 27,
+      "ovn_pnl": 7819.0
+    },
+    {
+      "name": "CAR",
+      "n": 8,
+      "pnl": 6104.0,
+      "win_n": 2,
+      "win_pnl": 6410.0,
+      "lose_n": 6,
+      "lose_pnl": -306.0,
+      "same_n": 0,
+      "same_pnl": 0,
+      "ovn_n": 8,
+      "ovn_pnl": 6104.0
+    },
+    {
+      "name": "UAL",
+      "n": 17,
+      "pnl": 3497.0,
+      "win_n": 12,
+      "win_pnl": 5212.0,
+      "lose_n": 5,
+      "lose_pnl": -1715.0,
+      "same_n": 3,
+      "same_pnl": -215.0,
+      "ovn_n": 14,
+      "ovn_pnl": 3712.0
+    },
+    {
+      "name": "GLD",
+      "n": 41,
+      "pnl": 3400.0,
+      "win_n": 14,
+      "win_pnl": 7734.0,
+      "lose_n": 27,
+      "lose_pnl": -4334.0,
+      "same_n": 24,
+      "same_pnl": -627.0,
+      "ovn_n": 17,
+      "ovn_pnl": 4027.0
+    },
+    {
+      "name": "IREN",
+      "n": 24,
+      "pnl": 2646.0,
+      "win_n": 13,
+      "win_pnl": 5069.0,
+      "lose_n": 11,
+      "lose_pnl": -2423.0,
+      "same_n": 5,
+      "same_pnl": -72.0,
+      "ovn_n": 19,
+      "ovn_pnl": 2718.0
+    },
+    {
+      "name": "QQQ",
+      "n": 235,
+      "pnl": 2047.0,
+      "win_n": 99,
+      "win_pnl": 25881.0,
+      "lose_n": 136,
+      "lose_pnl": -23834.0,
+      "same_n": 181,
+      "same_pnl": 2327.0,
+      "ovn_n": 54,
+      "ovn_pnl": -280.0
+    },
+    {
+      "name": "COIN",
+      "n": 19,
+      "pnl": 1600.0,
+      "win_n": 9,
+      "win_pnl": 2980.0,
+      "lose_n": 10,
+      "lose_pnl": -1380.0,
+      "same_n": 4,
+      "same_pnl": -220.0,
+      "ovn_n": 15,
+      "ovn_pnl": 1820.0
+    },
+    {
+      "name": "XLF",
+      "n": 5,
+      "pnl": 1390.0,
+      "win_n": 4,
+      "win_pnl": 1570.0,
+      "lose_n": 1,
+      "lose_pnl": -180.0,
+      "same_n": 0,
+      "same_pnl": 0,
+      "ovn_n": 5,
+      "ovn_pnl": 1390.0
+    },
+    {
+      "name": "SNDK",
+      "n": 5,
+      "pnl": 1275.0,
+      "win_n": 4,
+      "win_pnl": 1328.0,
+      "lose_n": 1,
+      "lose_pnl": -53.0,
+      "same_n": 3,
+      "same_pnl": 868.0,
+      "ovn_n": 2,
+      "ovn_pnl": 407.0
+    },
+    {
+      "name": "AAPL",
+      "n": 10,
+      "pnl": 1005.0,
+      "win_n": 5,
+      "win_pnl": 1949.0,
+      "lose_n": 5,
+      "lose_pnl": -944.0,
+      "same_n": 5,
+      "same_pnl": 1253.0,
+      "ovn_n": 5,
+      "ovn_pnl": -248.0
+    },
+    {
+      "name": "ALAB",
+      "n": 4,
+      "pnl": 990.0,
+      "win_n": 2,
+      "win_pnl": 1060.0,
+      "lose_n": 2,
+      "lose_pnl": -70.0,
+      "same_n": 0,
+      "same_pnl": 0,
+      "ovn_n": 4,
+      "ovn_pnl": 990.0
+    },
+    {
+      "name": "CVNA",
+      "n": 3,
+      "pnl": 970.0,
+      "win_n": 1,
+      "win_pnl": 1130.0,
+      "lose_n": 2,
+      "lose_pnl": -160.0,
+      "same_n": 1,
+      "same_pnl": 1130.0,
+      "ovn_n": 2,
+      "ovn_pnl": -160.0
+    }
+  ],
+  "top_losers": [
+    {
+      "name": "INTC",
+      "n": 45,
+      "pnl": -6141.0,
+      "win_n": 13,
+      "win_pnl": 2948.0,
+      "lose_n": 32,
+      "lose_pnl": -9089.0,
+      "same_n": 18,
+      "same_pnl": -433.0,
+      "ovn_n": 27,
+      "ovn_pnl": -5708.0
+    },
+    {
+      "name": "TSLA",
+      "n": 36,
+      "pnl": -3346.0,
+      "win_n": 9,
+      "win_pnl": 2213.0,
+      "lose_n": 27,
+      "lose_pnl": -5559.0,
+      "same_n": 14,
+      "same_pnl": -590.0,
+      "ovn_n": 22,
+      "ovn_pnl": -2756.0
+    },
+    {
+      "name": "SPY",
+      "n": 14,
+      "pnl": -2924.0,
+      "win_n": 3,
+      "win_pnl": 330.0,
+      "lose_n": 11,
+      "lose_pnl": -3254.0,
+      "same_n": 11,
+      "same_pnl": -1106.0,
+      "ovn_n": 3,
+      "ovn_pnl": -1818.0
+    },
+    {
+      "name": "MU",
+      "n": 115,
+      "pnl": -2522.0,
+      "win_n": 40,
+      "win_pnl": 16941.0,
+      "lose_n": 75,
+      "lose_pnl": -19463.0,
+      "same_n": 63,
+      "same_pnl": -1851.0,
+      "ovn_n": 52,
+      "ovn_pnl": -671.0
+    },
+    {
+      "name": "EWJ",
+      "n": 4,
+      "pnl": -2464.0,
+      "win_n": 0,
+      "win_pnl": 0,
+      "lose_n": 4,
+      "lose_pnl": -2464.0,
+      "same_n": 0,
+      "same_pnl": 0,
+      "ovn_n": 4,
+      "ovn_pnl": -2464.0
+    },
+    {
+      "name": "EWY",
+      "n": 9,
+      "pnl": -2235.0,
+      "win_n": 3,
+      "win_pnl": 530.0,
+      "lose_n": 6,
+      "lose_pnl": -2765.0,
+      "same_n": 3,
+      "same_pnl": 280.0,
+      "ovn_n": 6,
+      "ovn_pnl": -2515.0
+    },
+    {
+      "name": "SMH",
+      "n": 34,
+      "pnl": -1752.0,
+      "win_n": 11,
+      "win_pnl": 2325.0,
+      "lose_n": 23,
+      "lose_pnl": -4077.0,
+      "same_n": 20,
+      "same_pnl": 417.0,
+      "ovn_n": 14,
+      "ovn_pnl": -2169.0
+    },
+    {
+      "name": "AMZN",
+      "n": 14,
+      "pnl": -1691.0,
+      "win_n": 4,
+      "win_pnl": 1580.0,
+      "lose_n": 10,
+      "lose_pnl": -3271.0,
+      "same_n": 1,
+      "same_pnl": -6.0,
+      "ovn_n": 13,
+      "ovn_pnl": -1685.0
+    },
+    {
+      "name": "CRCL",
+      "n": 4,
+      "pnl": -1470.0,
+      "win_n": 0,
+      "win_pnl": 0,
+      "lose_n": 4,
+      "lose_pnl": -1470.0,
+      "same_n": 1,
+      "same_pnl": -220.0,
+      "ovn_n": 3,
+      "ovn_pnl": -1250.0
+    },
+    {
+      "name": "AVGO",
+      "n": 6,
+      "pnl": -1431.0,
+      "win_n": 0,
+      "win_pnl": 0,
+      "lose_n": 6,
+      "lose_pnl": -1431.0,
+      "same_n": 3,
+      "same_pnl": -167.0,
+      "ovn_n": 3,
+      "ovn_pnl": -1264.0
+    },
+    {
+      "name": "HOOD",
+      "n": 8,
+      "pnl": -1310.0,
+      "win_n": 3,
+      "win_pnl": 428.0,
+      "lose_n": 5,
+      "lose_pnl": -1738.0,
+      "same_n": 0,
+      "same_pnl": 0,
+      "ovn_n": 8,
+      "ovn_pnl": -1310.0
+    },
+    {
+      "name": "CRWV",
+      "n": 18,
+      "pnl": -1288.0,
+      "win_n": 6,
+      "win_pnl": 1129.0,
+      "lose_n": 12,
+      "lose_pnl": -2417.0,
+      "same_n": 7,
+      "same_pnl": -141.0,
+      "ovn_n": 11,
+      "ovn_pnl": -1147.0
+    }
+  ],
+  "ytd_bins": [
+    {
+      "bin": "\u2264 \u2212500",
+      "n": 61,
+      "pnl": -50844.0,
+      "wr": 0.0,
+      "avg": -833.51
+    },
+    {
+      "bin": "\u2212500 to \u2212100",
+      "n": 280,
+      "pnl": -63391.0,
+      "wr": 0.0,
+      "avg": -226.4
+    },
+    {
+      "bin": "\u2212100 to 0",
+      "n": 217,
+      "pnl": -10982.0,
+      "wr": 0.0,
+      "avg": -50.61
+    },
+    {
+      "bin": "0 to 100",
+      "n": 142,
+      "pnl": 5215.0,
+      "wr": 0.8028,
+      "avg": 36.73
+    },
+    {
+      "bin": "100 to 500",
+      "n": 169,
+      "pnl": 41618.0,
+      "wr": 1.0,
+      "avg": 246.26
+    },
+    {
+      "bin": "> 500",
+      "n": 78,
+      "pnl": 72917.0,
+      "wr": 1.0,
+      "avg": 934.83
+    }
+  ],
+  "same_day_bins": [
+    {
+      "bin": "\u2264 \u2212500",
+      "n": 6,
+      "pnl": -4072.0,
+      "wr": 0.0,
+      "avg": -678.67
+    },
+    {
+      "bin": "\u2212500 to \u2212100",
+      "n": 122,
+      "pnl": -22949.0,
+      "wr": 0.0,
+      "avg": -188.11
+    },
+    {
+      "bin": "\u2212100 to 0",
+      "n": 169,
+      "pnl": -7921.0,
+      "wr": 0.0,
+      "avg": -46.87
+    },
+    {
+      "bin": "0 to 100",
+      "n": 94,
+      "pnl": 3805.0,
+      "wr": 0.8936,
+      "avg": 40.48
+    },
+    {
+      "bin": "100 to 500",
+      "n": 88,
+      "pnl": 19547.0,
+      "wr": 1.0,
+      "avg": 222.12
+    },
+    {
+      "bin": "> 500",
+      "n": 17,
+      "pnl": 14353.0,
+      "wr": 1.0,
+      "avg": 844.29
+    }
+  ],
+  "overnight_bins": [
+    {
+      "bin": "\u2264 \u2212500",
+      "n": 55,
+      "pnl": -46772.0,
+      "wr": 0.0,
+      "avg": -850.4
+    },
+    {
+      "bin": "\u2212500 to \u2212100",
+      "n": 158,
+      "pnl": -40442.0,
+      "wr": 0.0,
+      "avg": -255.96
+    },
+    {
+      "bin": "\u2212100 to 0",
+      "n": 48,
+      "pnl": -3061.0,
+      "wr": 0.0,
+      "avg": -63.77
+    },
+    {
+      "bin": "0 to 100",
+      "n": 48,
+      "pnl": 1410.0,
+      "wr": 0.625,
+      "avg": 29.38
+    },
+    {
+      "bin": "100 to 500",
+      "n": 81,
+      "pnl": 22071.0,
+      "wr": 1.0,
+      "avg": 272.48
+    },
+    {
+      "bin": "> 500",
+      "n": 61,
+      "pnl": 58564.0,
+      "wr": 1.0,
+      "avg": 960.07
+    }
+  ],
+  "biggest_win_lots": [
+    {
+      "name": "CAR",
+      "pnl": 5710.0,
+      "hold": "overnight",
+      "open": "2026-04-22",
+      "close": "2026-04-23",
+      "direction": "long",
+      "symbol": "CAR260424P00285000"
+    },
+    {
+      "name": "MU",
+      "pnl": 2320.0,
+      "hold": "overnight",
+      "open": "2026-03-26",
+      "close": "2026-03-31",
+      "direction": "long",
+      "symbol": "MU260515P00260000"
+    },
+    {
+      "name": "QQQ",
+      "pnl": 2133.0,
+      "hold": "same-day",
+      "open": "2026-06-09",
+      "close": "2026-06-09",
+      "direction": "long",
+      "symbol": "QQQ260618P00675000"
+    },
+    {
+      "name": "MSTR",
+      "pnl": 1565.0,
+      "hold": "overnight",
+      "open": "2026-01-29",
+      "close": "2026-02-05",
+      "direction": "long",
+      "symbol": "MSTR260320P00120000"
+    },
+    {
+      "name": "MSTR",
+      "pnl": 1525.0,
+      "hold": "overnight",
+      "open": "2026-01-29",
+      "close": "2026-02-05",
+      "direction": "long",
+      "symbol": "MSTR260320P00120000"
+    },
+    {
+      "name": "MSTR",
+      "pnl": 1476.0,
+      "hold": "overnight",
+      "open": "2026-01-29",
+      "close": "2026-02-05",
+      "direction": "long",
+      "symbol": "MSTR260320P00120000"
+    },
+    {
+      "name": "GLD",
+      "pnl": 1470.0,
+      "hold": "overnight",
+      "open": "2026-06-05",
+      "close": "2026-06-10",
+      "direction": "long",
+      "symbol": "GLD260618P00389000"
+    },
+    {
+      "name": "UAL",
+      "pnl": 1432.0,
+      "hold": "overnight",
+      "open": "2026-03-25",
+      "close": "2026-03-30",
+      "direction": "long",
+      "symbol": "UAL260515P00080000"
+    },
+    {
+      "name": "NVDA",
+      "pnl": 1420.0,
+      "hold": "overnight",
+      "open": "2026-03-26",
+      "close": "2026-03-30",
+      "direction": "long",
+      "symbol": "NVDA260417P00145000"
+    },
+    {
+      "name": "QQQ",
+      "pnl": 1401.0,
+      "hold": "overnight",
+      "open": "2026-06-22",
+      "close": "2026-06-23",
+      "direction": "long",
+      "symbol": "QQQ260702P00700000"
+    },
+    {
+      "name": "GLD",
+      "pnl": 1345.0,
+      "hold": "overnight",
+      "open": "2026-06-05",
+      "close": "2026-06-11",
+      "direction": "long",
+      "symbol": "GLD260618P00389000"
+    },
+    {
+      "name": "QQQ",
+      "pnl": 1325.0,
+      "hold": "overnight",
+      "open": "2026-03-02",
+      "close": "2026-03-03",
+      "direction": "long",
+      "symbol": "QQQ260303P00596000"
+    }
+  ],
+  "biggest_lose_lots": [
+    {
+      "name": "MU",
+      "pnl": -2020.0,
+      "hold": "overnight",
+      "open": "2026-03-09",
+      "close": "2026-03-10",
+      "direction": "long",
+      "symbol": "MU260417P00310000"
+    },
+    {
+      "name": "PLTR",
+      "pnl": -1480.0,
+      "hold": "overnight",
+      "open": "2026-03-03",
+      "close": "2026-03-16",
+      "direction": "long",
+      "symbol": "PLTR260320P00115000"
+    },
+    {
+      "name": "INTC",
+      "pnl": -1410.0,
+      "hold": "overnight",
+      "open": "2026-03-31",
+      "close": "2026-04-13",
+      "direction": "long",
+      "symbol": "INTC260417P00039000"
+    },
+    {
+      "name": "MU",
+      "pnl": -1300.0,
+      "hold": "overnight",
+      "open": "2026-04-07",
+      "close": "2026-04-08",
+      "direction": "long",
+      "symbol": "MU260515P00280000"
+    },
+    {
+      "name": "UAL",
+      "pnl": -1250.0,
+      "hold": "overnight",
+      "open": "2026-04-23",
+      "close": "2026-05-15",
+      "direction": "long",
+      "symbol": "UAL260515P00065000"
+    },
+    {
+      "name": "NVDA",
+      "pnl": -1236.0,
+      "hold": "overnight",
+      "open": "2026-04-07",
+      "close": "2026-04-08",
+      "direction": "long",
+      "symbol": "NVDA260515P00200000"
+    },
+    {
+      "name": "INTC",
+      "pnl": -1200.0,
+      "hold": "overnight",
+      "open": "2026-07-08",
+      "close": "2026-07-10",
+      "direction": "long",
+      "symbol": "INTC260717P00095000"
+    },
+    {
+      "name": "MU",
+      "pnl": -1187.0,
+      "hold": "overnight",
+      "open": "2026-06-25",
+      "close": "2026-06-26",
+      "direction": "long",
+      "symbol": "MU260626P01085000"
+    },
+    {
+      "name": "MU",
+      "pnl": -1185.0,
+      "hold": "overnight",
+      "open": "2026-04-06",
+      "close": "2026-04-08",
+      "direction": "long",
+      "symbol": "MU260515P00300000"
+    },
+    {
+      "name": "TSLA",
+      "pnl": -1176.0,
+      "hold": "overnight",
+      "open": "2026-01-29",
+      "close": "2026-02-20",
+      "direction": "long",
+      "symbol": "TSLA260220P00385000"
+    },
+    {
+      "name": "ASML",
+      "pnl": -1155.0,
+      "hold": "overnight",
+      "open": "2026-03-20",
+      "close": "2026-03-25",
+      "direction": "long",
+      "symbol": "ASML260417P01120000"
+    },
+    {
+      "name": "LOGI",
+      "pnl": -1150.0,
+      "hold": "overnight",
+      "open": "2026-03-20",
+      "close": "2026-03-25",
+      "direction": "long",
+      "symbol": "LOGI260515P00080000"
+    }
+  ]
+}

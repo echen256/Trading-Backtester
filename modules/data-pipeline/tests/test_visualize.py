@@ -9,7 +9,9 @@ import pytest
 from trading_data_pipeline.visualize import (
     _find_data_file,
     _load_rows,
+    _load_workspace_manifest,
     _parse_timeframe,
+    main,
     make_chart_payload,
     render_chart_html,
 )
@@ -42,6 +44,12 @@ def test_parse_timeframe_accepts_daily_aliases() -> None:
 
 def test_parse_timeframe_accepts_minute_suffix() -> None:
     assert _parse_timeframe("15m") == 15
+
+
+def test_parse_timeframe_accepts_multiplied_hour_day_and_week_suffixes() -> None:
+    assert _parse_timeframe("2h") == 120
+    assert _parse_timeframe("3d") == 4320
+    assert _parse_timeframe("2w") == 20160
 
 
 def test_find_data_file_prefers_timeframe_directory(tmp_path: Path) -> None:
@@ -79,8 +87,111 @@ def test_render_chart_html_includes_strategy_dropdown() -> None:
     assert 'data-feature="sessionGaps"' in html
     assert 'id="gap-min-pct"' in html
     assert 'id="gap-min-abs"' in html
+    assert 'data-feature="dealingRanges"' in html
+    assert "function dealingRangeShapes()" in html
+    assert "function dealingRangeEventTraces()" in html
+    assert payload.dealing_ranges["config"] == {"lookback": 5, "lookahead": 1}
     assert "Strategy Statistics" in html
     assert "Strategy overlay" in html
     assert 'rangebreaks: [{ bounds: ["sat", "mon"] }]' in html
     assert "function computeSessionGaps()" in html
-    assert "layout.shapes = state.sessionGaps ? buildGapShapes(sessionGaps) : [];" in html
+    assert '...annotationSpanShapes("price")' in html
+
+
+def test_render_chart_html_includes_universal_annotations() -> None:
+    rows = _make_rows()
+    payload = make_chart_payload(
+        ticker="MU",
+        timeframe_minutes=1440,
+        rows=rows,
+        annotations={
+            "schema_version": "trading-chart-annotations/v1",
+            "groups": [{"id": "signals", "label": "Signals", "color": "#ff00ff"}],
+            "panels": [
+                {
+                    "id": "adaptive_macd",
+                    "label": "Adaptive MACD",
+                    "series": [
+                        {
+                            "id": "line",
+                            "type": "line",
+                            "points": [{"time": rows[0]["time"], "value": 0.5}],
+                        }
+                    ],
+                }
+            ],
+            "points": [
+                {
+                    "id": "signal-1",
+                    "group": "signals",
+                    "time": rows[0]["time"],
+                    "pane": "price",
+                    "value": rows[0]["close"],
+                    "marker": "triangle-up",
+                }
+            ],
+        },
+    )
+
+    html = render_chart_html(payload)
+
+    assert 'id="annotation-controls"' in html
+    assert 'id="custom-indicator-panels"' in html
+    assert "trading-chart-annotations/v1" in html
+    assert "function annotationPointTraces" in html
+    assert "function renderCustomPanels" in html
+    assert "Adaptive MACD" in html
+
+
+def test_load_workspace_manifest_builds_selectable_views(tmp_path: Path) -> None:
+    csv_path = tmp_path / "MU.csv"
+    csv_path.write_text(
+        "timestamp,open,high,low,close,volume\n"
+        "2024-01-01T00:00:00Z,100,102,99,101,1000\n"
+        "2024-01-02T00:00:00Z,101,104,100,103,1100\n",
+        encoding="utf-8",
+    )
+    annotations_path = tmp_path / "study.json"
+    annotations_path.write_text(
+        '{"schema_version":"trading-chart-annotations/v1","groups":[],"panels":[],"points":[],"links":[],"spans":[]}',
+        encoding="utf-8",
+    )
+    manifest_path = tmp_path / "workspace.json"
+    manifest_path.write_text(
+        """{
+          "schema_version": "trading-chart-workspace/v1",
+          "title": "Test workspace",
+          "views": [{
+            "id": "mu-daily-macd",
+            "ticker": "MU",
+            "timeframe": "D",
+            "study_id": "macd",
+            "study_label": "MACD",
+            "data": "MU.csv",
+            "annotations": "study.json"
+          }]
+        }""",
+        encoding="utf-8",
+    )
+
+    title, views = _load_workspace_manifest(manifest_path)
+
+    assert title == "Test workspace"
+    assert len(views) == 1
+    assert views[0].timeframe == "D"
+    assert views[0].study_label == "MACD"
+    assert "MU" in views[0].html
+
+    output_path = tmp_path / "workspace.html"
+    main(["--workspace", str(manifest_path), "--output", str(output_path), "--no-open"])
+    workspace_html = output_path.read_text(encoding="utf-8")
+    assert 'id="timeframe"' in workspace_html
+    assert 'id="study"' in workspace_html
+
+
+def test_load_workspace_manifest_requires_supported_schema(tmp_path: Path) -> None:
+    manifest_path = tmp_path / "workspace.json"
+    manifest_path.write_text('{"schema_version":"old","views":[]}', encoding="utf-8")
+
+    with pytest.raises(ValueError, match="schema_version"):
+        _load_workspace_manifest(manifest_path)

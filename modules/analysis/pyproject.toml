@@ -13,6 +13,9 @@ dependencies = [
   "plotly>=5.24",
   "asciichart>=0.1",
   "streamlit>=1.32",
+  "pandas>=2.2",
+  "pyarrow>=23",
+  "jsonschema>=4.23",
 ]
 
 [project.scripts]
@@ -33,9 +36,14 @@ trading-scanner-weekly-batch = "trading_analysis.strategies.scanner_batch:main"
 trading-strategy-chart-hub = "trading_analysis.strategies.chart_hub:main"
 trading-weekly-control-experiment = "trading_analysis.strategies.weekly_control_experiment:main"
 trading-evaluate-trade = "trading_analysis.evaluate_trade:main"
+trading-size-ticket = "trading_analysis.position_sizer.cli:main"
+trading-analysis-dashboard = "trading_analysis.dashboard.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+trading_analysis = ["position_sizer/checklists/*.json"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/trading_analysis"]

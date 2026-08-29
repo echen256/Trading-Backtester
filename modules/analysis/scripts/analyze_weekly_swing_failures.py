@@ -13,6 +13,8 @@ from urllib.request import Request, urlopen
 
 import numpy as np
 import pandas as pd
+
+from trading_analysis.dashboard import StudyArtifactWriter
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from matplotlib.patches import Rectangle
@@ -391,8 +393,20 @@ def main() -> None:
     report.parent.mkdir(parents=True, exist_ok=True)
     report.write_text("\n".join(lines) + "\n", encoding="utf-8")
     write_chart(all_data, all_events, chart)
+    dashboard_output = StudyArtifactWriter().publish_report_study(
+        study_id="weekly-swing-failures",
+        study_name="Weekly Swing-point Failures",
+        version="1.0",
+        generator="modules/analysis/scripts/analyze_weekly_swing_failures.py",
+        files={"report": report, "chart": chart},
+        metrics=[
+            {"label": "BTC events", "value": len(all_events["BTCUSD"])},
+            {"label": "QQQ events", "value": len(all_events["QQQ"])},
+        ],
+    )
     print("\n".join(lines[:100]))
     print(f"\nWrote {report}\nWrote {chart}")
+    print(f"Published dashboard study {dashboard_output}")
 
 
 if __name__ == "__main__":

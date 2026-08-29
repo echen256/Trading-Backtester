@@ -7,8 +7,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 This is a full-stack trading/backtesting system split into independent modules:
 - **Backend** (`backend/`): Python Flask API with WebSocket support for real-time trading data streaming
 - **Data Pipeline** (`modules/data-pipeline/`): Polygon.io downloader + BigQuery uploader
-- **Analysis Toolkit** (`modules/analysis/`): Order CSV utilities and Schwab converters
-- **Frontend** (`modules/frontend/`): React + TypeScript dashboard with financial charting capabilities
+- **Analysis Toolkit** (`modules/analysis/`): Order utilities, study artifacts, and the canonical dashboard API
+- **Dashboard** (`modules/analysis/dashboard/`): canonical React + TypeScript market/study workbench
+- **Frontend compatibility** (`modules/frontend/`): npm launcher delegating to the analysis dashboard
 
 ## Key Commands
 
@@ -33,7 +34,7 @@ pip freeze > requirements.txt
 ### Frontend Development
 
 ```bash
-cd Trading-Backtester/modules/frontend
+cd Trading-Backtester/modules/analysis/dashboard
 
 # Install dependencies
 npm install
@@ -68,13 +69,14 @@ The backend (`/Trading-Backtester/backend/`) implements:
    - Pre-trained ML models (v1.joblib, v2.joblib)
    - Custom indicators (Inverse Fisher)
 
-### Frontend Architecture
+### Dashboard Architecture
 
-The frontend (`/Trading-Backtester/modules/frontend/`) features:
-- Real-time trading dashboard served at `/`
-- WebSocket client for receiving live updates
-- Lightweight-charts for financial data visualization
-- TypeScript for type safety
+The dashboard (`/Trading-Backtester/modules/analysis/dashboard/`) features:
+- Catalog-backed local stock and crypto data
+- Lightweight Charts v5 price, volume, annotation, and indicator panes
+- Versioned `trading-study-run/v1` generator artifacts
+- Viewport-sized OHLCV range loading and server aggregation
+- TypeScript contract types and URL-restorable state
 
 ### WebSocket Data Flow
 

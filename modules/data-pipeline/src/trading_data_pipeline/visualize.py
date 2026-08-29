@@ -14,6 +14,14 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from .chart_annotations import load_annotation_document, normalize_annotation_document
+from .dealing_ranges import compute_dealing_ranges
+from .chart_workspace import (
+    SCHEMA_VERSION as WORKSPACE_SCHEMA_VERSION,
+    WorkspaceView,
+    render_chart_workspace_html,
+)
+
 PACKAGE_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_DATA_DIR = PACKAGE_ROOT / "data"
 STRATEGIES_DIR = Path(__file__).resolve().parent / "strategies"
@@ -26,21 +34,28 @@ class ChartPayload:
     rows: list[dict[str, object]]
     source_label: str | None = None
     overlays: dict[str, Any] = field(default_factory=dict)
+    annotations: dict[str, object] = field(default_factory=dict)
+    dealing_ranges: dict[str, object] = field(default_factory=dict)
 
 
 def _parse_timeframe(value: str) -> int:
     normalized = value.strip().lower()
-    if normalized.endswith("m"):
-        normalized = normalized[:-1]
-    elif normalized.endswith("h"):
-        return 60
-    elif normalized in {"d", "1d", "day", "daily"}:
+    if normalized in {"day", "daily"}:
         return 1440
-    elif normalized in {"w", "1w", "week", "weekly"}:
+    if normalized in {"week", "weekly"}:
         return 10080
 
+    multiplier = 1
+    for suffix, unit_minutes in (("m", 1), ("h", 60), ("d", 1440), ("w", 10080)):
+        if normalized.endswith(suffix):
+            multiplier = unit_minutes
+            normalized = normalized[:-1]
+            if not normalized:
+                normalized = "1"
+            break
+
     try:
-        minutes = int(normalized)
+        minutes = int(normalized) * multiplier
     except ValueError as exc:  # pragma: no cover - argparse exercises this
         raise argparse.ArgumentTypeError(f"Unsupported timeframe: {value}") from exc
 
@@ -454,6 +469,7 @@ def make_chart_payload(
     rows: list[dict[str, object]],
     source_label: str | None = None,
     overlays: dict[str, Any] | None = None,
+    annotations: dict[str, object] | None = None,
 ) -> ChartPayload:
     normalized_rows = normalize_rows(rows)
     resolved_overlays = dict(overlays or {})
@@ -466,15 +482,24 @@ def make_chart_payload(
         rows=normalized_rows,
         source_label=source_label,
         overlays=resolved_overlays,
+        annotations=normalize_annotation_document(annotations),
+        dealing_ranges=compute_dealing_ranges(normalized_rows, lookback=5, lookahead=1),
     )
 
 
-def make_chart_payload_from_csv(csv_path: Path, *, ticker: str, timeframe_minutes: int) -> ChartPayload:
+def make_chart_payload_from_csv(
+    csv_path: Path,
+    *,
+    ticker: str,
+    timeframe_minutes: int,
+    annotations: dict[str, object] | None = None,
+) -> ChartPayload:
     return make_chart_payload(
         ticker=ticker,
         timeframe_minutes=timeframe_minutes,
         rows=_load_rows(csv_path),
         source_label=str(csv_path),
+        annotations=annotations,
     )
 
 
@@ -504,13 +529,25 @@ def render_chart_html(payload: ChartPayload) -> str:
     macd_line, signal_line, macd_histogram = _macd(close_values)
     red_marker_times, red_marker_prices = _normalize_marker_points(payload.overlays.get("red_markers"))
     green_marker_times, green_marker_prices = _normalize_marker_points(payload.overlays.get("green_markers"))
+    annotation_document = normalize_annotation_document(payload.annotations)
+    dealing_range_payload = payload.dealing_ranges or compute_dealing_ranges(rows, lookback=5, lookahead=1)
+    range_count = len(dealing_range_payload.get("ranges", []))
+    range_event_count = len(dealing_range_payload.get("events", []))
+    summary["Dealing Ranges"] = f"{range_count} · {range_event_count} events"
 
+    referenced_panes = {
+        str(item.get("pane"))
+        for collection in ("points", "links", "spans")
+        for item in annotation_document.get(collection, [])
+        if isinstance(item, dict)
+    }
     initial_state = {
-        "fisher": False,
-        "macd": False,
+        "fisher": "fisher" in referenced_panes,
+        "macd": "macd" in referenced_panes,
         "redMarkers": False,
         "greenMarkers": False,
         "sessionGaps": True,
+        "dealingRanges": True,
     }
     strategy_options_html = "".join(
         [
@@ -677,7 +714,8 @@ def render_chart_html(payload: ChartPayload) -> str:
       min-height: 720px;
     }}
     #fisher-chart,
-    #macd-chart {{
+    #macd-chart,
+    .custom-indicator-chart {{
       width: 100%;
       height: 240px;
       min-height: 240px;
@@ -791,7 +829,8 @@ def render_chart_html(payload: ChartPayload) -> str:
         min-height: 520px;
       }}
       #fisher-chart,
-      #macd-chart {{
+      #macd-chart,
+      .custom-indicator-chart {{
         height: 220px;
         min-height: 220px;
       }}
@@ -819,6 +858,7 @@ def render_chart_html(payload: ChartPayload) -> str:
         <button class="control-button" data-feature="fisher">Fisher 50</button>
         <button class="control-button" data-feature="macd">MACD</button>
         <button class="control-button" data-feature="sessionGaps">Session Gaps</button>
+        <button class="control-button" data-feature="dealingRanges">Dealing Range 5/1</button>
         <button class="control-button" data-feature="redMarkers">Red triangles / 10 bars</button>
         <button class="control-button" data-feature="greenMarkers">Green triangles / 7 bars</button>
         <div class="control-group" aria-label="Gap calibration settings">
@@ -837,6 +877,8 @@ def render_chart_html(payload: ChartPayload) -> str:
         <button class="control-button" data-action="scale-y-in">Y Scale In</button>
         <button class="control-button" data-action="scale-y-out">Y Scale Out</button>
         <button class="control-button" data-action="scale-y-reset">Y Scale Reset</button>
+        <div id="annotation-controls" class="control-group" aria-label="Annotation groups"></div>
+        <div id="custom-panel-controls" class="control-group" aria-label="Custom indicator panels"></div>
       </div>
       <div id="feature-status" class="status-panel"></div>
       <div class="links">
@@ -847,6 +889,7 @@ def render_chart_html(payload: ChartPayload) -> str:
       <div id="chart" data-plot-pane="true"></div>
       <div id="fisher-chart" class="hidden" data-plot-pane="true"></div>
       <div id="macd-chart" class="hidden" data-plot-pane="true"></div>
+      <div id="custom-indicator-panels"></div>
       <div id="strategy-stats-panel" class="strategy-stats-panel hidden">
         <div class="strategy-stats-header">
           <div class="strategy-stats-title">Strategy Statistics</div>
@@ -875,6 +918,11 @@ def render_chart_html(payload: ChartPayload) -> str:
     const greenMarkerTimes = {json.dumps(green_marker_times)};
     const greenMarkerPrices = {json.dumps(green_marker_prices)};
     const strategyPayloads = {json.dumps(strategy_payloads)};
+    const annotationDocument = {json.dumps(annotation_document)};
+    const dealingRangePayload = {json.dumps(dealing_range_payload)};
+    const annotationGroups = Object.fromEntries(annotationDocument.groups.map((group) => [group.id, group]));
+    const annotationGroupState = Object.fromEntries(annotationDocument.groups.map((group) => [group.id, Boolean(group.visible)]));
+    const customPanelState = Object.fromEntries(annotationDocument.panels.map((panel) => [panel.id, Boolean(panel.visible)]));
     const strategyPayloadBySlug = Object.fromEntries(strategyPayloads.map((strategy) => [strategy.slug, strategy]));
     const timeframeMinutes = {json.dumps(payload.timeframe_minutes)};
     const defaultPriceRange = [Math.min(...lowValues), Math.max(...highValues)];
@@ -885,6 +933,268 @@ def render_chart_html(payload: ChartPayload) -> str:
     let xSyncCleanup = null;
     let syncingTimeRange = false;
     let activePaneId = "chart";
+
+    function annotationGroupVisible(groupId) {{
+      return Boolean(annotationGroupState[groupId]);
+    }}
+
+    function annotationHover(point) {{
+      const lines = [point.label || point.role || "Annotation"];
+      lines.push(`Time: ${{point.time}}`);
+      lines.push(`Value: ${{Number(point.value).toFixed(4)}}`);
+      if (point.role) lines.push(`Role: ${{point.role}}`);
+      for (const [key, value] of Object.entries(point.metadata || {{}})) {{
+        lines.push(`${{formatStatisticLabel(key)}}: ${{formatStatisticValue(key, value)}}`);
+      }}
+      return lines.join("<br>");
+    }}
+
+    function annotationPointTraces(pane, showLegend = false) {{
+      const traces = [];
+      for (const group of annotationDocument.groups) {{
+        if (!annotationGroupVisible(group.id)) continue;
+        const points = annotationDocument.points.filter((point) => point.group === group.id && point.pane === pane);
+        if (!points.length) continue;
+        traces.push({{
+          type: "scatter",
+          mode: "markers+text",
+          x: points.map((point) => point.time),
+          y: points.map((point) => point.value),
+          text: points.map((point) => point.label || ""),
+          textposition: points.map((point) => point.marker === "triangle-up" ? "bottom center" : "top center"),
+          customdata: points.map(annotationHover),
+          hovertemplate: "%{{customdata}}<extra></extra>",
+          name: group.label,
+          legendgroup: `annotations-${{group.id}}`,
+          showlegend: showLegend,
+          marker: {{
+            color: points.map((point) => point.color || group.color),
+            size: points.map((point) => point.size || 11),
+            symbol: points.map((point) => point.marker || "circle"),
+            line: {{ color: "#08101d", width: 1 }}
+          }}
+        }});
+      }}
+      return traces;
+    }}
+
+    function annotationLinkTraces(pane) {{
+      const traces = [];
+      for (const group of annotationDocument.groups) {{
+        if (!annotationGroupVisible(group.id)) continue;
+        const links = annotationDocument.links.filter((link) => link.group === group.id && link.pane === pane);
+        if (!links.length) continue;
+        const x = [], y = [], hover = [];
+        for (const link of links) {{
+          const detail = [link.label || group.label, ...Object.entries(link.metadata || {{}}).map(([key, value]) => `${{formatStatisticLabel(key)}}: ${{formatStatisticValue(key, value)}}`)].join("<br>");
+          x.push(link.start_time, link.end_time, null);
+          y.push(link.start_value, link.end_value, null);
+          hover.push(detail, detail, "");
+        }}
+        traces.push({{
+          type: "scatter",
+          mode: "lines+markers",
+          x, y,
+          customdata: hover,
+          hovertemplate: "%{{customdata}}<extra></extra>",
+          name: `${{group.label}} paths`,
+          legendgroup: `annotations-${{group.id}}`,
+          showlegend: false,
+          line: {{ color: links[0].color || group.color, width: 1.5, dash: links[0].dash || "dot" }},
+          marker: {{ color: links[0].color || group.color, size: 5 }}
+        }});
+      }}
+      return traces;
+    }}
+
+    function annotationSpanShapes(pane) {{
+      return annotationDocument.spans
+        .filter((span) => span.pane === pane && annotationGroupVisible(span.group))
+        .map((span) => {{
+          const group = annotationGroups[span.group];
+          const bounded = span.lower !== null && span.upper !== null;
+          return {{
+            type: "rect",
+            xref: "x",
+            yref: bounded ? "y" : "paper",
+            x0: span.start_time,
+            x1: span.end_time,
+            y0: bounded ? span.lower : 0,
+            y1: bounded ? span.upper : 1,
+            fillcolor: span.color || group?.color || "#56b6c2",
+            opacity: span.opacity ?? 0.12,
+            line: {{ width: 0 }},
+            layer: "below",
+            name: span.label || group?.label || "Annotation span"
+          }};
+        }});
+    }}
+
+    function dealingRangeShapes() {{
+      if (!state.dealingRanges) return [];
+      const shapes = [];
+      const lastTime = times[times.length - 1];
+      for (const range of dealingRangePayload.ranges) {{
+        const isCurrent = range.id === dealingRangePayload.current_range_id;
+        const x1 = range.end_time || lastTime;
+        const lineWidth = isCurrent ? 1.6 : 0.8;
+        shapes.push(
+          {{
+            type: "rect", xref: "x", yref: "y",
+            x0: range.start_time, x1, y0: range.midpoint, y1: range.upper,
+            fillcolor: "rgba(239,83,80,0.10)",
+            line: {{ width: 0 }}, layer: "below"
+          }},
+          {{
+            type: "rect", xref: "x", yref: "y",
+            x0: range.start_time, x1, y0: range.lower, y1: range.midpoint,
+            fillcolor: "rgba(38,166,154,0.10)",
+            line: {{ width: 0 }}, layer: "below"
+          }},
+          {{
+            type: "line", xref: "x", yref: "y",
+            x0: range.start_time, x1, y0: range.upper, y1: range.upper,
+            line: {{ color: "rgba(239,83,80,0.88)", width: lineWidth }}
+          }},
+          {{
+            type: "line", xref: "x", yref: "y",
+            x0: range.start_time, x1, y0: range.midpoint, y1: range.midpoint,
+            line: {{ color: "rgba(246,200,95,0.9)", width: lineWidth, dash: "dot" }}
+          }},
+          {{
+            type: "line", xref: "x", yref: "y",
+            x0: range.start_time, x1, y0: range.lower, y1: range.lower,
+            line: {{ color: "rgba(38,166,154,0.88)", width: lineWidth }}
+          }}
+        );
+      }}
+      return shapes;
+    }}
+
+    function dealingRangeEventTraces() {{
+      if (!state.dealingRanges) return [];
+      const sweeps = dealingRangePayload.events.filter((event) => event.kind.includes("sweep"));
+      const expansions = dealingRangePayload.events.filter((event) => event.kind.startsWith("expansion"));
+      const traces = [];
+      if (sweeps.length) {{
+        traces.push({{
+          type: "scatter", mode: "markers",
+          x: sweeps.map((event) => event.time),
+          y: sweeps.map((event) => event.price),
+          text: sweeps.map((event) => `${{event.kind.replaceAll("_", " ")}}<br>Range: ${{event.range_id}}<br>Boundary held: ${{event.boundary ?? "both"}}`),
+          hovertemplate: "%{{x}}<br>%{{text}}<extra></extra>",
+          name: "Range sweep / failed breakout",
+          marker: {{ color: "#f6c85f", size: 10, symbol: "diamond", line: {{ color: "#08101d", width: 1 }} }}
+        }});
+      }}
+      if (expansions.length) {{
+        traces.push({{
+          type: "scatter", mode: "markers",
+          x: expansions.map((event) => event.time),
+          y: expansions.map((event) => event.price),
+          text: expansions.map((event) => `${{event.kind.replaceAll("_", " ")}}<br>Destination: ${{event.target === "old_range" ? "old range" : "new prices"}}<br>Broken boundary: ${{Number(event.boundary).toFixed(4)}}`),
+          hovertemplate: "%{{x}}<br>%{{text}}<extra></extra>",
+          name: "Range expansion",
+          marker: {{
+            color: expansions.map((event) => event.target === "old_range" ? "#ab7df6" : "#56b6c2"),
+            size: 11,
+            symbol: expansions.map((event) => event.kind === "expansion_up" ? "triangle-up" : "triangle-down"),
+            line: {{ color: "#08101d", width: 1 }}
+          }}
+        }});
+      }}
+      return traces;
+    }}
+
+    function seriesTrace(series) {{
+      const common = {{
+        x: series.points.map((point) => point.time),
+        y: series.points.map((point) => point.value),
+        name: series.name,
+        hovertemplate: "%{{x}}<br>%{{y:.4f}}<extra>%{{fullData.name}}</extra>"
+      }};
+      if (series.type === "histogram") {{
+        return {{
+          ...common,
+          type: "bar",
+          marker: {{ color: series.points.map((point) => point.color || series.color) }}
+        }};
+      }}
+      if (series.type === "area") {{
+        return {{
+          ...common,
+          type: "scatter",
+          mode: "lines",
+          fill: "tozeroy",
+          line: {{ color: series.color, width: series.line_width || 2 }}
+        }};
+      }}
+      return {{
+        ...common,
+        type: "scatter",
+        mode: "lines",
+        line: {{ color: series.color, width: series.line_width || 2 }}
+      }};
+    }}
+
+    function createUniversalControls() {{
+      const annotationContainer = document.getElementById("annotation-controls");
+      const panelContainer = document.getElementById("custom-panel-controls");
+      if (annotationContainer) {{
+        annotationContainer.replaceChildren();
+        if (annotationDocument.groups.length) {{
+          for (const group of annotationDocument.groups) {{
+            const button = document.createElement("button");
+            button.className = "control-button";
+            button.dataset.annotationGroup = group.id;
+            button.textContent = group.label;
+            annotationContainer.appendChild(button);
+          }}
+        }} else {{
+          const empty = document.createElement("span");
+          empty.className = "control-field";
+          empty.textContent = "No annotation groups";
+          annotationContainer.appendChild(empty);
+        }}
+      }}
+      if (panelContainer) {{
+        panelContainer.replaceChildren();
+        if (annotationDocument.panels.length) {{
+          for (const panel of annotationDocument.panels) {{
+            const button = document.createElement("button");
+            button.className = "control-button";
+            button.dataset.customPanel = panel.id;
+            button.textContent = panel.label;
+            panelContainer.appendChild(button);
+          }}
+        }} else {{
+          const empty = document.createElement("span");
+          empty.className = "control-field";
+          empty.textContent = "No custom panels";
+          panelContainer.appendChild(empty);
+        }}
+      }}
+      const panes = document.getElementById("custom-indicator-panels");
+      if (panes) {{
+        panes.replaceChildren();
+        for (const panel of annotationDocument.panels) {{
+          const pane = document.createElement("div");
+          pane.id = `custom-pane-${{panel.id}}`;
+          pane.className = `custom-indicator-chart${{customPanelState[panel.id] ? "" : " hidden"}}`;
+          pane.dataset.plotPane = "true";
+          panes.appendChild(pane);
+        }}
+      }}
+    }}
+
+    function setUniversalButtonStates() {{
+      document.querySelectorAll("[data-annotation-group]").forEach((button) => {{
+        button.classList.toggle("active", annotationGroupVisible(button.dataset.annotationGroup));
+      }});
+      document.querySelectorAll("[data-custom-panel]").forEach((button) => {{
+        button.classList.toggle("active", Boolean(customPanelState[button.dataset.customPanel]));
+      }});
+    }}
 
     function getSelectedStrategy() {{
       const select = document.getElementById("strategy-select");
@@ -987,14 +1297,26 @@ def render_chart_html(payload: ChartPayload) -> str:
       const selectedStrategy = getSelectedStrategy();
       const sessionGaps = computeSessionGaps();
       const gapSettings = getGapSettings();
+      const currentRange = dealingRangePayload.ranges.find((range) => range.id === dealingRangePayload.current_range_id);
+      const rangeEvents = dealingRangePayload.events;
+      const sweepCount = rangeEvents.filter((event) => event.kind.includes("sweep")).length;
+      const expansionCount = rangeEvents.filter((event) => event.kind.startsWith("expansion")).length;
       const lines = [
         `Fisher pane: ${{state.fisher ? "on" : "off"}}`,
         `MACD pane: ${{state.macd ? "on" : "off"}}`,
         `Session gap overlay: ${{state.sessionGaps ? "on" : "off"}} (${{sessionGaps.length}} gaps, min % ${{gapSettings.minPercent.toFixed(2)}}, min $ ${{gapSettings.minAbsolute.toFixed(2)}})`,
+        `Dealing ranges 5/1: ${{state.dealingRanges ? "on" : "off"}} (${{dealingRangePayload.ranges.length}} ranges, ${{sweepCount}} sweeps, ${{expansionCount}} expansions)`,
         `Red triangle overlay: ${{state.redMarkers ? "on" : "off"}} (${{redMarkerTimes.length}} markers)`,
         `Green triangle overlay: ${{state.greenMarkers ? "on" : "off"}} (${{greenMarkerTimes.length}} markers)`,
-        `Strategy overlay: ${{selectedStrategy ? selectedStrategy.name : "none"}}`
+        `Strategy overlay: ${{selectedStrategy ? selectedStrategy.name : "none"}}`,
+        `Annotation groups: ${{annotationDocument.groups.filter((group) => annotationGroupVisible(group.id)).length}}/${{annotationDocument.groups.length}} visible`,
+        `Custom panes: ${{annotationDocument.panels.filter((panel) => customPanelState[panel.id]).length}}/${{annotationDocument.panels.length}} visible`
       ];
+      if (state.dealingRanges && currentRange) {{
+        const lastClose = closeValues[closeValues.length - 1];
+        const location = lastClose > currentRange.midpoint ? "premium" : lastClose < currentRange.midpoint ? "discount" : "equilibrium";
+        lines.push(`Active ${{currentRange.id}}: ${{currentRange.lower.toFixed(4)}} / ${{currentRange.midpoint.toFixed(4)}} / ${{currentRange.upper.toFixed(4)}} · close in ${{location}}`);
+      }}
       if (sessionGaps.length) {{
         const largestGap = sessionGaps.reduce((best, gap) => (gap.absolutePoints > best.absolutePoints ? gap : best), sessionGaps[0]);
         lines.push(`Largest gap: ${{largestGap.direction}} ${{largestGap.absolutePoints.toFixed(2)}} pts (${{largestGap.percent.toFixed(2)}}%) on ${{largestGap.currentTime.slice(0, 10)}}`);
@@ -1003,6 +1325,11 @@ def render_chart_html(payload: ChartPayload) -> str:
         lines.push(`Strategy entries: ${{selectedStrategy.entries.length}}`);
         lines.push(`Strategy exits: ${{selectedStrategy.exits.length}}`);
         lines.push(...strategySummaryLines(selectedStrategy));
+      }}
+      for (const group of annotationDocument.groups) {{
+        if (!annotationGroupVisible(group.id)) continue;
+        const count = annotationDocument.points.filter((point) => point.group === group.id).length;
+        lines.push(`${{group.label}}: ${{count}} points`);
       }}
       if (!window.Plotly) {{
         lines.push("Plotly failed to load, so charts cannot render.");
@@ -1541,10 +1868,17 @@ def render_chart_html(payload: ChartPayload) -> str:
           }});
         }}
       }}
+      traces.push(...annotationPointTraces("price", true));
+      traces.push(...annotationLinkTraces("price"));
+      traces.push(...dealingRangeEventTraces());
       const layout = baseLayout(null);
       layout.xaxis.range = getCurrentTimeRange();
       layout.yaxis.zeroline = false;
-      layout.shapes = state.sessionGaps ? buildGapShapes(sessionGaps) : [];
+      layout.shapes = [
+        ...(state.sessionGaps ? buildGapShapes(sessionGaps) : []),
+        ...dealingRangeShapes(),
+        ...annotationSpanShapes("price")
+      ];
       Plotly.react("chart", traces, layout, plotConfig()).then(() => {{
         bindAxisDragHandles();
         bindWheelPan();
@@ -1558,16 +1892,21 @@ def render_chart_html(payload: ChartPayload) -> str:
       if (!state.fisher) return;
       const layout = baseLayout(240);
       layout.xaxis.range = getCurrentTimeRange();
+      layout.shapes = annotationSpanShapes("fisher");
       Plotly.react(
         "fisher-chart",
-        [{{
-          type: "scatter",
-          mode: "lines",
-          x: times,
-          y: fisherValues,
-          name: "Fisher 50",
-          line: {{ color: "#56b6c2", width: 2 }}
-        }}],
+        [
+          {{
+            type: "scatter",
+            mode: "lines",
+            x: times,
+            y: fisherValues,
+            name: "Fisher 50",
+            line: {{ color: "#56b6c2", width: 2 }}
+          }},
+          ...annotationPointTraces("fisher"),
+          ...annotationLinkTraces("fisher")
+        ],
         layout,
         plotConfig()
       ).then(() => {{
@@ -1583,6 +1922,7 @@ def render_chart_html(payload: ChartPayload) -> str:
       if (!state.macd) return;
       const layout = baseLayout(240);
       layout.xaxis.range = getCurrentTimeRange();
+      layout.shapes = annotationSpanShapes("macd");
       Plotly.react(
         "macd-chart",
         [
@@ -1610,7 +1950,9 @@ def render_chart_html(payload: ChartPayload) -> str:
             y: signalLine,
             name: "Signal",
             line: {{ color: "#f6c85f", width: 2 }}
-          }}
+          }},
+          ...annotationPointTraces("macd"),
+          ...annotationLinkTraces("macd")
         ],
         layout,
         plotConfig()
@@ -1619,6 +1961,32 @@ def render_chart_html(payload: ChartPayload) -> str:
         bindWheelPan();
         bindTimeRangeSync();
       }});
+    }}
+
+    function renderCustomPanels() {{
+      for (const panel of annotationDocument.panels) {{
+        const container = document.getElementById(`custom-pane-${{panel.id}}`);
+        if (!container) continue;
+        container.classList.toggle("hidden", !customPanelState[panel.id]);
+        if (!customPanelState[panel.id]) continue;
+        container.style.height = `${{panel.height || 260}}px`;
+        container.style.minHeight = `${{panel.height || 260}}px`;
+        const layout = baseLayout(panel.height || 260);
+        layout.title = {{ text: panel.label, x: 0.01, font: {{ size: 14 }} }};
+        layout.xaxis.range = getCurrentTimeRange();
+        layout.yaxis.zeroline = Boolean(panel.zero_line);
+        layout.shapes = annotationSpanShapes(panel.id);
+        const traces = [
+          ...panel.series.map(seriesTrace),
+          ...annotationPointTraces(panel.id),
+          ...annotationLinkTraces(panel.id)
+        ];
+        Plotly.react(container.id, traces, layout, plotConfig()).then(() => {{
+          bindAxisDragHandles();
+          bindWheelPan();
+          bindTimeRangeSync();
+        }});
+      }}
     }}
 
     function renderChart() {{
@@ -1630,10 +1998,12 @@ def render_chart_html(payload: ChartPayload) -> str:
       renderPriceChart();
       renderFisherChart();
       renderMacdChart();
+      renderCustomPanels();
       renderStrategyStatsTable();
     }}
 
     function bindControls() {{
+      createUniversalControls();
       const strategySelect = document.getElementById("strategy-select");
       if (strategySelect) {{
         strategySelect.addEventListener("change", () => {{
@@ -1654,6 +2024,22 @@ def render_chart_html(payload: ChartPayload) -> str:
       }});
       document.querySelectorAll(".control-button").forEach((button) => {{
         button.addEventListener("click", () => {{
+          const annotationGroup = button.dataset.annotationGroup;
+          if (annotationGroup) {{
+            annotationGroupState[annotationGroup] = !annotationGroupState[annotationGroup];
+            setUniversalButtonStates();
+            updateStatus();
+            renderChart();
+            return;
+          }}
+          const customPanel = button.dataset.customPanel;
+          if (customPanel) {{
+            customPanelState[customPanel] = !customPanelState[customPanel];
+            setUniversalButtonStates();
+            updateStatus();
+            renderChart();
+            return;
+          }}
           const action = button.dataset.action;
           if (action === "scale-x-in") {{
             scaleTimeAxis(0.85);
@@ -1687,6 +2073,7 @@ def render_chart_html(payload: ChartPayload) -> str:
         }});
       }});
       setAllButtonStates();
+      setUniversalButtonStates();
       updateStatus();
     }}
 
@@ -1699,20 +2086,86 @@ def render_chart_html(payload: ChartPayload) -> str:
 """
 
 
-def _build_html(rows: list[dict[str, object]], *, ticker: str, timeframe_minutes: int, csv_path: Path) -> str:
+def _build_html(
+    rows: list[dict[str, object]],
+    *,
+    ticker: str,
+    timeframe_minutes: int,
+    csv_path: Path,
+    annotations: dict[str, object] | None = None,
+) -> str:
     payload = make_chart_payload(
         ticker=ticker,
         timeframe_minutes=timeframe_minutes,
         rows=rows,
         source_label=str(csv_path),
+        annotations=annotations,
     )
     return render_chart_html(payload)
 
 
+def _load_workspace_manifest(manifest_path: Path) -> tuple[str, list[WorkspaceView]]:
+    """Build self-contained chart views from a workspace manifest."""
+    try:
+        document = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"Invalid workspace JSON in {manifest_path}: {exc}") from exc
+    if not isinstance(document, dict):
+        raise ValueError("Workspace manifest must be a JSON object")
+    if document.get("schema_version") != WORKSPACE_SCHEMA_VERSION:
+        raise ValueError(f"Workspace manifest schema_version must be {WORKSPACE_SCHEMA_VERSION!r}")
+    raw_views = document.get("views")
+    if not isinstance(raw_views, list) or not raw_views:
+        raise ValueError("Workspace manifest views must be a non-empty array")
+
+    base_dir = manifest_path.resolve().parent
+    views: list[WorkspaceView] = []
+    for index, raw_view in enumerate(raw_views):
+        if not isinstance(raw_view, dict):
+            raise ValueError(f"Workspace view {index} must be an object")
+        required = ("id", "ticker", "timeframe", "study_id", "study_label", "data")
+        missing = [key for key in required if not str(raw_view.get(key, "")).strip()]
+        if missing:
+            raise ValueError(f"Workspace view {index} is missing: {', '.join(missing)}")
+        timeframe = _parse_timeframe(str(raw_view["timeframe"]))
+        csv_path = Path(str(raw_view["data"]))
+        if not csv_path.is_absolute():
+            csv_path = base_dir / csv_path
+        rows = _load_rows(csv_path)
+        if not rows:
+            raise ValueError(f"{csv_path} does not contain any valid OHLC rows")
+        annotations = None
+        if raw_view.get("annotations"):
+            annotation_path = Path(str(raw_view["annotations"]))
+            if not annotation_path.is_absolute():
+                annotation_path = base_dir / annotation_path
+            annotations = load_annotation_document(annotation_path)
+        payload = make_chart_payload(
+            ticker=str(raw_view["ticker"]),
+            timeframe_minutes=timeframe,
+            rows=rows,
+            source_label=str(csv_path),
+            annotations=annotations,
+        )
+        views.append(
+            WorkspaceView(
+                id=str(raw_view["id"]),
+                ticker=str(raw_view["ticker"]),
+                timeframe=str(raw_view["timeframe"]),
+                study_id=str(raw_view["study_id"]),
+                study_label=str(raw_view["study_label"]),
+                label=str(raw_view.get("label") or ""),
+                html=render_chart_html(payload),
+            )
+        )
+    title = str(document.get("title") or "Trading research workspace")
+    return title, views
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Visualize a local archived time series in the browser")
-    parser.add_argument("ticker", help="Ticker symbol, for example AAPL or NASDAQ:AAPL")
-    parser.add_argument("timeframe", type=_parse_timeframe, help="Timeframe in minutes, or D/1D/W")
+    parser.add_argument("ticker", nargs="?", help="Ticker symbol, for example AAPL or NASDAQ:AAPL")
+    parser.add_argument("timeframe", nargs="?", type=_parse_timeframe, help="Timeframe in minutes, or D/1D/W")
     parser.add_argument(
         "--data-dir",
         type=Path,
@@ -1729,6 +2182,16 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Generate the HTML but do not open the browser automatically.",
     )
+    parser.add_argument(
+        "--annotations",
+        type=Path,
+        help="Optional trading-chart-annotations/v1 JSON document.",
+    )
+    parser.add_argument(
+        "--workspace",
+        type=Path,
+        help="Optional trading-chart-workspace/v1 manifest with selectable views.",
+    )
     return parser
 
 
@@ -1736,18 +2199,38 @@ def main(argv: list[str] | None = None) -> None:
     parser = build_parser()
     args = parser.parse_args(argv)
 
-    csv_path = _find_data_file(args.data_dir, args.ticker, args.timeframe)
-    rows = _load_rows(csv_path)
-    if not rows:
-        raise ValueError(f"{csv_path} does not contain any valid OHLC rows")
-    html = _build_html(rows, ticker=args.ticker, timeframe_minutes=args.timeframe, csv_path=csv_path)
+    if args.workspace:
+        if args.ticker is not None or args.timeframe is not None:
+            parser.error("ticker/timeframe cannot be combined with --workspace")
+        if args.annotations:
+            parser.error("--annotations belongs inside each workspace view")
+        title, views = _load_workspace_manifest(args.workspace)
+        html = render_chart_workspace_html(views, title=title)
+    else:
+        if args.ticker is None or args.timeframe is None:
+            parser.error("ticker and timeframe are required unless --workspace is used")
+        csv_path = _find_data_file(args.data_dir, args.ticker, args.timeframe)
+        rows = _load_rows(csv_path)
+        if not rows:
+            raise ValueError(f"{csv_path} does not contain any valid OHLC rows")
+        annotations = load_annotation_document(args.annotations) if args.annotations else None
+        html = _build_html(
+            rows,
+            ticker=args.ticker,
+            timeframe_minutes=args.timeframe,
+            csv_path=csv_path,
+            annotations=annotations,
+        )
 
     if args.output:
         output_path = args.output
         output_path.parent.mkdir(parents=True, exist_ok=True)
     else:
         temp_dir = Path(tempfile.gettempdir())
-        output_path = temp_dir / f"{_sanitize_symbol(args.ticker)}-{args.timeframe}M-view.html"
+        if args.workspace:
+            output_path = temp_dir / "trading-chart-workspace.html"
+        else:
+            output_path = temp_dir / f"{_sanitize_symbol(args.ticker)}-{args.timeframe}M-view.html"
 
     output_path.write_text(html, encoding="utf-8")
     print(f"Wrote viewer to {output_path}")

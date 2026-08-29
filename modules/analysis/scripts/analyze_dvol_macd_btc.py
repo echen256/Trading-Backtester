@@ -15,6 +15,8 @@ from urllib.request import Request, urlopen
 import numpy as np
 import pandas as pd
 
+from trading_analysis.dashboard import StudyArtifactWriter
+
 
 THRESHOLD = 0.5
 HORIZONS = (1, 3, 5, 10, 20, 30)
@@ -294,8 +296,17 @@ def main() -> None:
         )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    dashboard_output = StudyArtifactWriter().publish_report_study(
+        study_id="dvol-macd-btc",
+        study_name="DVOL MACD / BTC Event Study",
+        version="1.0",
+        generator="modules/analysis/scripts/analyze_dvol_macd_btc.py",
+        files={"report": args.output},
+        metrics=[{"label": "Events", "value": len(event_frame)}],
+    )
     print("\n".join(lines[:40]))
     print(f"\nWrote {args.output}")
+    print(f"Published dashboard study {dashboard_output}")
 
 
 if __name__ == "__main__":

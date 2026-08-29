@@ -1,0 +1,787 @@
+{
+  "range": "2026-01-02 to 2026-08-27",
+  "rule_hold": "Overnight lots opened in the last 14 days, cost >= $250, prior-session mark > $50 lock the book to that underlying. Exits always allowed. Same-day opens never count as winning. Options expire off the lock.",
+  "rule_harvest": "After a realized close >= $50 this session, no new underlyings for the rest of the day unless a working overnight winner is still open.",
+  "related": "same underlying (stock and options)",
+  "mstu": "1-for-10 reverse split applied to open lots on 2026-08-24; realized PnL restated",
+  "actual": {
+    "n": 2057,
+    "pnl": 4028.86,
+    "wr": 0.3816,
+    "same_day_n": 997,
+    "same_day_pnl": -19465.6,
+    "ovn_n": 1060,
+    "ovn_pnl": 23494.46
+  },
+  "actual_equity": {
+    "n": 286,
+    "pnl": 1640.86,
+    "wr": 0.4196,
+    "same_day_n": 83,
+    "same_day_pnl": -8490.6,
+    "ovn_n": 203,
+    "ovn_pnl": 10131.46
+  },
+  "actual_option": {
+    "n": 1771,
+    "pnl": 2388.0,
+    "wr": 0.3755,
+    "same_day_n": 914,
+    "same_day_pnl": -10975.0,
+    "ovn_n": 857,
+    "ovn_pnl": 13363.0
+  },
+  "actual_call": {
+    "n": 824,
+    "pnl": 7855.0,
+    "wr": 0.3689,
+    "same_day_n": 418,
+    "same_day_pnl": -13738.0,
+    "ovn_n": 406,
+    "ovn_pnl": 21593.0
+  },
+  "actual_put": {
+    "n": 947,
+    "pnl": -5467.0,
+    "wr": 0.3812,
+    "same_day_n": 496,
+    "same_day_pnl": 2763.0,
+    "ovn_n": 451,
+    "ovn_pnl": -8230.0
+  },
+  "monthly_actual": {
+    "2026-01": 3439.0,
+    "2026-02": 7888.85,
+    "2026-03": 9671.57,
+    "2026-04": -17861.08,
+    "2026-05": -1853.49,
+    "2026-06": 6625.25,
+    "2026-07": -6087.32,
+    "2026-08": 2206.08
+  },
+  "fills_in": 3540,
+  "hold": {
+    "mode": "hold",
+    "fills_blocked": 1206,
+    "fills_kept": 2334,
+    "lock_sessions": 144,
+    "sim": {
+      "n": 630,
+      "pnl": -13905.2,
+      "wr": 0.354,
+      "same_day_n": 304,
+      "same_day_pnl": -17253.0,
+      "ovn_n": 326,
+      "ovn_pnl": 3347.8
+    },
+    "spray": {
+      "n": 1427,
+      "pnl": 17934.06,
+      "wr": 0.3938,
+      "same_day_n": 693,
+      "same_day_pnl": -2212.6,
+      "ovn_n": 734,
+      "ovn_pnl": 20146.66
+    },
+    "sim_equity": {
+      "n": 76,
+      "pnl": 7683.8,
+      "wr": 0.4868,
+      "same_day_n": 14,
+      "same_day_pnl": -2419.0,
+      "ovn_n": 62,
+      "ovn_pnl": 10102.8
+    },
+    "sim_option": {
+      "n": 554,
+      "pnl": -21589.0,
+      "wr": 0.3357,
+      "same_day_n": 290,
+      "same_day_pnl": -14834.0,
+      "ovn_n": 264,
+      "ovn_pnl": -6755.0
+    },
+    "sim_call": {
+      "n": 284,
+      "pnl": -728.0,
+      "wr": 0.3451,
+      "same_day_n": 141,
+      "same_day_pnl": -9255.0,
+      "ovn_n": 143,
+      "ovn_pnl": 8527.0
+    },
+    "sim_put": {
+      "n": 270,
+      "pnl": -20861.0,
+      "wr": 0.3259,
+      "same_day_n": 149,
+      "same_day_pnl": -5579.0,
+      "ovn_n": 121,
+      "ovn_pnl": -15282.0
+    },
+    "monthly": {
+      "2026-01": -1763.0,
+      "2026-02": -36.8,
+      "2026-03": 4354.45,
+      "2026-04": -6907.6,
+      "2026-05": 5197.2,
+      "2026-06": -1609.45,
+      "2026-07": -8745.95,
+      "2026-08": -4394.05
+    },
+    "spray_hurt": {
+      "INTC": -4962.0,
+      "USO": -2977.0,
+      "WEAT": -2231.5,
+      "AMZN": -1892.6,
+      "EWJ": -1624.0,
+      "AVGO": -1591.0,
+      "KC": -1495.0,
+      "EWY": -1444.0,
+      "IBIT": -1426.0,
+      "NTR": -1368.8
+    },
+    "spray_helped": {
+      "MU": 8826.0,
+      "GLD": 7803.2,
+      "CAR": 6104.0,
+      "QCOM": 5411.75,
+      "MSTR": 4937.0,
+      "UAL": 4391.0,
+      "RIOT": 4149.0,
+      "MSFT": 2757.0
+    },
+    "blocked_by_entry": {
+      "QQQ": 199,
+      "MU": 100,
+      "GLD": 45,
+      "INTC": 40,
+      "IREN": 39,
+      "TSLA": 35,
+      "QCOM": 28,
+      "USO": 26,
+      "SMH": 25,
+      "NVDA": 24,
+      "CRWV": 22,
+      "MSTR": 22
+    },
+    "blocked_by_winner": {
+      "NTR": 171,
+      "BABA": 165,
+      "IREN": 164,
+      "MSTR": 121,
+      "GLD": 120,
+      "UVXY": 115,
+      "USO": 110,
+      "TSLA": 103,
+      "MU": 99,
+      "UAL": 95,
+      "QQQ": 94,
+      "NVDA": 93
+    },
+    "blocked_busiest_days": {
+      "2026-08-13": 24,
+      "2026-06-25": 23,
+      "2026-06-05": 22,
+      "2026-04-24": 21,
+      "2026-05-13": 21,
+      "2026-06-12": 21,
+      "2026-07-07": 21,
+      "2026-06-11": 20
+    },
+    "aug26_blocked_n": 0,
+    "aug26_blocked": [],
+    "delta": -17934.06
+  },
+  "harvest": {
+    "mode": "harvest",
+    "fills_blocked": 1246,
+    "fills_kept": 2294,
+    "lock_sessions": 144,
+    "sim": {
+      "n": 594,
+      "pnl": 11155.25,
+      "wr": 0.4024,
+      "same_day_n": 336,
+      "same_day_pnl": -6762.17,
+      "ovn_n": 258,
+      "ovn_pnl": 17917.42
+    },
+    "spray": {
+      "n": 1463,
+      "pnl": -7126.39,
+      "wr": 0.3732,
+      "same_day_n": 661,
+      "same_day_pnl": -12703.43,
+      "ovn_n": 802,
+      "ovn_pnl": 5577.04
+    },
+    "sim_equity": {
+      "n": 80,
+      "pnl": -90.75,
+      "wr": 0.375,
+      "same_day_n": 33,
+      "same_day_pnl": -4108.17,
+      "ovn_n": 47,
+      "ovn_pnl": 4017.42
+    },
+    "sim_option": {
+      "n": 514,
+      "pnl": 11246.0,
+      "wr": 0.4066,
+      "same_day_n": 303,
+      "same_day_pnl": -2654.0,
+      "ovn_n": 211,
+      "ovn_pnl": 13900.0
+    },
+    "sim_call": {
+      "n": 252,
+      "pnl": 7000.0,
+      "wr": 0.3929,
+      "same_day_n": 151,
+      "same_day_pnl": -6809.0,
+      "ovn_n": 101,
+      "ovn_pnl": 13809.0
+    },
+    "sim_put": {
+      "n": 262,
+      "pnl": 4246.0,
+      "wr": 0.4198,
+      "same_day_n": 152,
+      "same_day_pnl": 4155.0,
+      "ovn_n": 110,
+      "ovn_pnl": 91.0
+    },
+    "monthly": {
+      "2026-01": 5465.0,
+      "2026-02": 7738.35,
+      "2026-03": 6240.95,
+      "2026-04": -15966.94,
+      "2026-05": 4459.26,
+      "2026-06": 4563.2,
+      "2026-07": -1891.32,
+      "2026-08": 546.75
+    },
+    "spray_hurt": {
+      "INTC": -6672.0,
+      "USO": -5037.0,
+      "IREN": -3025.5,
+      "SPY": -2689.0,
+      "SMH": -2503.0,
+      "TSLA": -2384.0,
+      "SOXS": -2064.97,
+      "WEAT": -2033.0,
+      "EWY": -1852.0,
+      "ASTX": -1766.75
+    },
+    "spray_helped": {
+      "MU": 7255.6,
+      "CAR": 6104.0,
+      "GLD": 5636.2,
+      "QCOM": 5406.75,
+      "RIOT": 4797.0,
+      "WLAC": 3020.0,
+      "UAL": 2988.0,
+      "MSTR": 2528.0
+    },
+    "blocked_by_entry": {
+      "QQQ": 226,
+      "MU": 96,
+      "IREN": 54,
+      "GLD": 49,
+      "INTC": 44,
+      "TSLA": 38,
+      "USO": 30,
+      "UVXY": 30,
+      "MSTR": 27,
+      "QCOM": 25,
+      "SMH": 22,
+      "CRWV": 20
+    },
+    "blocked_by_winner": {
+      "[harvest-flat]": 290,
+      "IREN": 155,
+      "NTR": 153,
+      "BABA": 131,
+      "UVXY": 110,
+      "MSTR": 103,
+      "GLD": 94,
+      "TSLA": 93,
+      "QQQ": 87,
+      "USO": 84,
+      "UAL": 79,
+      "SLV": 75
+    },
+    "blocked_busiest_days": {
+      "2026-06-05": 25,
+      "2026-08-13": 24,
+      "2026-03-13": 21,
+      "2026-06-11": 19,
+      "2026-08-07": 19,
+      "2026-05-11": 18,
+      "2026-05-13": 18,
+      "2026-07-01": 18
+    },
+    "aug26_blocked_n": 9,
+    "aug26_blocked": [
+      {
+        "clock": "09:34",
+        "name": "ORCL Call 157.5",
+        "lock": [],
+        "harvested": true
+      },
+      {
+        "clock": "09:35",
+        "name": "ORCL Call 165",
+        "lock": [],
+        "harvested": true
+      },
+      {
+        "clock": "09:47",
+        "name": "XLE Call 62",
+        "lock": [],
+        "harvested": true
+      },
+      {
+        "clock": "10:18",
+        "name": "WTIU",
+        "lock": [],
+        "harvested": true
+      },
+      {
+        "clock": "11:55",
+        "name": "SOXS",
+        "lock": [],
+        "harvested": true
+      },
+      {
+        "clock": "12:39",
+        "name": "SPY Put 756",
+        "lock": [],
+        "harvested": true
+      },
+      {
+        "clock": "13:34",
+        "name": "HNGE",
+        "lock": [],
+        "harvested": true
+      },
+      {
+        "clock": "14:20",
+        "name": "TSLA Put 325",
+        "lock": [],
+        "harvested": true
+      },
+      {
+        "clock": "14:57",
+        "name": "WEAT Call 28",
+        "lock": [],
+        "harvested": true
+      }
+    ],
+    "delta": 7126.39
+  },
+  "combined": {
+    "mode": "combined",
+    "fills_blocked": 1496,
+    "fills_kept": 2044,
+    "lock_sessions": 144,
+    "sim": {
+      "n": 300,
+      "pnl": 5233.9,
+      "wr": 0.3867,
+      "same_day_n": 135,
+      "same_day_pnl": -5750.8,
+      "ovn_n": 165,
+      "ovn_pnl": 10984.7
+    },
+    "spray": {
+      "n": 1757,
+      "pnl": -1205.04,
+      "wr": 0.3808,
+      "same_day_n": 862,
+      "same_day_pnl": -13714.8,
+      "ovn_n": 895,
+      "ovn_pnl": 12509.76
+    },
+    "sim_equity": {
+      "n": 20,
+      "pnl": 5298.9,
+      "wr": 0.7,
+      "same_day_n": 3,
+      "same_day_pnl": -538.8,
+      "ovn_n": 17,
+      "ovn_pnl": 5837.7
+    },
+    "sim_option": {
+      "n": 280,
+      "pnl": -65.0,
+      "wr": 0.3643,
+      "same_day_n": 132,
+      "same_day_pnl": -5212.0,
+      "ovn_n": 148,
+      "ovn_pnl": 5147.0
+    },
+    "sim_call": {
+      "n": 143,
+      "pnl": 9425.0,
+      "wr": 0.3846,
+      "same_day_n": 64,
+      "same_day_pnl": -4323.0,
+      "ovn_n": 79,
+      "ovn_pnl": 13748.0
+    },
+    "sim_put": {
+      "n": 137,
+      "pnl": -9490.0,
+      "wr": 0.3431,
+      "same_day_n": 68,
+      "same_day_pnl": -889.0,
+      "ovn_n": 69,
+      "ovn_pnl": -8601.0
+    },
+    "monthly": {
+      "2026-01": -1763.0,
+      "2026-02": 1053.2,
+      "2026-03": 4354.45,
+      "2026-04": -8258.6,
+      "2026-05": 5211.5,
+      "2026-06": 5574.55,
+      "2026-07": -1360.0,
+      "2026-08": 421.8
+    },
+    "spray_hurt": {
+      "USO": -5884.0,
+      "INTC": -5432.0,
+      "SPY": -2799.0,
+      "SOXS": -2630.62,
+      "WEAT": -2231.5,
+      "EWY": -2122.0,
+      "AMZN": -1892.6,
+      "ASTX": -1766.75,
+      "IBIT": -1696.0,
+      "EWJ": -1624.0
+    },
+    "spray_helped": {
+      "CAR": 6104.0,
+      "QCOM": 5286.75,
+      "MSTR": 5164.0,
+      "GLD": 4598.2,
+      "MU": 4455.6,
+      "UAL": 4391.0,
+      "RIOT": 4149.0,
+      "QQQ": 3606.0
+    },
+    "blocked_by_entry": {
+      "QQQ": 255,
+      "MU": 125,
+      "GLD": 61,
+      "INTC": 53,
+      "IREN": 51,
+      "TSLA": 38,
+      "USO": 38,
+      "MSTR": 34,
+      "SMH": 31,
+      "QCOM": 29,
+      "CRWV": 26,
+      "NVDA": 26
+    },
+    "blocked_by_winner": {
+      "[harvest-flat]": 290,
+      "NTR": 171,
+      "BABA": 165,
+      "IREN": 164,
+      "MSTR": 121,
+      "GLD": 120,
+      "UVXY": 115,
+      "USO": 110,
+      "TSLA": 103,
+      "MU": 99,
+      "UAL": 95,
+      "QQQ": 94
+    },
+    "blocked_busiest_days": {
+      "2026-07-01": 25,
+      "2026-08-13": 24,
+      "2026-06-25": 23,
+      "2026-06-05": 22,
+      "2026-04-24": 21,
+      "2026-05-13": 21,
+      "2026-06-12": 21,
+      "2026-07-07": 21
+    },
+    "aug26_blocked_n": 9,
+    "aug26_blocked": [
+      {
+        "clock": "09:34",
+        "name": "ORCL Call 157.5",
+        "lock": [],
+        "harvested": true
+      },
+      {
+        "clock": "09:35",
+        "name": "ORCL Call 165",
+        "lock": [],
+        "harvested": true
+      },
+      {
+        "clock": "09:47",
+        "name": "XLE Call 62",
+        "lock": [],
+        "harvested": true
+      },
+      {
+        "clock": "10:18",
+        "name": "WTIU",
+        "lock": [],
+        "harvested": true
+      },
+      {
+        "clock": "11:55",
+        "name": "SOXS",
+        "lock": [],
+        "harvested": true
+      },
+      {
+        "clock": "12:39",
+        "name": "SPY Put 756",
+        "lock": [],
+        "harvested": true
+      },
+      {
+        "clock": "13:34",
+        "name": "HNGE",
+        "lock": [],
+        "harvested": true
+      },
+      {
+        "clock": "14:20",
+        "name": "TSLA Put 325",
+        "lock": [],
+        "harvested": true
+      },
+      {
+        "clock": "14:57",
+        "name": "WEAT Call 28",
+        "lock": [],
+        "harvested": true
+      }
+    ],
+    "delta": 1205.04
+  },
+  "naive": {
+    "mode": "naive",
+    "fills_blocked": 1564,
+    "fills_kept": 1976,
+    "lock_sessions": 163,
+    "sim": {
+      "n": 228,
+      "pnl": 8458.1,
+      "wr": 0.4254,
+      "same_day_n": 86,
+      "same_day_pnl": -907.4,
+      "ovn_n": 142,
+      "ovn_pnl": 9365.5
+    },
+    "spray": {
+      "n": 1829,
+      "pnl": -4429.24,
+      "wr": 0.3762,
+      "same_day_n": 911,
+      "same_day_pnl": -18558.2,
+      "ovn_n": 918,
+      "ovn_pnl": 14128.96
+    },
+    "sim_equity": {
+      "n": 23,
+      "pnl": 1774.1,
+      "wr": 0.5652,
+      "same_day_n": 4,
+      "same_day_pnl": -1130.4,
+      "ovn_n": 19,
+      "ovn_pnl": 2904.5
+    },
+    "sim_option": {
+      "n": 205,
+      "pnl": 6684.0,
+      "wr": 0.4098,
+      "same_day_n": 82,
+      "same_day_pnl": 223.0,
+      "ovn_n": 123,
+      "ovn_pnl": 6461.0
+    },
+    "sim_call": {
+      "n": 112,
+      "pnl": 8145.0,
+      "wr": 0.375,
+      "same_day_n": 42,
+      "same_day_pnl": -2325.0,
+      "ovn_n": 70,
+      "ovn_pnl": 10470.0
+    },
+    "sim_put": {
+      "n": 93,
+      "pnl": -1461.0,
+      "wr": 0.4516,
+      "same_day_n": 40,
+      "same_day_pnl": 2548.0,
+      "ovn_n": 53,
+      "ovn_pnl": -4009.0
+    },
+    "monthly": {
+      "2026-01": -1661.0,
+      "2026-02": 1767.05,
+      "2026-03": 4945.65,
+      "2026-04": -1629.6,
+      "2026-05": 1177.0,
+      "2026-06": 4184.0,
+      "2026-07": -520.0,
+      "2026-08": 195.0
+    },
+    "spray_hurt": {
+      "USO": -7559.0,
+      "INTC": -5986.45,
+      "SPY": -2799.0,
+      "SOXS": -2578.62,
+      "EWJ": -2464.0,
+      "VET": -2330.0,
+      "WEAT": -2231.5,
+      "EWY": -2122.0,
+      "AMZN": -1892.6,
+      "ASTX": -1766.75
+    },
+    "spray_helped": {
+      "MSTR": 6207.0,
+      "CAR": 6104.0,
+      "QCOM": 5198.75,
+      "UAL": 4241.0,
+      "RIOT": 4149.0,
+      "GLD": 3949.2,
+      "MU": 3915.6,
+      "BABA": 3523.0
+    },
+    "blocked_by_entry": {
+      "QQQ": 267,
+      "MU": 136,
+      "GLD": 63,
+      "INTC": 61,
+      "IREN": 54,
+      "TSLA": 39,
+      "MSTR": 39,
+      "USO": 39,
+      "SMH": 35,
+      "NVDA": 30,
+      "QCOM": 30,
+      "CRWV": 26
+    },
+    "blocked_by_winner": {
+      "BABA": 1490,
+      "LOGI": 1036,
+      "NTR": 201,
+      "IREN": 166,
+      "QQQ": 149,
+      "GLD": 128,
+      "CAR": 126,
+      "MSTR": 115,
+      "UVXY": 114,
+      "USO": 111,
+      "MU": 99,
+      "UAL": 95
+    },
+    "blocked_busiest_days": {
+      "2026-07-01": 25,
+      "2026-08-13": 24,
+      "2026-06-25": 23,
+      "2026-06-05": 22,
+      "2026-06-18": 22,
+      "2026-04-24": 21,
+      "2026-06-12": 21,
+      "2026-07-07": 21
+    },
+    "aug26_blocked_n": 9,
+    "aug26_blocked": [
+      {
+        "clock": "09:34",
+        "name": "ORCL Call 157.5",
+        "lock": [
+          "BABA",
+          "LOGI"
+        ],
+        "harvested": true
+      },
+      {
+        "clock": "09:35",
+        "name": "ORCL Call 165",
+        "lock": [
+          "BABA",
+          "LOGI"
+        ],
+        "harvested": true
+      },
+      {
+        "clock": "09:47",
+        "name": "XLE Call 62",
+        "lock": [
+          "BABA",
+          "LOGI"
+        ],
+        "harvested": true
+      },
+      {
+        "clock": "10:18",
+        "name": "WTIU",
+        "lock": [
+          "BABA",
+          "LOGI"
+        ],
+        "harvested": true
+      },
+      {
+        "clock": "11:55",
+        "name": "SOXS",
+        "lock": [
+          "BABA",
+          "LOGI"
+        ],
+        "harvested": true
+      },
+      {
+        "clock": "12:39",
+        "name": "SPY Put 756",
+        "lock": [
+          "BABA",
+          "LOGI"
+        ],
+        "harvested": true
+      },
+      {
+        "clock": "13:34",
+        "name": "HNGE",
+        "lock": [
+          "BABA",
+          "LOGI"
+        ],
+        "harvested": true
+      },
+      {
+        "clock": "14:20",
+        "name": "TSLA Put 325",
+        "lock": [
+          "BABA",
+          "LOGI"
+        ],
+        "harvested": true
+      },
+      {
+        "clock": "14:57",
+        "name": "WEAT Call 28",
+        "lock": [
+          "BABA",
+          "LOGI"
+        ],
+        "harvested": true
+      }
+    ],
+    "delta": 4429.24
+  }
+}

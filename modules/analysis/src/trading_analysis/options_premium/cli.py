@@ -13,6 +13,7 @@ from trading_analysis.parse_orders import ORDER_DATA_DIR
 
 from .api import PLOT_SERIES_CAP, build_premium_payload, default_lookback_window
 from .chart import write_premium_chart_html
+from .dashboard import publish_premium_payload
 from .contracts import (
     DEFAULT_DTE_MAX,
     DEFAULT_DTE_MIN,
@@ -121,6 +122,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     fetch_p.add_argument("--series-cap", type=int, default=PLOT_SERIES_CAP)
     fetch_p.add_argument("--no-high", action="store_true", help="Omit daily high series")
+    fetch_p.add_argument("--publish-dashboard", action="store_true", help="Publish the payload to the analysis dashboard")
     fetch_p.add_argument(
         "-o",
         "--output",
@@ -145,6 +147,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="HTML output path",
     )
     chart_p.add_argument("--open", action="store_true", help="Open HTML in browser")
+    chart_p.add_argument("--publish-dashboard", action="store_true", help="Publish the payload to the analysis dashboard")
 
     return parser
 
@@ -245,6 +248,8 @@ def _cmd_fetch(args: argparse.Namespace) -> int:
         raise SystemExit("fetch requires a single --symbol (or a one-ticker watchlist)")
     payload = _build_payload_from_args(args, symbols[0])
     _dump(payload, args.output)
+    if args.publish_dashboard:
+        print(f"Published dashboard study {publish_premium_payload(payload)}", file=sys.stderr)
     return 0
 
 
@@ -262,6 +267,8 @@ def _cmd_chart(args: argparse.Namespace) -> int:
         auto_open=args.open,
     )
     print(f"Wrote {path}")
+    if args.publish_dashboard:
+        print(f"Published dashboard study {publish_premium_payload(payload)}")
     return 0
 
 

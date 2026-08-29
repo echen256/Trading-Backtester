@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:trading:chart-study:v2",
+  "title": "Trading chart study",
+  "type": "object",
+  "required": ["schema_version", "groups", "panels", "points", "links", "spans", "levels"],
+  "properties": {
+    "schema_version": {"const": "trading-chart-study/v2"},
+    "groups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "label"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "label": {"type": "string"},
+          "color": {"type": "string"},
+          "visible": {"type": "boolean"}
+        },
+        "additionalProperties": true
+      }
+    },
+    "panels": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "series"],
+        "properties": {
+          "id": {"type": "string"},
+          "label": {"type": "string"},
+          "height": {"type": "integer", "minimum": 80},
+          "visible": {"type": "boolean"},
+          "zero_line": {"type": "boolean"},
+          "series": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "name", "type", "points"],
+              "properties": {
+                "id": {"type": "string"},
+                "name": {"type": "string"},
+                "type": {"enum": ["line", "histogram", "area"]},
+                "color": {"type": "string"},
+                "line_width": {"type": "number"},
+                "points": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["time"],
+                    "properties": {
+                      "time": {"type": "string"},
+                      "value": {"type": ["number", "null"]},
+                      "color": {"type": "string"}
+                    },
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "additionalProperties": true
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "points": {"type": "array", "items": {"$ref": "#/$defs/annotation"}},
+    "links": {
+      "type": "array",
+      "items": {
+        "allOf": [
+          {"$ref": "#/$defs/annotation"},
+          {"required": ["start_time", "end_time", "start_value", "end_value"]}
+        ]
+      }
+    },
+    "spans": {
+      "type": "array",
+      "items": {
+        "allOf": [
+          {"$ref": "#/$defs/annotation"},
+          {"required": ["start_time", "end_time"]}
+        ]
+      }
+    },
+    "levels": {
+      "type": "array",
+      "items": {
+        "allOf": [
+          {"$ref": "#/$defs/annotation"},
+          {"required": ["value"]}
+        ]
+      }
+    }
+  },
+  "$defs": {
+    "annotation": {
+      "type": "object",
+      "required": ["id", "group"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "group": {"type": "string", "minLength": 1},
+        "pane": {"type": "string"},
+        "time": {"type": "string"},
+        "value": {"type": "number"},
+        "start_time": {"type": "string"},
+        "end_time": {"type": "string"},
+        "start_value": {"type": "number"},
+        "end_value": {"type": "number"},
+        "lower": {"type": ["number", "null"]},
+        "upper": {"type": ["number", "null"]},
+        "label": {"type": "string"},
+        "role": {"type": "string"},
+        "marker": {"type": "string"},
+        "color": {"type": "string"},
+        "metadata": {"type": "object"}
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}

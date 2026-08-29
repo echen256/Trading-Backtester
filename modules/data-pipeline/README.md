@@ -19,9 +19,14 @@ pip install -e modules/data-pipeline
 - `trading-data-pull`: Pull one ticker from BigQuery into a local CSV archive.
 - `trading-data-download-cmc`: Download crypto OHLCV from CoinMarketCap into
   `modules/data-pipeline/data/cmc/<timeframe>/`.
-- `trading-data-visualize`: Open a browser view for one archived CSV by ticker
-  and timeframe, rendering the local series and embedding a TradingView market
-  widget alongside it when available.
+- `trading-data-visualize`: Export the legacy standalone local chart for an archived CSV,
+  or load a workspace with in-app symbol, timeframe, and study selectors. It
+  supports strategy overlays plus versioned, user-supplied annotations, linked
+  entry/exit paths, time spans, hover metadata, and custom indicator panes.
+
+Interactive development has moved to `modules/analysis/dashboard`. The legacy
+visualizer remains for portable HTML exports while generators migrate to
+`trading-study-run/v1`; do not add new application UI here.
 
 Run each command with `--help` to discover the available options.  Configuration
 defaults live under `modules/data-pipeline/config/`.
@@ -31,6 +36,8 @@ defaults live under `modules/data-pipeline/config/`.
 ```bash
 trading-data-visualize AAPL D
 trading-data-visualize MU 1440 --no-open
+trading-data-visualize MU 1440 --annotations my-study.json --output mu-study.html --no-open
+trading-data-visualize --workspace research-workspace.json --output research-workspace.html --no-open
 trading-data-download I:SPX --market indices --interval 1440
 ```
 
@@ -63,3 +70,6 @@ payload = make_chart_payload(
 )
 html = render_chart_html(payload)
 ```
+
+See [UNIVERSAL_VISUALIZER.md](UNIVERSAL_VISUALIZER.md) for the annotation and
+workspace JSON contracts, supported marker/panel types, and complete examples.

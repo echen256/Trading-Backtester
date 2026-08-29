@@ -1,0 +1,680 @@
+{
+  "source": "Polygon adjusted daily cohort + cached RTH one-minute aggregates",
+  "date_range": [
+    "2024-07-29",
+    "2026-08-11"
+  ],
+  "universe": [
+    "ALAB",
+    "AMD",
+    "AMKR",
+    "APLD",
+    "ARM",
+    "BIDU",
+    "CAR",
+    "CIFR",
+    "COIN",
+    "CRDO",
+    "EOSE",
+    "FUTU",
+    "GRAL",
+    "HUT",
+    "INTC",
+    "IREN",
+    "MRVL",
+    "MSTR",
+    "MU",
+    "NBIS",
+    "NVDA",
+    "NVTS",
+    "OPEN",
+    "PLTR",
+    "QCOM",
+    "RIOT",
+    "RKLB",
+    "SMCI",
+    "SNDK",
+    "TSLA",
+    "USAR"
+  ],
+  "universe_n": 31,
+  "cohort_n": 128,
+  "candidate_n": 128,
+  "errors": [],
+  "gap_filters": {
+    "gap_up_pct_min": 10.0,
+    "prior_close_min": 5.0,
+    "session_volume_min": 1000000,
+    "first_hour_end": "10:30 America/New_York",
+    "condition": "first-hour high <= open (no new high) AND 10:30 close < open (filling)"
+  },
+  "new_high_buffer_pct": 0.1,
+  "pullback_min_pct": 1.0,
+  "runner_definitions": {
+    "loose": {
+      "label": "Loose",
+      "return_min": 0.02,
+      "close_location_min": 0.65,
+      "max_close_drawdown_max": 0.05,
+      "efficiency_min": 0.0
+    },
+    "primary": {
+      "label": "Primary",
+      "return_min": 0.03,
+      "close_location_min": 0.75,
+      "max_close_drawdown_max": 0.03,
+      "efficiency_min": 0.0
+    },
+    "strict": {
+      "label": "Strict",
+      "return_min": 0.05,
+      "close_location_min": 0.85,
+      "max_close_drawdown_max": 0.02,
+      "efficiency_min": 0.0
+    }
+  },
+  "primary_unique_tickers": 10,
+  "primary_unique_dates": 11,
+  "variants": {
+    "loose": {
+      "n": 30,
+      "afternoon_new_high": {
+        "count": 14,
+        "n": 30,
+        "pct": 46.666666666666664,
+        "ci95_pct": [
+          30.232388907699754,
+          63.8577003801267
+        ]
+      },
+      "pullback_then_afternoon_new_high": {
+        "count": 11,
+        "n": 30,
+        "pct": 36.666666666666664,
+        "ci95_pct": [
+          21.873920806100706,
+          54.486436345205114
+        ]
+      },
+      "constructive_pullback_then_new_high": {
+        "count": 10,
+        "n": 30,
+        "pct": 33.33333333333333,
+        "ci95_pct": [
+          19.230498083676135,
+          51.219948355456154
+        ]
+      },
+      "close_above_first_hour_high": {
+        "count": 13,
+        "n": 30,
+        "pct": 43.333333333333336,
+        "ci95_pct": [
+          27.37748557646652,
+          60.80269299918639
+        ]
+      },
+      "close_above_pre_afternoon_high": {
+        "count": 6,
+        "n": 30,
+        "pct": 20.0,
+        "ci95_pct": [
+          9.50510717728987,
+          37.30569641314825
+        ]
+      },
+      "close_within_2pct_of_hod": {
+        "count": 12,
+        "n": 30,
+        "pct": 40.0,
+        "ci95_pct": [
+          24.590628116801852,
+          57.67963974667752
+        ]
+      },
+      "reclaim_signal_offered": {
+        "count": 16,
+        "n": 30,
+        "pct": 53.333333333333336,
+        "ci95_pct": [
+          36.1422996198733,
+          69.76761109230026
+        ]
+      },
+      "new_high_after_reclaim": {
+        "count": 12,
+        "n": 16,
+        "pct": 75.0,
+        "ci95_pct": [
+          50.50168346449122,
+          89.81793250878695
+        ]
+      },
+      "pullback_depth_sensitivity": {
+        "0.5%": {
+          "all_primary_count": 13,
+          "all_primary_n": 30,
+          "hod_winner_count": 13,
+          "hod_winner_n": 14
+        },
+        "1%": {
+          "all_primary_count": 11,
+          "all_primary_n": 30,
+          "hod_winner_count": 11,
+          "hod_winner_n": 14
+        },
+        "1.5%": {
+          "all_primary_count": 9,
+          "all_primary_n": 30,
+          "hod_winner_count": 9,
+          "hod_winner_n": 14
+        },
+        "2%": {
+          "all_primary_count": 7,
+          "all_primary_n": 30,
+          "hod_winner_count": 7,
+          "hod_winner_n": 14
+        },
+        "3%": {
+          "all_primary_count": 4,
+          "all_primary_n": 30,
+          "hod_winner_count": 4,
+          "hod_winner_n": 14
+        }
+      },
+      "first_afternoon_hod_hour_counts": {
+        "13:00-13:59": 8,
+        "14:00-14:59": 3,
+        "15:00-15:59": 3
+      },
+      "median_first_hour_return_pct": 6.587319125751634,
+      "median_afternoon_hod_minute": 255.5,
+      "median_reclaim_minute": 215.0,
+      "median_reclaim_to_close_pct": 0.5874029142689197,
+      "mean_reclaim_to_close_pct": 0.6772718231928723,
+      "reclaim_close_win_pct": 68.75,
+      "median_reclaim_mfe_pct": 1.9077205279225184,
+      "median_reclaim_mae_pct": -0.8865857067146043
+    },
+    "primary": {
+      "n": 12,
+      "afternoon_new_high": {
+        "count": 8,
+        "n": 12,
+        "pct": 66.66666666666666,
+        "ci95_pct": [
+          39.06220888727995,
+          86.18799089087868
+        ]
+      },
+      "pullback_then_afternoon_new_high": {
+        "count": 6,
+        "n": 12,
+        "pct": 50.0,
+        "ci95_pct": [
+          25.37815976337061,
+          74.6218402366294
+        ]
+      },
+      "constructive_pullback_then_new_high": {
+        "count": 5,
+        "n": 12,
+        "pct": 41.66666666666667,
+        "ci95_pct": [
+          19.326031365875664,
+          68.04886874504503
+        ]
+      },
+      "close_above_first_hour_high": {
+        "count": 6,
+        "n": 12,
+        "pct": 50.0,
+        "ci95_pct": [
+          25.37815976337061,
+          74.6218402366294
+        ]
+      },
+      "close_above_pre_afternoon_high": {
+        "count": 2,
+        "n": 12,
+        "pct": 16.666666666666664,
+        "ci95_pct": [
+          4.6965142183853805,
+          44.80308622529734
+        ]
+      },
+      "close_within_2pct_of_hod": {
+        "count": 6,
+        "n": 12,
+        "pct": 50.0,
+        "ci95_pct": [
+          25.37815976337061,
+          74.6218402366294
+        ]
+      },
+      "reclaim_signal_offered": {
+        "count": 8,
+        "n": 12,
+        "pct": 66.66666666666666,
+        "ci95_pct": [
+          39.06220888727995,
+          86.18799089087868
+        ]
+      },
+      "new_high_after_reclaim": {
+        "count": 6,
+        "n": 8,
+        "pct": 75.0,
+        "ci95_pct": [
+          40.92754303101688,
+          92.8520787247891
+        ]
+      },
+      "pullback_depth_sensitivity": {
+        "0.5%": {
+          "all_primary_count": 7,
+          "all_primary_n": 12,
+          "hod_winner_count": 7,
+          "hod_winner_n": 8
+        },
+        "1%": {
+          "all_primary_count": 6,
+          "all_primary_n": 12,
+          "hod_winner_count": 6,
+          "hod_winner_n": 8
+        },
+        "1.5%": {
+          "all_primary_count": 5,
+          "all_primary_n": 12,
+          "hod_winner_count": 5,
+          "hod_winner_n": 8
+        },
+        "2%": {
+          "all_primary_count": 3,
+          "all_primary_n": 12,
+          "hod_winner_count": 3,
+          "hod_winner_n": 8
+        },
+        "3%": {
+          "all_primary_count": 2,
+          "all_primary_n": 12,
+          "hod_winner_count": 2,
+          "hod_winner_n": 8
+        }
+      },
+      "first_afternoon_hod_hour_counts": {
+        "13:00-13:59": 5,
+        "14:00-14:59": 3,
+        "15:00-15:59": 0
+      },
+      "median_first_hour_return_pct": 6.122946421871389,
+      "median_afternoon_hod_minute": 255.5,
+      "median_reclaim_minute": 227.5,
+      "median_reclaim_to_close_pct": 0.4504590990426216,
+      "mean_reclaim_to_close_pct": 0.3391003013772764,
+      "reclaim_close_win_pct": 62.5,
+      "median_reclaim_mfe_pct": 1.543128970042107,
+      "median_reclaim_mae_pct": -0.6636347253355046
+    },
+    "strict": {
+      "n": 4,
+      "afternoon_new_high": {
+        "count": 2,
+        "n": 4,
+        "pct": 50.0,
+        "ci95_pct": [
+          15.003898915214947,
+          84.99610108478505
+        ]
+      },
+      "pullback_then_afternoon_new_high": {
+        "count": 0,
+        "n": 4,
+        "pct": 0.0,
+        "ci95_pct": [
+          0.0,
+          48.98908364545973
+        ]
+      },
+      "constructive_pullback_then_new_high": {
+        "count": 0,
+        "n": 4,
+        "pct": 0.0,
+        "ci95_pct": [
+          0.0,
+          48.98908364545973
+        ]
+      },
+      "close_above_first_hour_high": {
+        "count": 1,
+        "n": 4,
+        "pct": 25.0,
+        "ci95_pct": [
+          4.558726080970055,
+          69.93581574175981
+        ]
+      },
+      "close_above_pre_afternoon_high": {
+        "count": 0,
+        "n": 4,
+        "pct": 0.0,
+        "ci95_pct": [
+          0.0,
+          48.98908364545973
+        ]
+      },
+      "close_within_2pct_of_hod": {
+        "count": 1,
+        "n": 4,
+        "pct": 25.0,
+        "ci95_pct": [
+          4.558726080970055,
+          69.93581574175981
+        ]
+      },
+      "reclaim_signal_offered": {
+        "count": 2,
+        "n": 4,
+        "pct": 50.0,
+        "ci95_pct": [
+          15.003898915214947,
+          84.99610108478505
+        ]
+      },
+      "new_high_after_reclaim": {
+        "count": 0,
+        "n": 2,
+        "pct": 0.0,
+        "ci95_pct": [
+          0.0,
+          65.76197724933469
+        ]
+      },
+      "pullback_depth_sensitivity": {
+        "0.5%": {
+          "all_primary_count": 1,
+          "all_primary_n": 4,
+          "hod_winner_count": 1,
+          "hod_winner_n": 2
+        },
+        "1%": {
+          "all_primary_count": 0,
+          "all_primary_n": 4,
+          "hod_winner_count": 0,
+          "hod_winner_n": 2
+        },
+        "1.5%": {
+          "all_primary_count": 0,
+          "all_primary_n": 4,
+          "hod_winner_count": 0,
+          "hod_winner_n": 2
+        },
+        "2%": {
+          "all_primary_count": 0,
+          "all_primary_n": 4,
+          "hod_winner_count": 0,
+          "hod_winner_n": 2
+        },
+        "3%": {
+          "all_primary_count": 0,
+          "all_primary_n": 4,
+          "hod_winner_count": 0,
+          "hod_winner_n": 2
+        }
+      },
+      "first_afternoon_hod_hour_counts": {
+        "13:00-13:59": 2,
+        "14:00-14:59": 0,
+        "15:00-15:59": 0
+      },
+      "median_first_hour_return_pct": 7.491733185186367,
+      "median_afternoon_hod_minute": 234.5,
+      "median_reclaim_minute": 250.5,
+      "median_reclaim_to_close_pct": -2.029051033578233,
+      "mean_reclaim_to_close_pct": -2.029051033578233,
+      "reclaim_close_win_pct": 0.0,
+      "median_reclaim_mfe_pct": 0.5013187962571775,
+      "median_reclaim_mae_pct": -2.916808676013438
+    }
+  },
+  "baseline_all_gap_ups": {
+    "n": 128,
+    "afternoon_new_high": {
+      "count": 39,
+      "n": 128,
+      "pct": 30.46875,
+      "ci95_pct": [
+        23.16056151523922,
+        38.91510083919471
+      ]
+    },
+    "pullback_then_afternoon_new_high": {
+      "count": 31,
+      "n": 128,
+      "pct": 24.21875,
+      "ci95_pct": [
+        17.618737999242146,
+        32.32113630861063
+      ]
+    },
+    "constructive_pullback_then_new_high": {
+      "count": 22,
+      "n": 128,
+      "pct": 17.1875,
+      "ci95_pct": [
+        11.633115948147267,
+        24.653996807301727
+      ]
+    },
+    "close_above_first_hour_high": {
+      "count": 32,
+      "n": 128,
+      "pct": 25.0,
+      "ci95_pct": [
+        18.301284861358557,
+        33.15556295231686
+      ]
+    },
+    "close_above_pre_afternoon_high": {
+      "count": 19,
+      "n": 128,
+      "pct": 14.84375,
+      "ci95_pct": [
+        9.71346311535001,
+        22.022729122631056
+      ]
+    },
+    "close_within_2pct_of_hod": {
+      "count": 34,
+      "n": 128,
+      "pct": 26.5625,
+      "ci95_pct": [
+        19.675501016357284,
+        34.81529380896342
+      ]
+    },
+    "reclaim_signal_offered": {
+      "count": 68,
+      "n": 128,
+      "pct": 53.125,
+      "ci95_pct": [
+        44.51537079599453,
+        61.55252322729605
+      ]
+    },
+    "new_high_after_reclaim": {
+      "count": 33,
+      "n": 68,
+      "pct": 48.529411764705884,
+      "ci95_pct": [
+        37.05084547256065,
+        60.16524669367487
+      ]
+    },
+    "pullback_depth_sensitivity": {
+      "0.5%": {
+        "all_primary_count": 35,
+        "all_primary_n": 128,
+        "hod_winner_count": 35,
+        "hod_winner_n": 39
+      },
+      "1%": {
+        "all_primary_count": 31,
+        "all_primary_n": 128,
+        "hod_winner_count": 31,
+        "hod_winner_n": 39
+      },
+      "1.5%": {
+        "all_primary_count": 29,
+        "all_primary_n": 128,
+        "hod_winner_count": 29,
+        "hod_winner_n": 39
+      },
+      "2%": {
+        "all_primary_count": 24,
+        "all_primary_n": 128,
+        "hod_winner_count": 24,
+        "hod_winner_n": 39
+      },
+      "3%": {
+        "all_primary_count": 17,
+        "all_primary_n": 128,
+        "hod_winner_count": 17,
+        "hod_winner_n": 39
+      }
+    },
+    "first_afternoon_hod_hour_counts": {
+      "13:00-13:59": 24,
+      "14:00-14:59": 10,
+      "15:00-15:59": 5
+    },
+    "median_first_hour_return_pct": 1.1120173025444435,
+    "median_afternoon_hod_minute": 242.0,
+    "median_reclaim_minute": 212.0,
+    "median_reclaim_to_close_pct": -0.28540878390260205,
+    "mean_reclaim_to_close_pct": -0.3164756490987653,
+    "reclaim_close_win_pct": 44.11764705882353,
+    "median_reclaim_mfe_pct": 1.5383283933951608,
+    "median_reclaim_mae_pct": -1.7031019496572986
+  },
+  "baseline_non_primary": {
+    "n": 116,
+    "afternoon_new_high": {
+      "count": 31,
+      "n": 116,
+      "pct": 26.72413793103448,
+      "ci95_pct": [
+        19.51241465369091,
+        35.42805375232675
+      ]
+    },
+    "pullback_then_afternoon_new_high": {
+      "count": 25,
+      "n": 116,
+      "pct": 21.551724137931032,
+      "ci95_pct": [
+        15.045670645645782,
+        29.881568517264697
+      ]
+    },
+    "constructive_pullback_then_new_high": {
+      "count": 17,
+      "n": 116,
+      "pct": 14.655172413793101,
+      "ci95_pct": [
+        9.355750075335658,
+        22.220516763431903
+      ]
+    },
+    "close_above_first_hour_high": {
+      "count": 26,
+      "n": 116,
+      "pct": 22.413793103448278,
+      "ci95_pct": [
+        15.779761353649713,
+        30.816349349778633
+      ]
+    },
+    "close_above_pre_afternoon_high": {
+      "count": 17,
+      "n": 116,
+      "pct": 14.655172413793101,
+      "ci95_pct": [
+        9.355750075335658,
+        22.220516763431903
+      ]
+    },
+    "close_within_2pct_of_hod": {
+      "count": 28,
+      "n": 116,
+      "pct": 24.137931034482758,
+      "ci95_pct": [
+        17.260828506147007,
+        32.67302527831707
+      ]
+    },
+    "reclaim_signal_offered": {
+      "count": 60,
+      "n": 116,
+      "pct": 51.724137931034484,
+      "ci95_pct": [
+        42.7221384080937,
+        60.615604672942034
+      ]
+    },
+    "new_high_after_reclaim": {
+      "count": 27,
+      "n": 60,
+      "pct": 45.0,
+      "ci95_pct": [
+        33.09365440675524,
+        57.50806411466566
+      ]
+    },
+    "pullback_depth_sensitivity": {
+      "0.5%": {
+        "all_primary_count": 28,
+        "all_primary_n": 116,
+        "hod_winner_count": 28,
+        "hod_winner_n": 31
+      },
+      "1%": {
+        "all_primary_count": 25,
+        "all_primary_n": 116,
+        "hod_winner_count": 25,
+        "hod_winner_n": 31
+      },
+      "1.5%": {
+        "all_primary_count": 24,
+        "all_primary_n": 116,
+        "hod_winner_count": 24,
+        "hod_winner_n": 31
+      },
+      "2%": {
+        "all_primary_count": 21,
+        "all_primary_n": 116,
+        "hod_winner_count": 21,
+        "hod_winner_n": 31
+      },
+      "3%": {
+        "all_primary_count": 15,
+        "all_primary_n": 116,
+        "hod_winner_count": 15,
+        "hod_winner_n": 31
+      }
+    },
+    "first_afternoon_hod_hour_counts": {
+      "13:00-13:59": 19,
+      "14:00-14:59": 7,
+      "15:00-15:59": 5
+    },
+    "median_first_hour_return_pct": 0.5443582855341855,
+    "median_afternoon_hod_minute": 235.0,
+    "median_reclaim_minute": 212.0,
+    "median_reclaim_to_close_pct": -0.541113074644306,
+    "mean_reclaim_to_close_pct": -0.40388577582890417,
+    "reclaim_close_win_pct": 41.66666666666667,
+    "median_reclaim_mfe_pct": 1.4927003705373587,
+    "median_reclaim_mae_pct": -1.7992576811674765
+  }
+}

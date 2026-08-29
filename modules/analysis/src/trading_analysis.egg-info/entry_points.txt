@@ -1,7 +1,9 @@
 [console_scripts]
+trading-analysis-dashboard = trading_analysis.dashboard.cli:main
 trading-bucket-analysis = trading_analysis.bucket_analysis:main
 trading-compliance-monitor = trading_analysis.compliance_monitor:main
 trading-composite-trend = trading_analysis.strategies.composite_trend:main
+trading-evaluate-trade = trading_analysis.evaluate_trade:main
 trading-fisher-trade-overlay = trading_analysis.fisher_trade_overlay:main
 trading-levered-trend-following = trading_analysis.strategies.levered_weekly_trend:main
 trading-options-premium = trading_analysis.options_premium.cli:main

@@ -12,6 +12,7 @@ from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Sequence
 
+from .dashboard import StudyArtifactWriter
 from .display_common import describe_contract, extract_contract_expiration, extract_underlying_symbol
 from .market_data import (
     DEFAULT_OPTION_DAILY_CACHE_DIR,
@@ -210,10 +211,25 @@ def main(argv: Sequence[str] | None = None) -> None:
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(output, indent=2), encoding="utf-8")
+    dashboard_output = StudyArtifactWriter().publish_report_study(
+        study_id="trade-hold-review",
+        study_name="Trade Hold-longer Review",
+        version="1.0",
+        generator="trading_analysis.export_trade_hold_review",
+        files={"review": args.output},
+        parameters={"start_date": start_date.isoformat(), "end_date": end_date.isoformat()},
+        metrics=[
+            {"label": "Analyzed trades", "value": len(realized_trades)},
+            {"label": "Profitable trades", "value": len(profitable_trades)},
+            {"label": "Unprofitable trades", "value": len(unprofitable_trades)},
+            {"label": "Fetch errors", "value": len(fetch_errors)},
+        ],
+    )
     print(f"Wrote trade hold review to {args.output}")
     print(f"Profitable trades: {len(profitable_trades)}")
     print(f"Unprofitable trades: {len(unprofitable_trades)}")
     print(f"Option fetch errors: {len(fetch_errors)}")
+    print(f"Published dashboard study {dashboard_output}")
 
 
 def _parse_iso_date(value: str) -> date:
